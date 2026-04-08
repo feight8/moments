@@ -1,0 +1,87 @@
+// ---------------------------------------------------------------------------
+// Domain types
+// ---------------------------------------------------------------------------
+
+/** A historical event as returned by the public API (year is never included). */
+export interface PublicEvent {
+  id: string;
+  description: string;
+  slug: string;
+}
+
+/** A historical event as stored in the database (year included, server-side only). */
+export interface Event extends PublicEvent {
+  year: number;
+  created_at: string;
+}
+
+/** Today's puzzle as returned by GET /api/daily. */
+export interface DailyPuzzle {
+  date: string; // YYYY-MM-DD
+  events: PublicEvent[];
+}
+
+// ---------------------------------------------------------------------------
+// Game session types (client-side only, never persisted mid-game)
+// ---------------------------------------------------------------------------
+
+export interface Guess {
+  eventId: string;
+  guessYear: number;
+}
+
+/** A scored guess returned after submission. */
+export interface ScoredGuess {
+  eventId: string;
+  guessYear: number;
+  correctYear: number;
+  score: number;
+  isPerfect: boolean;
+  description: string;
+}
+
+/** Full session result returned by POST /api/submit. */
+export interface SessionResult {
+  date: string;
+  guesses: ScoredGuess[];
+  totalScore: number;
+  maxScore: number; // 550 if all perfect, used for display
+  perfectCount: number;
+  streak: number;
+}
+
+// ---------------------------------------------------------------------------
+// Supabase database row types
+// ---------------------------------------------------------------------------
+
+export interface DbEvent {
+  id: string;
+  description: string;
+  year: number;
+  slug: string;
+  created_at: string;
+}
+
+export interface DbDailyPuzzle {
+  id: string;
+  date: string;
+  event_ids: string[];
+  created_at: string;
+}
+
+export interface DbUserResult {
+  id: string;
+  user_id: string;
+  puzzle_date: string;
+  guesses: ScoredGuess[];
+  total_score: number;
+  completed_at: string;
+}
+
+export interface DbUserStreak {
+  user_id: string;
+  current_streak: number;
+  longest_streak: number;
+  last_completed_date: string;
+  updated_at: string;
+}
