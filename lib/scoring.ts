@@ -10,15 +10,15 @@
 
 const BASE_MAX = 100;
 const PERFECT_BONUS = 10;
-const MAX_DISTANCE = 1000; // years; beyond this score is 0
-const EXPONENT = 2.5;
+const MAX_DISTANCE = 250; // years; beyond this score is 0
+const EXPONENT = 2.0;
 
 export const MAX_SCORE_PER_EVENT = BASE_MAX + PERFECT_BONUS; // 110
 export const MAX_SESSION_SCORE = MAX_SCORE_PER_EVENT * 5;    // 550
 export const EVENTS_PER_SESSION = 5;
 
-/** Slider bounds — no pre-CE dates. */
-export const YEAR_MIN = 1;
+/** Slider bounds — 1000 CE to present day. */
+export const YEAR_MIN = 1000;
 export const YEAR_MAX = 2025;
 
 /**
@@ -55,10 +55,10 @@ export type DotColor = 'green' | 'yellow' | 'orange' | 'red';
 /**
  * Map a per-event score to its emoji dot color.
  *
- * green  ≥ 80   (~within 100 years)
- * yellow ≥ 50   (~within 300 years)
- * orange ≥ 20   (~within 500 years)
- * red    < 20
+ * green  ≥ 80   (~within 25 years)
+ * yellow ≥ 50   (~within 60 years)
+ * orange ≥ 20   (~within 100 years)
+ * red    < 20   (100+ years off)
  */
 export function scoreToDot(score: number): DotColor {
   if (score >= 80) return 'green';

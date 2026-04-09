@@ -30,9 +30,9 @@
 **Scoring formula** (`lib/scoring.ts`):
 ```
 distance = |guess_year − correct_year|
-if distance == 0  → 110  (100 base + 10 perfect bonus)
-if distance ≥ 1000 → 0
-otherwise         → round(100 × (1 − distance / 1000) ^ 2.5)
+if distance == 0   → 110  (100 base + 10 perfect bonus)
+if distance ≥ 250  → 0
+otherwise          → round(100 × (1 − distance / 250) ^ 2.0)
 ```
 
 **Sample scores:**
@@ -40,15 +40,13 @@ otherwise         → round(100 × (1 − distance / 1000) ^ 2.5)
 | Distance (years) | Points |
 |-----------------|--------|
 | 0 (exact) | 110 (includes +10 bonus) |
-| 1 | ~100 |
-| 10 | ~98 |
-| 50 | ~88 |
-| 100 | ~77 |
-| 200 | ~57 |
-| 300 | ~41 |
-| 500 | ~18 |
-| 750 | ~6 |
-| ≥ 1000 | 0 |
+| 10 | ~92 |
+| 25 | ~81 |
+| 50 | ~64 |
+| 100 | ~36 |
+| 150 | ~16 |
+| 200 | ~4 |
+| ≥ 250 | 0 |
 
 **Design notes:**
 - The curve is intentionally generous at close distances to reward players who are nearly right, and to encourage continued play rather than early discouragement.

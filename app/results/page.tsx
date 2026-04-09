@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ResultsCard from "@/components/ResultsCard";
+import NavHeader from "@/components/NavHeader";
 import type { SessionResult } from "@/types";
 
 export default function ResultsPage() {
@@ -33,15 +34,13 @@ export default function ResultsPage() {
   return (
     <main className="min-h-screen bg-parchment px-4 py-8">
       <div className="mx-auto max-w-lg space-y-6">
-        <header>
-          <h1 className="font-serif text-2xl font-bold text-ink">Moments</h1>
-        </header>
+        <NavHeader />
 
         {error && (
           <div className="text-center py-12 space-y-3">
             <p className="font-serif text-xl text-ink">{error}</p>
             <a href="/" className="font-sans text-sm text-ink-muted underline">
-              Back to home
+              back to home
             </a>
           </div>
         )}
@@ -49,7 +48,7 @@ export default function ResultsPage() {
         {!result && !error && (
           <div className="flex flex-col items-center gap-3 py-16 font-sans text-ink-muted">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-ink/20 border-t-gold" />
-            <p className="text-sm">Loading results…</p>
+            <p className="text-sm">loading results…</p>
           </div>
         )}
 
@@ -57,7 +56,7 @@ export default function ResultsPage() {
 
         {result && (
           <p className="text-center font-sans text-xs text-ink-muted pb-4">
-            Come back tomorrow for a new puzzle
+            come back tomorrow for a new puzzle
           </p>
         )}
       </div>

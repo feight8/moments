@@ -32,7 +32,7 @@ export default function ResultsCard({ result }: ResultsCardProps) {
   const shareText = [
     `Moments — ${dateLabel}`,
     emojiRow,
-    `Score: ${result.totalScore} / 500${bonusScore > 0 ? ` (+${bonusScore} perfect bonus)` : ""}`,
+    `Score: ${result.totalScore}/500${bonusScore > 0 ? ` (+${bonusScore} perfect)` : ""}`,
     result.streak > 0 ? `Streak: 🔥 ${result.streak}` : "",
     "",
     "Play at moments.app",

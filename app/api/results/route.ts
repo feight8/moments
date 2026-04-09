@@ -1,23 +1,36 @@
-import { NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { getUserFromRequest } from "@/lib/supabase/auth";
 import { todayUTC } from "@/lib/dates";
 import type { SessionResult, DbUserStreak } from "@/types";
 import { MAX_SCORE_PER_EVENT } from "@/lib/scoring";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const supabase = await createClient();
+export async function GET(req: NextRequest) {
   const serviceClient = createServiceClient();
-  const date = todayUTC();
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const { user, error: authError } = await getUserFromRequest(req);
 
   if (authError || !user) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
+
+  // Resolve active puzzle date with fallback (mirrors /api/daily logic)
+  let date = todayUTC();
+  const { data: todaysPuzzle } = await serviceClient
+    .from("daily_puzzles")
+    .select("date")
+    .eq("date", date)
+    .single();
+
+  if (!todaysPuzzle) {
+    const { data: latestPuzzle } = await serviceClient
+      .from("daily_puzzles")
+      .select("date")
+      .order("date", { ascending: false })
+      .limit(1)
+      .single();
+    if (latestPuzzle) date = latestPuzzle.date;
   }
 
   const { data: result } = await serviceClient

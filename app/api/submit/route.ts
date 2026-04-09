@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { getUserFromRequest } from "@/lib/supabase/auth";
 import { scoreGuess, isPerfect, MAX_SCORE_PER_EVENT } from "@/lib/scoring";
 import { todayUTC } from "@/lib/dates";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -12,20 +13,13 @@ interface SubmitBody {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
   const serviceClient = createServiceClient();
-
-  // Authenticate — anonymous sessions are valid
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const { user, error: authError } = await getUserFromRequest(req);
 
   if (authError || !user) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
-  // Parse and validate body
   let body: SubmitBody;
   try {
     body = await req.json();
@@ -42,9 +36,37 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const date = todayUTC();
+  // Resolve the active puzzle — today's if it exists, otherwise the latest.
+  // Mirrors the fallback logic in /api/daily so dev always has a puzzle.
+  let puzzle: { event_ids: string[]; date: string } | null = null;
+  const todayStr = todayUTC();
 
-  // Idempotency check — return existing result if already submitted today
+  const { data: todaysPuzzle } = await serviceClient
+    .from("daily_puzzles")
+    .select("event_ids, date")
+    .eq("date", todayStr)
+    .single();
+
+  if (todaysPuzzle) {
+    puzzle = todaysPuzzle;
+  } else {
+    const { data: latestPuzzle } = await serviceClient
+      .from("daily_puzzles")
+      .select("event_ids, date")
+      .order("date", { ascending: false })
+      .limit(1)
+      .single();
+    puzzle = latestPuzzle ?? null;
+  }
+
+  if (!puzzle) {
+    return NextResponse.json({ error: "No puzzle available." }, { status: 404 });
+  }
+
+  // Use the puzzle's own date as the idempotency key so dev fallback works.
+  const date = puzzle.date;
+
+  // Idempotency — return existing result if already submitted for this puzzle
   const { data: existing } = await serviceClient
     .from("user_results")
     .select("*")
@@ -56,38 +78,20 @@ export async function POST(req: NextRequest) {
     return buildResultResponse(existing.guesses, existing.total_score, date, user.id, serviceClient);
   }
 
-  // Fetch today's puzzle to get correct event order and IDs
-  const { data: puzzle } = await serviceClient
-    .from("daily_puzzles")
-    .select("event_ids")
-    .eq("date", date)
-    .single();
-
-  if (!puzzle) {
-    return NextResponse.json({ error: "No puzzle for today." }, { status: 404 });
-  }
-
-  // Validate all guess event IDs belong to today's puzzle
   const validIds = new Set<string>(puzzle.event_ids);
   for (const g of guesses) {
     if (!validIds.has(g.eventId)) {
-      return NextResponse.json(
-        { error: `Invalid event ID: ${g.eventId}` },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: `Invalid event ID: ${g.eventId}` }, { status: 400 });
     }
-    if (!Number.isInteger(g.guessYear) || g.guessYear < 1 || g.guessYear > 2025) {
-      return NextResponse.json(
-        { error: `Guess year out of range: ${g.guessYear}` },
-        { status: 400 }
-      );
+    if (!Number.isInteger(g.guessYear) || g.guessYear < 1000 || g.guessYear > 2025) {
+      return NextResponse.json({ error: `Guess year out of range: ${g.guessYear}` }, { status: 400 });
     }
   }
 
-  // Fetch correct years (server-side only)
+  // Fetch correct years and all reveal data
   const { data: events } = await serviceClient
     .from("events")
-    .select("id, description, year")
+    .select("id, description, year, image_url, reveal_image_url, additional_context")
     .in("id", puzzle.event_ids);
 
   if (!events) {
@@ -98,7 +102,6 @@ export async function POST(req: NextRequest) {
     (events as DbEvent[]).map((e) => [e.id, e])
   );
 
-  // Score each guess
   const scoredGuesses: ScoredGuess[] = (puzzle.event_ids as string[]).map((eventId: string) => {
     const guess = guesses.find((g) => g.eventId === eventId)!;
     const event = eventMap.get(eventId)!;
@@ -110,12 +113,14 @@ export async function POST(req: NextRequest) {
       score,
       isPerfect: isPerfect(guess.guessYear, event.year),
       description: event.description,
+      imageUrl: event.image_url,
+      additionalContext: event.additional_context,
+      revealImageUrl: event.reveal_image_url,
     };
   });
 
   const totalScore = scoredGuesses.reduce((sum, g) => sum + g.score, 0);
 
-  // Persist result
   await serviceClient.from("user_results").insert({
     user_id: user.id,
     puzzle_date: date,
@@ -123,17 +128,12 @@ export async function POST(req: NextRequest) {
     total_score: totalScore,
   });
 
-  // Update streak
   await updateStreak(user.id, date, serviceClient);
 
   return buildResultResponse(scoredGuesses, totalScore, date, user.id, serviceClient);
 }
 
-async function updateStreak(
-  userId: string,
-  date: string,
-  client: SupabaseClient
-) {
+async function updateStreak(userId: string, date: string, client: SupabaseClient) {
   const { data: streakRow } = (await client
     .from("user_streaks")
     .select("*")
@@ -151,7 +151,6 @@ async function updateStreak(
     if (streakRow.last_completed_date === yesterdayStr) {
       newStreak = streakRow.current_streak + 1;
     } else if (streakRow.last_completed_date === date) {
-      // Already counted today
       return;
     }
     longestStreak = Math.max(streakRow.longest_streak, newStreak);
@@ -180,13 +179,12 @@ async function buildResultResponse(
     .single()) as { data: Pick<DbUserStreak, "current_streak"> | null };
 
   const perfectCount = scoredGuesses.filter((g) => g.isPerfect).length;
-  const maxScore = MAX_SCORE_PER_EVENT * 5;
 
   const result: SessionResult = {
     date,
     guesses: scoredGuesses,
     totalScore,
-    maxScore,
+    maxScore: MAX_SCORE_PER_EVENT * 5,
     perfectCount,
     streak: streakRow?.current_streak ?? 0,
   };

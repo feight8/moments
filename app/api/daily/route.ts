@@ -9,24 +9,40 @@ export async function GET() {
   const supabase = await createClient();
   const date = todayUTC();
 
-  // Fetch today's puzzle
-  const { data: puzzle, error: puzzleError } = await supabase
+  // Try today's puzzle first; fall back to the most recently seeded puzzle.
+  // This keeps development working without needing a puzzle seeded for every
+  // calendar day. Remove the fallback query before launch.
+  let puzzle: DbDailyPuzzle | null = null;
+
+  const { data: todaysPuzzle } = await supabase
     .from("daily_puzzles")
     .select("*")
     .eq("date", date)
     .single<DbDailyPuzzle>();
 
-  if (puzzleError || !puzzle) {
+  if (todaysPuzzle) {
+    puzzle = todaysPuzzle;
+  } else {
+    const { data: latestPuzzle } = await supabase
+      .from("daily_puzzles")
+      .select("*")
+      .order("date", { ascending: false })
+      .limit(1)
+      .single<DbDailyPuzzle>();
+    puzzle = latestPuzzle ?? null;
+  }
+
+  if (!puzzle) {
     return NextResponse.json(
-      { error: "No puzzle found for today." },
+      { error: "No puzzle found. Please seed one in daily_puzzles." },
       { status: 404 }
     );
   }
 
-  // Fetch the events — explicitly omit `year` in the select
+  // Explicitly omit year, reveal_image_url, and additional_context
   const { data: events, error: eventsError } = await supabase
     .from("events")
-    .select("id, description, slug")
+    .select("id, description, slug, image_url")
     .in("id", puzzle.event_ids);
 
   if (eventsError || !events) {
@@ -36,11 +52,15 @@ export async function GET() {
     );
   }
 
-  // Preserve the order defined in daily_puzzles.event_ids
-  const ordered = puzzle.event_ids
+  const ordered = (puzzle.event_ids as string[])
     .map((id) => (events as DbEvent[]).find((e) => e.id === id))
     .filter((e): e is DbEvent => e !== undefined)
-    .map<PublicEvent>(({ id, description, slug }) => ({ id, description, slug }));
+    .map<PublicEvent>(({ id, description, slug, image_url }) => ({
+      id,
+      description,
+      slug,
+      imageUrl: image_url,
+    }));
 
   const response: DailyPuzzle = { date, events: ordered };
   return NextResponse.json(response);

@@ -7,11 +7,14 @@ export interface PublicEvent {
   id: string;
   description: string;
   slug: string;
+  imageUrl: string | null;
 }
 
 /** A historical event as stored in the database (year included, server-side only). */
 export interface Event extends PublicEvent {
   year: number;
+  additionalContext: string | null;
+  revealImageUrl: string | null;
   created_at: string;
 }
 
@@ -30,7 +33,18 @@ export interface Guess {
   guessYear: number;
 }
 
-/** A scored guess returned after submission. */
+/** Response from POST /api/guess — returned immediately after each locked-in guess. */
+export interface GuessResult {
+  eventId: string;
+  guessYear: number;
+  correctYear: number;
+  score: number;
+  isPerfect: boolean;
+  additionalContext: string | null;
+  revealImageUrl: string | null;
+}
+
+/** A fully scored guess stored in user_results and returned by POST /api/submit. */
 export interface ScoredGuess {
   eventId: string;
   guessYear: number;
@@ -38,14 +52,17 @@ export interface ScoredGuess {
   score: number;
   isPerfect: boolean;
   description: string;
+  imageUrl: string | null;
+  additionalContext: string | null;
+  revealImageUrl: string | null;
 }
 
-/** Full session result returned by POST /api/submit. */
+/** Full session result returned by POST /api/submit and GET /api/results. */
 export interface SessionResult {
   date: string;
   guesses: ScoredGuess[];
   totalScore: number;
-  maxScore: number; // 550 if all perfect, used for display
+  maxScore: number;
   perfectCount: number;
   streak: number;
 }
@@ -59,6 +76,9 @@ export interface DbEvent {
   description: string;
   year: number;
   slug: string;
+  image_url: string | null;
+  reveal_image_url: string | null;
+  additional_context: string | null;
   created_at: string;
 }
 
