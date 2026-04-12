@@ -6,17 +6,19 @@ interface ScoreDisplayProps {
 }
 
 const dotColorClass: Record<string, string> = {
-  green:  "text-dot-green",
-  yellow: "text-dot-yellow",
-  orange: "text-dot-orange",
-  red:    "text-dot-red",
+  gem:      "text-gold",
+  artifact: "text-dot-green",
+  coin:     "text-dot-yellow",
+  fossil:   "text-dot-orange",
+  rock:     "text-dot-red",
 };
 
 const dotBgClass: Record<string, string> = {
-  green:  "bg-dot-green/10 border-dot-green/30",
-  yellow: "bg-dot-yellow/10 border-dot-yellow/30",
-  orange: "bg-dot-orange/10 border-dot-orange/30",
-  red:    "bg-dot-red/10 border-dot-red/30",
+  gem:      "bg-gold/10 border-gold/30",
+  artifact: "bg-dot-green/10 border-dot-green/30",
+  coin:     "bg-dot-yellow/10 border-dot-yellow/30",
+  fossil:   "bg-dot-orange/10 border-dot-orange/30",
+  rock:     "bg-dot-red/10 border-dot-red/30",
 };
 
 export default function ScoreDisplay({ result }: ScoreDisplayProps) {
@@ -47,12 +49,12 @@ export default function ScoreDisplay({ result }: ScoreDisplayProps) {
             </span>
             <span className={`font-serif text-2xl font-bold ${dotColorClass[dot]}`}>
               {result.score}
-              <span className="text-sm font-sans font-normal text-ink-muted"> / 110</span>
+              <span className="text-sm font-sans font-normal text-ink-muted"> / 100</span>
             </span>
           </div>
           {result.isPerfect && (
             <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-sans font-semibold text-gold">
-              Perfect +10
+              perfect +10
             </span>
           )}
         </div>
@@ -60,16 +62,16 @@ export default function ScoreDisplay({ result }: ScoreDisplayProps) {
         {/* Guess vs correct */}
         <div className="mt-3 flex items-center gap-4 font-sans text-sm">
           <div>
-            <p className="text-xs text-ink-muted">Your guess</p>
+            <p className="text-xs text-ink-muted">your guess</p>
             <p className="font-semibold text-ink">{result.guessYear}</p>
           </div>
           <div className="text-ink-muted">→</div>
           <div>
-            <p className="text-xs text-ink-muted">Correct year</p>
+            <p className="text-xs text-ink-muted">correct year</p>
             <p className="font-semibold text-ink">{result.correctYear}</p>
           </div>
           <div className="ml-auto text-right">
-            <p className="text-xs text-ink-muted">Off by</p>
+            <p className="text-xs text-ink-muted">off by</p>
             <p className="font-semibold text-ink">
               {distance === 0 ? "—" : `${distance} yr${distance === 1 ? "" : "s"}`}
             </p>

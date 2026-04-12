@@ -105,3 +105,21 @@ export interface DbUserStreak {
   last_completed_date: string;
   updated_at: string;
 }
+
+export interface DbUserPlus {
+  user_id: string;
+  plan: "monthly" | "lifetime";
+  status: "active" | "cancelled" | "expired";
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  current_period_end: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DbStreakShield {
+  user_id: string;
+  month_key: string;
+  shields_remaining: number;
+  updated_at: string;
+}

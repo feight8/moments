@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useReducer } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { YEAR_MIN, YEAR_MAX } from "@/lib/scoring";
 import YearSlider from "@/components/YearSlider";
@@ -9,6 +9,7 @@ import EventCard from "@/components/EventCard";
 import ProgressBar from "@/components/ProgressBar";
 import RevealCard from "@/components/RevealCard";
 import NavHeader from "@/components/NavHeader";
+import { formatPuzzleDate } from "@/lib/dates";
 import type { DailyPuzzle, Guess, GuessResult, SessionResult } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -89,6 +90,10 @@ const initialState: State = {
 
 export default function PlayPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // ?date=YYYY-MM-DD is set by the archive page for past puzzles
+  const archiveDate = searchParams.get("date") ?? undefined;
+
   const [state, dispatch] = useReducer(reducer, initialState);
 
   // ---------------------------------------------------------------------------
@@ -118,24 +123,29 @@ export default function PlayPage() {
       if (!session) {
         const { error } = await supabase.auth.signInAnonymously();
         if (error) {
-          // Most common cause: Anonymous auth not enabled in Supabase dashboard.
-          // Go to Authentication → Sign In Methods → enable Anonymous.
           const detail = error.message ? ` (${error.message})` : "";
           dispatch({ type: "ERROR", message: `Failed to start session${detail}. If this persists, anonymous sign-in may not be enabled in Supabase.` });
           return;
         }
       }
 
-      // Redirect if already played today
-      const existingRes = await authFetch("/api/results");
-      if (existingRes.ok) {
-        router.replace("/results");
-        return;
+      // For today's puzzle, redirect if already played
+      if (!archiveDate) {
+        const existingRes = await authFetch("/api/results");
+        if (existingRes.ok) {
+          router.replace("/results");
+          return;
+        }
       }
 
-      const puzzleRes = await fetch("/api/daily");
+      const dailyUrl = archiveDate ? `/api/daily?date=${archiveDate}` : "/api/daily";
+      const puzzleRes = await authFetch(dailyUrl);
       if (!puzzleRes.ok) {
-        dispatch({ type: "ERROR", message: "No puzzle available today. Check back tomorrow!" });
+        if (puzzleRes.status === 403) {
+          dispatch({ type: "ERROR", message: "This puzzle requires Circa+. Upgrade to access the full archive." });
+          return;
+        }
+        dispatch({ type: "ERROR", message: "No puzzle available. Check back tomorrow!" });
         return;
       }
       const puzzle: DailyPuzzle = await puzzleRes.json();
@@ -155,7 +165,10 @@ export default function PlayPage() {
     const res = await authFetch("/api/guess", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(guess),
+      body: JSON.stringify({
+        ...guess,
+        ...(archiveDate ? { puzzleDate: archiveDate } : {}),
+      }),
     });
 
     if (!res.ok) {
@@ -182,7 +195,10 @@ export default function PlayPage() {
       const res = await authFetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ guesses: state.guesses }),
+        body: JSON.stringify({
+          guesses: state.guesses,
+          ...(archiveDate ? { puzzleDate: archiveDate } : {}),
+        }),
       });
 
       if (!res.ok) {
@@ -191,7 +207,7 @@ export default function PlayPage() {
       }
 
       const result: SessionResult = await res.json();
-      sessionStorage.setItem("moments_result", JSON.stringify(result));
+      sessionStorage.setItem("circa_result", JSON.stringify(result));
       router.push("/results");
     } else {
       dispatch({ type: "NEXT_EVENT" });
@@ -203,19 +219,28 @@ export default function PlayPage() {
   // ---------------------------------------------------------------------------
 
   if (state.phase === "loading") {
-    return <PageShell><LoadingSpinner message="Loading today's puzzle…" /></PageShell>;
+    return <PageShell archiveDate={archiveDate}><LoadingSpinner message="Loading puzzle…" /></PageShell>;
   }
 
   if (state.phase === "submitting") {
-    return <PageShell><LoadingSpinner message="Saving your results…" /></PageShell>;
+    return <PageShell archiveDate={archiveDate}><LoadingSpinner message="Saving your results…" /></PageShell>;
   }
 
   if (state.phase === "error") {
     return (
-      <PageShell>
+      <PageShell archiveDate={archiveDate}>
         <div className="text-center space-y-4 py-12">
           <p className="font-serif text-xl text-ink">{state.error}</p>
-          <a href="/" className="font-sans text-sm text-ink-muted underline">Back to home</a>
+          <div className="space-y-2">
+            {state.error?.includes("Circa+") && (
+              <a href="/plus" className="block font-sans text-sm text-gold underline">
+                Upgrade to Plus →
+              </a>
+            )}
+            <a href={archiveDate ? "/archive" : "/"} className="block font-sans text-sm text-ink-muted underline">
+              {archiveDate ? "Back to archive" : "Back to home"}
+            </a>
+          </div>
         </div>
       </PageShell>
     );
@@ -228,7 +253,7 @@ export default function PlayPage() {
   const isRevealing = state.phase === "revealing";
 
   return (
-    <PageShell>
+    <PageShell archiveDate={archiveDate}>
       <ProgressBar current={state.currentIndex + 1} total={state.puzzle.events.length} />
 
       {/* Event card — always visible */}
@@ -274,11 +299,17 @@ export default function PlayPage() {
   );
 }
 
-function PageShell({ children }: { children: React.ReactNode }) {
+function PageShell({ children, archiveDate }: { children: React.ReactNode; archiveDate?: string }) {
+  const label = archiveDate ? formatPuzzleDate(archiveDate) : undefined;
   return (
     <main className="min-h-screen bg-parchment px-4 py-8">
       <div className="mx-auto max-w-lg space-y-6">
-        <NavHeader />
+        <NavHeader backHref={archiveDate ? "/archive" : "/"} />
+        {label && (
+          <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted text-center">
+            archive · {label}
+          </p>
+        )}
         {children}
       </div>
     </main>

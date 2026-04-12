@@ -1,35 +1,64 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getUserFromRequest } from "@/lib/supabase/auth";
+import { getUserPlusStatus } from "@/lib/plus";
 import { todayUTC } from "@/lib/dates";
 import type { DailyPuzzle, PublicEvent, DbDailyPuzzle, DbEvent } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const supabase = await createClient();
-  const date = todayUTC();
+  const requestedDate = req.nextUrl.searchParams.get("date");
+  const today = todayUTC();
 
-  // Try today's puzzle first; fall back to the most recently seeded puzzle.
-  // This keeps development working without needing a puzzle seeded for every
-  // calendar day. Remove the fallback query before launch.
+  // Archive requests (past dates) require Plus
+  if (requestedDate && requestedDate < today) {
+    const { user } = await getUserFromRequest(req);
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+    }
+    const { isPlus } = await getUserPlusStatus(user.id);
+    if (!isPlus) {
+      return NextResponse.json({ error: "Circa+ required to play archive puzzles." }, { status: 403 });
+    }
+  }
+
+  // Determine which puzzle to serve
   let puzzle: DbDailyPuzzle | null = null;
+  const client = requestedDate ? createServiceClient() : supabase;
 
-  const { data: todaysPuzzle } = await supabase
-    .from("daily_puzzles")
-    .select("*")
-    .eq("date", date)
-    .single<DbDailyPuzzle>();
-
-  if (todaysPuzzle) {
-    puzzle = todaysPuzzle;
-  } else {
-    const { data: latestPuzzle } = await supabase
+  if (requestedDate) {
+    // Explicit date requested (archive play)
+    const { data } = await client
       .from("daily_puzzles")
       .select("*")
-      .order("date", { ascending: false })
-      .limit(1)
+      .eq("date", requestedDate)
       .single<DbDailyPuzzle>();
-    puzzle = latestPuzzle ?? null;
+    puzzle = data ?? null;
+
+    if (!puzzle) {
+      return NextResponse.json({ error: "No puzzle found for that date." }, { status: 404 });
+    }
+  } else {
+    // Today's puzzle with dev fallback
+    const { data: todaysPuzzle } = await client
+      .from("daily_puzzles")
+      .select("*")
+      .eq("date", today)
+      .single<DbDailyPuzzle>();
+
+    if (todaysPuzzle) {
+      puzzle = todaysPuzzle;
+    } else {
+      const { data: latestPuzzle } = await client
+        .from("daily_puzzles")
+        .select("*")
+        .order("date", { ascending: false })
+        .limit(1)
+        .single<DbDailyPuzzle>();
+      puzzle = latestPuzzle ?? null;
+    }
   }
 
   if (!puzzle) {
@@ -62,6 +91,6 @@ export async function GET() {
       imageUrl: image_url,
     }));
 
-  const response: DailyPuzzle = { date, events: ordered };
+  const response: DailyPuzzle = { date: puzzle.date, events: ordered };
   return NextResponse.json(response);
 }

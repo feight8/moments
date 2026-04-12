@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
+import { getUserPlusStatus } from "@/lib/plus";
 import { scoreGuess, isPerfect } from "@/lib/scoring";
 import { todayUTC } from "@/lib/dates";
 import type { GuessResult, DbEvent, DbDailyPuzzle } from "@/types";
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic";
 interface GuessBody {
   eventId: string;
   guessYear: number;
+  puzzleDate?: string; // YYYY-MM-DD; provided for archive play
 }
 
 export async function POST(req: NextRequest) {
@@ -27,32 +29,49 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
-  const { eventId, guessYear } = body;
+  const { eventId, guessYear, puzzleDate } = body;
 
   if (!eventId || !Number.isInteger(guessYear) || guessYear < 1000 || guessYear > 2025) {
     return NextResponse.json({ error: "Invalid guess." }, { status: 400 });
   }
 
-  // Resolve the active puzzle with the same fallback logic as /api/daily
-  let puzzle: DbDailyPuzzle | null = null;
+  // Archive guesses (past dates) require Plus
   const todayStr = todayUTC();
+  if (puzzleDate && puzzleDate < todayStr) {
+    const { isPlus } = await getUserPlusStatus(user.id);
+    if (!isPlus) {
+      return NextResponse.json({ error: "Circa+ required." }, { status: 403 });
+    }
+  }
 
-  const { data: todaysPuzzle } = await serviceClient
-    .from("daily_puzzles")
-    .select("*")
-    .eq("date", todayStr)
-    .single<DbDailyPuzzle>();
+  // Resolve the active puzzle
+  let puzzle: DbDailyPuzzle | null = null;
 
-  if (todaysPuzzle) {
-    puzzle = todaysPuzzle;
-  } else {
-    const { data: latestPuzzle } = await serviceClient
+  if (puzzleDate) {
+    const { data } = await serviceClient
       .from("daily_puzzles")
       .select("*")
-      .order("date", { ascending: false })
-      .limit(1)
+      .eq("date", puzzleDate)
       .single<DbDailyPuzzle>();
-    puzzle = latestPuzzle ?? null;
+    puzzle = data ?? null;
+  } else {
+    const { data: todaysPuzzle } = await serviceClient
+      .from("daily_puzzles")
+      .select("*")
+      .eq("date", todayStr)
+      .single<DbDailyPuzzle>();
+
+    if (todaysPuzzle) {
+      puzzle = todaysPuzzle;
+    } else {
+      const { data: latestPuzzle } = await serviceClient
+        .from("daily_puzzles")
+        .select("*")
+        .order("date", { ascending: false })
+        .limit(1)
+        .single<DbDailyPuzzle>();
+      puzzle = latestPuzzle ?? null;
+    }
   }
 
   if (!puzzle || !(puzzle.event_ids as string[]).includes(eventId)) {

@@ -10,7 +10,7 @@ import { useEffect } from "react";
 export default function SettingsProvider() {
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("moments_settings");
+      const raw = localStorage.getItem("circa_settings");
       if (!raw) return;
       const s = JSON.parse(raw);
       const root = document.documentElement;

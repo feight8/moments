@@ -10,7 +10,7 @@
 
 const BASE_MAX = 100;
 const PERFECT_BONUS = 10;
-const MAX_DISTANCE = 250; // years; beyond this score is 0
+const MAX_DISTANCE = 150; // years; beyond this score is 0
 const EXPONENT = 2.0;
 
 export const MAX_SCORE_PER_EVENT = BASE_MAX + PERFECT_BONUS; // 110
@@ -50,33 +50,36 @@ export function scoreSession(
   return guesses.reduce((sum, g) => sum + scoreGuess(g.guessYear, g.correctYear), 0);
 }
 
-export type DotColor = 'green' | 'yellow' | 'orange' | 'red';
+export type DigTier = 'gem' | 'artifact' | 'coin' | 'fossil' | 'rock';
 
 /**
- * Map a per-event score to its emoji dot color.
+ * Map a per-event score to its archaeological dig tier.
  *
- * green  ≥ 80   (~within 25 years)
- * yellow ≥ 50   (~within 60 years)
- * orange ≥ 20   (~within 100 years)
- * red    < 20   (100+ years off)
+ * gem      = 110   (exact year — perfect find)
+ * artifact ≥ 85   (~within 10 years)
+ * coin     ≥ 65   (~within 25 years)
+ * fossil   ≥ 20   (~within 75 years)
+ * rock     < 20   (75+ years off, or 0)
  */
-export function scoreToDot(score: number): DotColor {
-  if (score >= 80) return 'green';
-  if (score >= 50) return 'yellow';
-  if (score >= 20) return 'orange';
-  return 'red';
+export function scoreToDot(score: number): DigTier {
+  if (score >= 110) return 'gem';
+  if (score >= 85)  return 'artifact';
+  if (score >= 65)  return 'coin';
+  if (score >= 20)  return 'fossil';
+  return 'rock';
 }
 
-export const DOT_EMOJI: Record<DotColor, string> = {
-  green:  '🟢',
-  yellow: '🟡',
-  orange: '🟠',
-  red:    '🔴',
+export const DOT_EMOJI: Record<DigTier, string> = {
+  gem:      '💎',
+  artifact: '🏺',
+  coin:     '🪙',
+  fossil:   '🦴',
+  rock:     '🪨',
 };
 
 /**
  * Build the emoji row string used in the share card.
- * e.g. "🟢 🟡 🟢 🔴 🟢"
+ * e.g. "💎 🏺 🪙 🦴 🪨"
  */
 export function buildEmojiRow(scores: number[]): string {
   return scores.map((s) => DOT_EMOJI[scoreToDot(s)]).join(' ');

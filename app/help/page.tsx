@@ -1,7 +1,7 @@
 "use client";
 
 import NavHeader from "@/components/NavHeader";
-import { DOT_EMOJI } from "@/lib/scoring";
+import { DOT_EMOJI, type DigTier } from "@/lib/scoring";
 import { useSettings } from "@/lib/settings";
 
 // ---------------------------------------------------------------------------
@@ -75,7 +75,7 @@ function Card({ children, divided }: { children: React.ReactNode; divided?: bool
 // Scoring row
 // ---------------------------------------------------------------------------
 
-function ScoreRow({ distance, score, dot }: { distance: string; score: string; dot: "green" | "yellow" | "orange" | "red" }) {
+function ScoreRow({ distance, score, dot }: { distance: string; score: string; dot: DigTier }) {
   return (
     <div className="flex items-center justify-between py-2 font-sans text-sm">
       <div className="flex items-center gap-2">
@@ -114,14 +114,14 @@ export default function HelpPage() {
                 <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-parchment">1</span>
                 <div>
                   <p className="font-semibold">Read the event</p>
-                  <p className="mt-0.5 text-ink-muted">Each puzzle has 5 historical events described in 2–3 sentences. The year is always omitted.</p>
+                  <p className="mt-0.5 text-ink-muted">Each puzzle has 5 historical events described in 2-3 sentences. The year is always omitted.</p>
                 </div>
               </li>
               <li className="flex gap-3">
                 <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-parchment">2</span>
                 <div>
                   <p className="font-semibold">Guess the year</p>
-                  <p className="mt-0.5 text-ink-muted">Drag the slider or tap the year display to type a number. The range is 1000 CE – 2025.</p>
+                  <p className="mt-0.5 text-ink-muted">Drag the slider or tap the year display to type a number. The range is 1000 CE - 2025.</p>
                 </div>
               </li>
               <li className="flex gap-3">
@@ -148,16 +148,17 @@ export default function HelpPage() {
         <Section title="Scoring">
           <Card>
             <p className="font-sans text-sm text-ink-muted mb-4">
-              Each event is worth up to <span className="font-semibold text-ink">100 points</span>, plus a <span className="font-semibold text-gold">+10 bonus</span> for an exact year. Score drops smoothly the further off you are — zero points at 250+ years.
+              Each event is worth up to <span className="font-semibold text-ink">100 points</span>, plus a <span className="font-semibold text-gold">+10 bonus</span> for an exact year. Score drops smoothly the further off you are — zero points at 150+ years.
             </p>
             <div className="divide-y divide-ink/8">
-              <ScoreRow distance="Exact year" score="110 pts" dot="green" />
-              <ScoreRow distance="~10 years off" score="~92 pts" dot="green" />
-              <ScoreRow distance="~25 years off" score="~81 pts" dot="green" />
-              <ScoreRow distance="~50 years off" score="~64 pts" dot="yellow" />
-              <ScoreRow distance="~100 years off" score="~36 pts" dot="orange" />
-              <ScoreRow distance="~150 years off" score="~16 pts" dot="red" />
-              <ScoreRow distance="250+ years off" score="0 pts" dot="red" />
+              <ScoreRow distance="Exact year" score="110 pts" dot="gem" />
+              <ScoreRow distance="~5 years off" score="~93 pts" dot="artifact" />
+              <ScoreRow distance="~10 years off" score="~87 pts" dot="artifact" />
+              <ScoreRow distance="~25 years off" score="~69 pts" dot="coin" />
+              <ScoreRow distance="~50 years off" score="~44 pts" dot="coin" />
+              <ScoreRow distance="~75 years off" score="~25 pts" dot="fossil" />
+              <ScoreRow distance="~100 years off" score="~11 pts" dot="rock" />
+              <ScoreRow distance="150+ years off" score="0 pts" dot="rock" />
             </div>
             <p className="mt-4 font-sans text-xs text-ink-muted">
               Max session score: <span className="font-semibold text-ink">550 pts</span> (5 perfect guesses)
@@ -168,17 +169,18 @@ export default function HelpPage() {
         {/* ------------------------------------------------------------------ */}
         {/* DOTS                                                                 */}
         {/* ------------------------------------------------------------------ */}
-        <Section title="Result dots">
+        <Section title="Result symbols">
           <Card>
             <div className="divide-y divide-ink/8 font-sans text-sm">
               {[
-                { dot: "🟢", label: "Green", desc: "≥ 80 pts — within ~25 years" },
-                { dot: "🟡", label: "Yellow", desc: "≥ 50 pts — within ~60 years" },
-                { dot: "🟠", label: "Orange", desc: "≥ 20 pts — within ~100 years" },
-                { dot: "🔴", label: "Red", desc: "< 20 pts — more than 100 years off" },
-              ].map(({ dot, label, desc }) => (
+                { emoji: "💎", label: "Gem", desc: "Exact year — perfect find!" },
+                { emoji: "🏺", label: "Artifact", desc: "within ~10 years (85+ pts)" },
+                { emoji: "🪙", label: "Coin", desc: "within ~25 years (65+ pts)" },
+                { emoji: "🦴", label: "Fossil", desc: "within ~75 years (20+ pts)" },
+                { emoji: "🪨", label: "Rock", desc: "75+ years off, or 150+ for zero" },
+              ].map(({ emoji, label, desc }) => (
                 <div key={label} className="flex items-center gap-3 py-2.5">
-                  <span className="text-xl">{dot}</span>
+                  <span className="text-xl">{emoji}</span>
                   <div>
                     <span className="font-semibold text-ink">{label}</span>
                     <span className="ml-2 text-ink-muted">{desc}</span>
@@ -195,7 +197,7 @@ export default function HelpPage() {
         <Section title="Streaks">
           <Card>
             <p className="font-sans text-sm text-ink-muted leading-relaxed">
-              Complete the daily puzzle to start a streak. Come back the next day to keep it going — missing a day resets your streak to zero. Your longest ever streak is saved separately. Streaks are shown on your results card and in the share text.
+              Complete the daily puzzle to start a streak. Come back the next day to keep it going - missing a day resets your streak to zero. Your longest ever streak is saved separately. Streaks are shown on your results card and in the share text.
             </p>
           </Card>
         </Section>
@@ -239,8 +241,8 @@ export default function HelpPage() {
         <Section title="About">
           <Card>
             <div className="font-sans text-sm text-ink-muted space-y-2 leading-relaxed">
-              <p>moments is a daily history guessing game. A new puzzle drops every day — same events for everyone, same time to play.</p>
-              <p>Found a bug or have a suggestion? The project is on <a href="https://github.com/feight8/moments" target="_blank" rel="noopener noreferrer" className="text-ink underline hover:text-gold transition-colors">GitHub</a>.</p>
+              <p>circa is a daily history guessing game. A new puzzle drops every day — same events for everyone, same time to play.</p>
+              <p>Found a bug or have a suggestion? The project is on <a href="https://github.com/feight8/circa" target="_blank" rel="noopener noreferrer" className="text-ink underline hover:text-gold transition-colors">GitHub</a>.</p>
             </div>
           </Card>
         </Section>

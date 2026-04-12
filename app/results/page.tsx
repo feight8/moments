@@ -12,7 +12,7 @@ export default function ResultsPage() {
   useEffect(() => {
     // Prefer result from sessionStorage (set immediately after submit)
     // to avoid a round-trip and flash of loading state
-    const cached = sessionStorage.getItem("moments_result");
+    const cached = sessionStorage.getItem("circa_result");
     if (cached) {
       try {
         setResult(JSON.parse(cached));

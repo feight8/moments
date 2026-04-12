@@ -12,14 +12,16 @@ interface ResultsCardProps {
 }
 
 const dotBorderClass: Record<string, string> = {
-  green:  "ring-dot-green/40",
-  yellow: "ring-dot-yellow/40",
-  orange: "ring-dot-orange/40",
-  red:    "ring-dot-red/40",
+  gem:      "ring-gold/40",
+  artifact: "ring-dot-green/40",
+  coin:     "ring-dot-yellow/40",
+  fossil:   "ring-dot-orange/40",
+  rock:     "ring-dot-red/40",
 };
 
 export default function ResultsCard({ result }: ResultsCardProps) {
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
 
   const emojiRow = buildEmojiRow(result.guesses.map((g) => g.score));
   const dateLabel = formatPuzzleDate(result.date);
@@ -30,17 +32,27 @@ export default function ResultsCard({ result }: ResultsCardProps) {
   const bonusScore = result.totalScore - baseScore;
 
   const shareText = [
-    `Moments — ${dateLabel}`,
+    `Circa — ${dateLabel}`,
     emojiRow,
     `Score: ${result.totalScore}/500${bonusScore > 0 ? ` (+${bonusScore} perfect)` : ""}`,
     result.streak > 0 ? `Streak: 🔥 ${result.streak}` : "",
     "",
-    "Play at moments.app",
+    "play at circagame.app",
   ]
     .filter((line) => line !== undefined)
     .join("\n");
 
-  async function handleCopy() {
+  async function handleShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: shareText });
+        setShared(true);
+        setTimeout(() => setShared(false), 2000);
+        return;
+      } catch {
+        // user cancelled or share failed — fall through to clipboard
+      }
+    }
     await navigator.clipboard.writeText(shareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -53,7 +65,7 @@ export default function ResultsCard({ result }: ResultsCardProps) {
         <p className="text-xs font-sans font-semibold uppercase tracking-widest text-ink-muted">
           {dateLabel}
         </p>
-        <h2 className="font-serif text-3xl font-bold text-ink">Today&apos;s Results</h2>
+        <h2 className="font-serif text-3xl font-bold text-ink">today&apos;s results</h2>
         <div className="flex justify-center pt-1">
           <StreakBadge streak={result.streak} />
         </div>
@@ -80,7 +92,7 @@ export default function ResultsCard({ result }: ResultsCardProps) {
       {/* Score summary */}
       <div className="rounded-2xl border border-ink/10 bg-white/60 p-5 text-center backdrop-blur-sm">
         <p className="font-sans text-xs text-ink-muted uppercase tracking-widest mb-1">
-          Total Score
+          total score
         </p>
         <p className="font-serif text-5xl font-bold text-ink">
           {result.totalScore}
@@ -88,7 +100,7 @@ export default function ResultsCard({ result }: ResultsCardProps) {
         </p>
         {bonusScore > 0 && (
           <p className="mt-1 text-sm font-sans text-gold">
-            Includes +{bonusScore} perfect bonus
+            includes +{bonusScore} perfect bonus
             {result.perfectCount > 1 ? ` (${result.perfectCount} perfects)` : ""}
           </p>
         )}
@@ -103,15 +115,15 @@ export default function ResultsCard({ result }: ResultsCardProps) {
 
       {/* Share button */}
       <button
-        onClick={handleCopy}
+        onClick={handleShare}
         className="w-full rounded-2xl bg-ink py-4 font-sans font-semibold text-parchment transition-colors hover:bg-ink/80 active:scale-95"
       >
-        {copied ? "Copied!" : "Copy Results"}
+        {shared ? "shared!" : copied ? "copied!" : "share results"}
       </button>
 
       {/* Share preview */}
       <div className="rounded-xl border border-ink/10 bg-white/40 p-4 font-sans text-sm text-ink-muted">
-        <p className="text-xs uppercase tracking-widest mb-2 text-ink-muted/60">Preview</p>
+        <p className="text-xs uppercase tracking-widest mb-2 text-ink-muted/60">preview</p>
         <pre className="whitespace-pre-wrap font-sans text-sm text-ink">{shareText}</pre>
       </div>
     </div>

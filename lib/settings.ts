@@ -20,7 +20,7 @@ const DEFAULTS: Settings = {
   showSliderTicks: false,
 };
 
-const STORAGE_KEY = "moments_settings";
+const STORAGE_KEY = "circa_settings";
 
 function load(): Settings {
   if (typeof window === "undefined") return DEFAULTS;
