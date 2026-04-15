@@ -148,7 +148,7 @@ export default function YearSlider({ value, onChange, disabled = false }: YearSl
           onMouseUp={() => setIsDragging(false)}
           onTouchStart={() => setIsDragging(true)}
           onTouchEnd={() => setIsDragging(false)}
-          className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed touch-none"
           aria-label={`Year slider: ${value}`}
           aria-valuemin={YEAR_MIN}
           aria-valuemax={YEAR_MAX}
