@@ -95,7 +95,13 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (existing) {
-    return buildResultResponse(existing.guesses, existing.total_score, date, user.id, serviceClient);
+    // Already submitted — fetch streak and return existing result
+    const { data: streakRow } = (await serviceClient
+      .from("user_streaks")
+      .select("current_streak")
+      .eq("user_id", user.id)
+      .single()) as { data: Pick<DbUserStreak, "current_streak"> | null };
+    return buildResultResponse(existing.guesses, existing.total_score, date, streakRow?.current_streak ?? 0);
   }
 
   const validIds = new Set<string>(puzzle.event_ids);
@@ -141,19 +147,25 @@ export async function POST(req: NextRequest) {
 
   const totalScore = scoredGuesses.reduce((sum, g) => sum + g.score, 0);
 
-  await serviceClient.from("user_results").insert({
+  const { error: insertError } = await serviceClient.from("user_results").insert({
     user_id: user.id,
     puzzle_date: date,
     guesses: scoredGuesses,
     total_score: totalScore,
   });
 
-  await updateStreak(user.id, date, isPlus, serviceClient);
+  if (insertError) {
+    console.error("[submit] insert failed:", insertError.message, insertError.code);
+    return NextResponse.json({ error: "Failed to save results. Please try again." }, { status: 500 });
+  }
 
-  return buildResultResponse(scoredGuesses, totalScore, date, user.id, serviceClient);
+  const newStreak = await updateStreak(user.id, date, isPlus, serviceClient);
+
+  return buildResultResponse(scoredGuesses, totalScore, date, newStreak);
 }
 
-async function updateStreak(userId: string, date: string, isPlus: boolean, client: SupabaseClient) {
+/** Returns the new current streak count after updating. */
+async function updateStreak(userId: string, date: string, isPlus: boolean, client: SupabaseClient): Promise<number> {
   const { data: streakRow } = (await client
     .from("user_streaks")
     .select("*")
@@ -164,20 +176,17 @@ async function updateStreak(userId: string, date: string, isPlus: boolean, clien
   yesterday.setUTCDate(yesterday.getUTCDate() - 1);
   const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-  // Already submitted today — idempotent, nothing to do
-  if (streakRow?.last_completed_date === date) return;
+  // Already submitted today — idempotent, return existing streak
+  if (streakRow?.last_completed_date === date) return streakRow.current_streak;
 
   let newStreak = 1;
   let longestStreak = streakRow?.longest_streak ?? 1;
-  let shieldUsed = false;
 
   if (streakRow) {
     if (streakRow.last_completed_date === yesterdayStr) {
-      // Consecutive day — extend streak
       newStreak = streakRow.current_streak + 1;
     } else if (streakRow.current_streak > 0 && isPlus) {
-      // Missed a day but user has Plus — try to consume a streak shield
-      shieldUsed = await consumeStreakShield(userId, date);
+      const shieldUsed = await consumeStreakShield(userId, date);
       newStreak = shieldUsed ? streakRow.current_streak + 1 : 1;
     }
     longestStreak = Math.max(longestStreak, newStreak);
@@ -190,21 +199,16 @@ async function updateStreak(userId: string, date: string, isPlus: boolean, clien
     last_completed_date: date,
     updated_at: new Date().toISOString(),
   });
+
+  return newStreak;
 }
 
-async function buildResultResponse(
+function buildResultResponse(
   scoredGuesses: ScoredGuess[],
   totalScore: number,
   date: string,
-  userId: string,
-  client: SupabaseClient
-): Promise<NextResponse> {
-  const { data: streakRow } = (await client
-    .from("user_streaks")
-    .select("current_streak")
-    .eq("user_id", userId)
-    .single()) as { data: Pick<DbUserStreak, "current_streak"> | null };
-
+  streak: number
+): NextResponse {
   const perfectCount = scoredGuesses.filter((g) => g.isPerfect).length;
 
   const result: SessionResult = {
@@ -213,7 +217,7 @@ async function buildResultResponse(
     totalScore,
     maxScore: MAX_SCORE_PER_EVENT * 5,
     perfectCount,
-    streak: streakRow?.current_streak ?? 0,
+    streak,
   };
 
   return NextResponse.json(result);
