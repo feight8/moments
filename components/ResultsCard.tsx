@@ -37,7 +37,7 @@ export default function ResultsCard({ result }: ResultsCardProps) {
     `Score: ${result.totalScore}/500${bonusScore > 0 ? ` (+${bonusScore} perfect)` : ""}`,
     result.streak > 0 ? `Streak: 🔥 ${result.streak}` : "",
     "",
-    "play at circagame.app",
+    "play at circagame.com",
   ]
     .filter((line) => line !== undefined)
     .join("\n");
