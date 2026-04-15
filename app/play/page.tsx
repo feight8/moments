@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { YEAR_MIN, YEAR_MAX } from "@/lib/scoring";
@@ -89,6 +89,14 @@ const initialState: State = {
 // ---------------------------------------------------------------------------
 
 export default function PlayPage() {
+  return (
+    <Suspense fallback={<PageShell><LoadingSpinner message="Loading puzzle…" /></PageShell>}>
+      <PlayPageInner />
+    </Suspense>
+  );
+}
+
+function PlayPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // ?date=YYYY-MM-DD is set by the archive page for past puzzles
@@ -299,7 +307,7 @@ export default function PlayPage() {
   );
 }
 
-function PageShell({ children, archiveDate }: { children: React.ReactNode; archiveDate?: string }) {
+function PageShell({ children, archiveDate }: { children: React.ReactNode; archiveDate?: string | undefined }) {
   const label = archiveDate ? formatPuzzleDate(archiveDate) : undefined;
   return (
     <main className="min-h-screen bg-parchment px-4 py-8">
