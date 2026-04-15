@@ -35,28 +35,19 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.user_id;
-        const plan = session.metadata?.plan as "monthly" | "lifetime" | undefined;
+        const plan = session.metadata?.plan as "monthly" | "annual" | undefined;
 
         if (!userId || !plan) break;
 
-        if (plan === "lifetime") {
-          await upsertPlusRecord({
-            userId,
-            plan: "lifetime",
-            status: "active",
-            stripeCustomerId: session.customer as string,
-          });
-        } else {
-          // For subscriptions, the subscription object is created separately.
-          // We'll provision after customer.subscription.created/.updated.
-          await upsertPlusRecord({
-            userId,
-            plan: "monthly",
-            status: "active",
-            stripeCustomerId: session.customer as string,
-            stripeSubscriptionId: session.subscription as string,
-          });
-        }
+        // Both monthly and annual are subscriptions — provision now.
+        // The subscription.updated event will keep period_end up to date.
+        await upsertPlusRecord({
+          userId,
+          plan,
+          status: "active",
+          stripeCustomerId: session.customer as string,
+          stripeSubscriptionId: session.subscription as string,
+        });
         break;
       }
 
@@ -66,15 +57,15 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
         const userId = sub.metadata?.user_id;
+        const plan = (sub.metadata?.plan ?? "monthly") as "monthly" | "annual";
         if (!userId) break;
 
         const isActive = sub.status === "active" || sub.status === "trialing";
-        // current_period_end is on subscription items in newer Stripe API versions
         const periodEndTs = (sub as unknown as { current_period_end?: number }).current_period_end
           ?? sub.items?.data?.[0]?.current_period_end;
         await upsertPlusRecord({
           userId,
-          plan: "monthly",
+          plan,
           status: isActive ? "active" : "cancelled",
           stripeCustomerId: sub.customer as string,
           stripeSubscriptionId: sub.id,
@@ -89,13 +80,14 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
         const userId = sub.metadata?.user_id;
+        const plan = (sub.metadata?.plan ?? "monthly") as "monthly" | "annual";
         if (!userId) break;
 
         const periodEndTs = (sub as unknown as { current_period_end?: number }).current_period_end
           ?? sub.items?.data?.[0]?.current_period_end;
         await upsertPlusRecord({
           userId,
-          plan: "monthly",
+          plan,
           status: "expired",
           stripeCustomerId: sub.customer as string,
           stripeSubscriptionId: sub.id,

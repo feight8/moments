@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
-import { getUserPlusStatus } from "@/lib/plus";
+import { getUserPlusStatus, consumeStreakShield } from "@/lib/plus";
 import { scoreGuess, isPerfect, MAX_SCORE_PER_EVENT } from "@/lib/scoring";
 import { todayUTC } from "@/lib/dates";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -38,10 +38,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Resolve Plus status once — used for archive gate and streak shield
+  const { isPlus } = await getUserPlusStatus(user.id);
+
   // Archive submissions (past dates) require Plus
   const todayStr = todayUTC();
   if (puzzleDate && puzzleDate < todayStr) {
-    const { isPlus } = await getUserPlusStatus(user.id);
     if (!isPlus) {
       return NextResponse.json({ error: "Circa+ required." }, { status: 403 });
     }
@@ -146,12 +148,12 @@ export async function POST(req: NextRequest) {
     total_score: totalScore,
   });
 
-  await updateStreak(user.id, date, serviceClient);
+  await updateStreak(user.id, date, isPlus, serviceClient);
 
   return buildResultResponse(scoredGuesses, totalScore, date, user.id, serviceClient);
 }
 
-async function updateStreak(userId: string, date: string, client: SupabaseClient) {
+async function updateStreak(userId: string, date: string, isPlus: boolean, client: SupabaseClient) {
   const { data: streakRow } = (await client
     .from("user_streaks")
     .select("*")
@@ -162,16 +164,23 @@ async function updateStreak(userId: string, date: string, client: SupabaseClient
   yesterday.setUTCDate(yesterday.getUTCDate() - 1);
   const yesterdayStr = yesterday.toISOString().split("T")[0];
 
+  // Already submitted today — idempotent, nothing to do
+  if (streakRow?.last_completed_date === date) return;
+
   let newStreak = 1;
-  let longestStreak = 1;
+  let longestStreak = streakRow?.longest_streak ?? 1;
+  let shieldUsed = false;
 
   if (streakRow) {
     if (streakRow.last_completed_date === yesterdayStr) {
+      // Consecutive day — extend streak
       newStreak = streakRow.current_streak + 1;
-    } else if (streakRow.last_completed_date === date) {
-      return;
+    } else if (streakRow.current_streak > 0 && isPlus) {
+      // Missed a day but user has Plus — try to consume a streak shield
+      shieldUsed = await consumeStreakShield(userId, date);
+      newStreak = shieldUsed ? streakRow.current_streak + 1 : 1;
     }
-    longestStreak = Math.max(streakRow.longest_streak, newStreak);
+    longestStreak = Math.max(longestStreak, newStreak);
   }
 
   await client.from("user_streaks").upsert({

@@ -36,6 +36,10 @@ export default function ScoreDisplay({ result }: ScoreDisplayProps) {
             alt=""
             className="h-full w-full object-cover"
             loading="lazy"
+            onError={(e) => {
+              const parent = (e.target as HTMLElement).closest(".relative");
+              if (parent) (parent as HTMLElement).style.display = "none";
+            }}
           />
         </div>
       )}

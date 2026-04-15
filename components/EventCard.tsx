@@ -29,7 +29,7 @@ export default function EventCard({ description, eventNumber, imageUrl }: EventC
           Event {eventNumber}
         </p>
         <p className="font-serif text-lg leading-relaxed text-ink">{description}</p>
-        <p className="mt-4 text-xs font-sans text-ink-muted italic">When did this happen?</p>
+        <p className="mt-4 text-xs font-sans text-ink-muted italic">when did this happen?</p>
       </div>
     </div>
   );

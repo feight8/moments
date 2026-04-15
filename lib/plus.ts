@@ -6,7 +6,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 
 export interface PlusStatus {
   isPlus: boolean;
-  plan: "monthly" | "lifetime" | null;
+  plan: "monthly" | "annual" | null;
   currentPeriodEnd: string | null;
 }
 
@@ -15,6 +15,12 @@ export interface PlusStatus {
  * Returns false for anonymous users and expired subscriptions.
  */
 export async function getUserPlusStatus(userId: string): Promise<PlusStatus> {
+  // Admin bypass — set PLUS_ADMIN_USER_IDS to a comma-separated list of Supabase UUIDs
+  const adminIds = (process.env.PLUS_ADMIN_USER_IDS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  if (adminIds.includes(userId)) {
+    return { isPlus: true, plan: "annual", currentPeriodEnd: null };
+  }
+
   const client = createServiceClient();
 
   const { data } = await client
@@ -26,7 +32,7 @@ export async function getUserPlusStatus(userId: string): Promise<PlusStatus> {
   if (!data) return { isPlus: false, plan: null, currentPeriodEnd: null };
 
   const { plan, status, current_period_end } = data as {
-    plan: "monthly" | "lifetime";
+    plan: "monthly" | "annual";
     status: string;
     current_period_end: string | null;
   };
@@ -35,12 +41,7 @@ export async function getUserPlusStatus(userId: string): Promise<PlusStatus> {
     return { isPlus: false, plan, currentPeriodEnd: current_period_end };
   }
 
-  // Lifetime plans never expire
-  if (plan === "lifetime") {
-    return { isPlus: true, plan, currentPeriodEnd: null };
-  }
-
-  // Monthly: validate period hasn't expired
+  // Annual/monthly: validate period hasn't expired
   if (current_period_end && new Date(current_period_end) > new Date()) {
     return { isPlus: true, plan, currentPeriodEnd: current_period_end };
   }
@@ -54,7 +55,7 @@ export async function getUserPlusStatus(userId: string): Promise<PlusStatus> {
  */
 export async function upsertPlusRecord(params: {
   userId: string;
-  plan: "monthly" | "lifetime";
+  plan: "monthly" | "annual";
   status: "active" | "cancelled" | "expired";
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;

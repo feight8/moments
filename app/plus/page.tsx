@@ -44,20 +44,20 @@ const features = [
 // ---------------------------------------------------------------------------
 
 interface PricingCardProps {
-  plan: "monthly" | "lifetime";
+  plan: "monthly" | "annual";
   price: string;
   period: string;
   badge?: string;
-  onSelect: (plan: "monthly" | "lifetime") => void;
+  onSelect: (plan: "monthly" | "annual") => void;
   loading: boolean;
 }
 
 function PricingCard({ plan, price, period, badge, onSelect, loading }: PricingCardProps) {
-  const isLifetime = plan === "lifetime";
+  const isAnnual = plan === "annual";
   return (
     <div
       className={`relative rounded-2xl border p-6 space-y-4 ${
-        isLifetime
+        isAnnual
           ? "border-gold/50 bg-gold/5 ring-2 ring-gold/20"
           : "border-ink/10 bg-white/60"
       } backdrop-blur-sm`}
@@ -72,7 +72,7 @@ function PricingCard({ plan, price, period, badge, onSelect, loading }: PricingC
 
       <div>
         <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
-          {isLifetime ? "Lifetime" : "Monthly"}
+          {isAnnual ? "Annual" : "Monthly"}
         </p>
         <div className="flex items-end gap-1 mt-1">
           <span className="font-serif text-4xl font-bold text-ink">{price}</span>
@@ -84,20 +84,20 @@ function PricingCard({ plan, price, period, badge, onSelect, loading }: PricingC
         onClick={() => onSelect(plan)}
         disabled={loading}
         className={`w-full rounded-2xl py-3.5 font-sans font-semibold transition-colors active:scale-95 disabled:opacity-60 ${
-          isLifetime
+          isAnnual
             ? "bg-gold text-white hover:bg-gold/80"
             : "bg-ink text-parchment hover:bg-ink/80"
         }`}
       >
-        {loading ? "Redirecting…" : isLifetime ? "Get Lifetime Access" : "Subscribe Monthly"}
+        {loading ? "Redirecting…" : isAnnual ? "Subscribe Annually" : "Subscribe Monthly"}
       </button>
 
-      {isLifetime && (
+      {isAnnual && (
         <p className="text-center font-sans text-xs text-ink-muted">
-          Pay once · Access forever · No renewal
+          Best value · $1.25/month · Billed yearly
         </p>
       )}
-      {!isLifetime && (
+      {!isAnnual && (
         <p className="text-center font-sans text-xs text-ink-muted">
           Cancel anytime · Billed monthly
         </p>
@@ -112,10 +112,10 @@ function PricingCard({ plan, price, period, badge, onSelect, loading }: PricingC
 
 export default function PlusPage() {
   const router = useRouter();
-  const [loadingPlan, setLoadingPlan] = useState<"monthly" | "lifetime" | null>(null);
+  const [loadingPlan, setLoadingPlan] = useState<"monthly" | "annual" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSelect(plan: "monthly" | "lifetime") {
+  async function handleSelect(plan: "monthly" | "annual") {
     setError(null);
     setLoadingPlan(plan);
 
@@ -183,12 +183,12 @@ export default function PlusPage() {
         {/* Pricing cards */}
         <div className="space-y-4">
           <PricingCard
-            plan="lifetime"
+            plan="annual"
             price="$14.99"
-            period="one time"
+            period="/ year"
             badge="Best value"
             onSelect={handleSelect}
-            loading={loadingPlan === "lifetime"}
+            loading={loadingPlan === "annual"}
           />
           <PricingCard
             plan="monthly"

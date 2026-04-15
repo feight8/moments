@@ -10,12 +10,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 // Stripe Price IDs — create these in your Stripe Dashboard and set as env vars.
 const PRICE_IDS: Record<string, string> = {
-  monthly:  process.env.STRIPE_PRICE_MONTHLY!,  // $2.99/month recurring
-  lifetime: process.env.STRIPE_PRICE_LIFETIME!,  // $14.99 one-time
+  monthly: process.env.STRIPE_PRICE_MONTHLY!,  // $2.99/month recurring
+  annual:  process.env.STRIPE_PRICE_ANNUAL!,   // $14.99/year recurring
 };
 
 interface CheckoutBody {
-  plan: "monthly" | "lifetime";
+  plan: "monthly" | "annual";
 }
 
 export async function POST(req: NextRequest) {
@@ -42,14 +42,14 @@ export async function POST(req: NextRequest) {
   }
 
   const { plan } = body;
-  if (plan !== "monthly" && plan !== "lifetime") {
+  if (plan !== "monthly" && plan !== "annual") {
     return NextResponse.json({ error: "Invalid plan." }, { status: 400 });
   }
 
   const priceId = PRICE_IDS[plan];
   if (!priceId) {
     return NextResponse.json(
-      { error: "Stripe price not configured. Set STRIPE_PRICE_MONTHLY / STRIPE_PRICE_LIFETIME." },
+      { error: "Stripe price not configured. Set STRIPE_PRICE_MONTHLY / STRIPE_PRICE_ANNUAL." },
       { status: 500 }
     );
   }
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   const session = await stripe.checkout.sessions.create({
-    mode: plan === "monthly" ? "subscription" : "payment",
+    mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
     customer_email: user.email,
     success_url: `${origin}/plus/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -66,10 +66,7 @@ export async function POST(req: NextRequest) {
       user_id: user.id,
       plan,
     },
-    // Pre-fill email from Supabase account
-    ...(plan === "monthly" && {
-      subscription_data: { metadata: { user_id: user.id, plan } },
-    }),
+    subscription_data: { metadata: { user_id: user.id, plan } },
   });
 
   return NextResponse.json({ url: session.url });

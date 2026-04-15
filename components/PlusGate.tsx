@@ -25,7 +25,7 @@ export default function PlusGate({ children, locked, feature }: PlusGateProps) {
           {feature ?? "This feature"} is Plus-exclusive
         </p>
         <p className="font-sans text-sm text-ink-muted leading-relaxed">
-          Unlock the full archive, streak shields, stats, and more with Circa+ for $2.99/month or $14.99 lifetime.
+          Unlock the full archive, streak shields, stats, and more with Circa+ for $2.99/month or $14.99/year.
         </p>
       </div>
       <Link
