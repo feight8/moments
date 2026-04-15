@@ -195,22 +195,36 @@ function PlayPageInner() {
 
   async function handleNext() {
     if (!state.puzzle) return;
-    const isLast = state.currentIndex === state.puzzle.events.length - 1;
+    // Allow retry from error state only when all 5 guesses are already recorded
+    const isLast = state.currentIndex === state.puzzle.events.length - 1 ||
+      (state.phase === "error" && state.guesses.length === 5);
 
     if (isLast) {
       dispatch({ type: "SUBMITTING" });
+
+      // Always pin puzzleDate to the puzzle that was loaded — prevents
+      // midnight-rollover failures where the server resolves a different
+      // puzzle than the one the user actually played.
+      const submittedPuzzleDate = archiveDate ?? state.puzzle.date;
 
       const res = await authFetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           guesses: state.guesses,
-          ...(archiveDate ? { puzzleDate: archiveDate } : {}),
+          puzzleDate: submittedPuzzleDate,
         }),
       });
 
       if (!res.ok) {
-        dispatch({ type: "ERROR", message: "Failed to save results. Please try again." });
+        let serverMsg = "";
+        try { serverMsg = (await res.json())?.error ?? ""; } catch { /* ignore */ }
+        dispatch({
+          type: "ERROR",
+          message: serverMsg.includes("Circa+")
+            ? serverMsg
+            : "Something went wrong saving your results. Your guesses are safe — tap to try again.",
+        });
         return;
       }
 
@@ -235,11 +249,20 @@ function PlayPageInner() {
   }
 
   if (state.phase === "error") {
+    const canRetrySubmit = state.error?.includes("Your guesses are safe");
     return (
       <PageShell archiveDate={archiveDate}>
         <div className="text-center space-y-4 py-12">
           <p className="font-serif text-xl text-ink">{state.error}</p>
           <div className="space-y-2">
+            {canRetrySubmit && (
+              <button
+                onClick={handleNext}
+                className="block w-full rounded-2xl bg-gold py-3 font-sans font-semibold text-white hover:bg-gold/80 active:scale-95 transition-colors"
+              >
+                Try again →
+              </button>
+            )}
             {state.error?.includes("Circa+") && (
               <a href="/plus" className="block font-sans text-sm text-gold underline">
                 Upgrade to Plus →

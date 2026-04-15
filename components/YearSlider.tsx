@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { YEAR_MIN, YEAR_MAX } from "@/lib/scoring";
 
 interface YearSliderProps {
@@ -26,8 +26,61 @@ export default function YearSlider({ value, onChange, disabled = false }: YearSl
   const [inputText, setInputText] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // Stable ref so the native touch listener always has the current onChange/disabled
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const disabledRef = useRef(disabled);
+  disabledRef.current = disabled;
+  const isDraggingRef = useRef(false);
 
   const pct = ((value - YEAR_MIN) / (YEAR_MAX - YEAR_MIN)) * 100;
+
+  // Compute year from a clientX position over the track
+  function yearFromClientX(clientX: number): number {
+    if (!trackRef.current) return value;
+    const rect = trackRef.current.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    return clamp(Math.round(YEAR_MIN + ratio * (YEAR_MAX - YEAR_MIN)));
+  }
+
+  // Native (non-passive) touch listeners so we can preventDefault on touchmove
+  // and stop iOS Safari from scrolling the page while dragging the slider.
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    function onTouchStart(e: TouchEvent) {
+      if (disabledRef.current) return;
+      isDraggingRef.current = true;
+      setIsDragging(true);
+      const year = yearFromClientX(e.touches[0].clientX);
+      onChangeRef.current(year);
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      if (!isDraggingRef.current) return;
+      e.preventDefault(); // prevents page scroll — only works on non-passive listener
+      const year = yearFromClientX(e.touches[0].clientX);
+      onChangeRef.current(year);
+    }
+
+    function onTouchEnd() {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+    }
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSliderChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,7 +132,6 @@ export default function YearSlider({ value, onChange, disabled = false }: YearSl
       setInputText("");
       inputRef.current?.blur();
     }
-    // Arrow keys nudge while typing
     if (e.key === "ArrowUp") {
       e.preventDefault();
       const base = isEditing && !isNaN(parseInt(inputText)) ? parseInt(inputText) : value;
@@ -127,14 +179,15 @@ export default function YearSlider({ value, onChange, disabled = false }: YearSl
         </p>
       )}
 
-      {/* Slider track */}
-      <div className="relative px-1">
+      {/* Slider track — touch events handled here via native listeners */}
+      <div ref={trackRef} className="relative px-1 py-3 -my-3 cursor-pointer">
         <div className="relative h-2 rounded-full bg-ink/10">
           <div
             className="absolute left-0 top-0 h-2 rounded-full bg-gold transition-none"
             style={{ width: `${pct}%` }}
           />
         </div>
+        {/* Native range input for mouse + keyboard — hidden visually but accessible */}
         <input
           type="range"
           min={YEAR_MIN}
@@ -144,11 +197,9 @@ export default function YearSlider({ value, onChange, disabled = false }: YearSl
           disabled={disabled}
           onChange={handleSliderChange}
           onKeyDown={handleSliderKeyDown}
-          onMouseDown={() => setIsDragging(true)}
-          onMouseUp={() => setIsDragging(false)}
-          onTouchStart={() => setIsDragging(true)}
-          onTouchEnd={() => setIsDragging(false)}
-          className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed touch-none"
+          onMouseDown={() => { setIsDragging(true); isDraggingRef.current = true; }}
+          onMouseUp={() => { setIsDragging(false); isDraggingRef.current = false; }}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
           aria-label={`Year slider: ${value}`}
           aria-valuemin={YEAR_MIN}
           aria-valuemax={YEAR_MAX}

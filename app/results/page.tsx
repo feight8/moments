@@ -1,34 +1,58 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import ResultsCard from "@/components/ResultsCard";
+import ScoreDistribution from "@/components/ScoreDistribution";
+import LinkAccountPrompt from "@/components/LinkAccountPrompt";
 import NavHeader from "@/components/NavHeader";
 import type { SessionResult } from "@/types";
+import type { DistributionResponse } from "@/app/api/distribution/route";
 
 export default function ResultsPage() {
-  const [result, setResult] = useState<SessionResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [result, setResult]           = useState<SessionResult | null>(null);
+  const [distribution, setDistribution] = useState<DistributionResponse | null>(null);
+  const [showLinkPrompt, setShowLinkPrompt] = useState(false);
+  const [error, setError]             = useState<string | null>(null);
 
   useEffect(() => {
-    // Prefer result from sessionStorage (set immediately after submit)
-    // to avoid a round-trip and flash of loading state
-    const cached = sessionStorage.getItem("circa_result");
-    if (cached) {
-      try {
-        setResult(JSON.parse(cached));
-        return;
-      } catch {
-        // fall through to fetch
+    async function load() {
+      // 1. Load today's result (sessionStorage first, then API)
+      let sessionResult: SessionResult | null = null;
+      const cached = sessionStorage.getItem("circa_result");
+      if (cached) {
+        try { sessionResult = JSON.parse(cached); } catch { /* fall through */ }
+      }
+
+      if (!sessionResult) {
+        const res = await fetch("/api/results");
+        if (!res.ok) {
+          setError("Could not load your results. Please try again.");
+          return;
+        }
+        sessionResult = await res.json();
+      }
+      setResult(sessionResult);
+
+      // 2. Fetch distribution + link-prompt flag (auth header for Plus check)
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const date = sessionResult!.date;
+
+      const distRes = await fetch(`/api/distribution?date=${date}`, {
+        headers: session?.access_token
+          ? { Authorization: `Bearer ${session.access_token}` }
+          : {},
+      });
+
+      if (distRes.ok) {
+        const distData: DistributionResponse = await distRes.json();
+        setDistribution(distData);
+        setShowLinkPrompt(distData.showLinkPrompt);
       }
     }
 
-    fetch("/api/results")
-      .then((res) => {
-        if (!res.ok) throw new Error("No result found.");
-        return res.json();
-      })
-      .then((data: SessionResult) => setResult(data))
-      .catch(() => setError("Could not load your results. Please try again."));
+    load();
   }, []);
 
   return (
@@ -53,6 +77,16 @@ export default function ResultsPage() {
         )}
 
         {result && <ResultsCard result={result} />}
+
+        {result && distribution && (
+          <ScoreDistribution
+            buckets={distribution.buckets}
+            totalPlayers={distribution.totalPlayers}
+            userScore={result.totalScore}
+          />
+        )}
+
+        {showLinkPrompt && <LinkAccountPrompt />}
 
         {result && (
           <p className="text-center font-sans text-xs text-ink-muted pb-4">
