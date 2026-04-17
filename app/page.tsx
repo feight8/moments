@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { formatPuzzleDate, todayUTC } from "@/lib/dates";
+import { formatPuzzleDate, todayDate } from "@/lib/dates";
 import NavHeader from "@/components/NavHeader";
 import CircaLogo from "@/components/CircaLogo";
 import PlusBadge from "@/components/PlusBadge";
 
 export default function HomePage() {
-  const dateLabel = formatPuzzleDate(todayUTC());
+  const dateLabel = formatPuzzleDate(todayDate());
 
   return (
     <main className="min-h-screen bg-parchment flex flex-col items-center justify-center px-4">

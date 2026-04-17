@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
 import { getUserPlusStatus } from "@/lib/plus";
 import { scoreGuess, isPerfect } from "@/lib/scoring";
-import { todayUTC } from "@/lib/dates";
+import { todayDate } from "@/lib/dates";
 import type { GuessResult, DbEvent, DbDailyPuzzle } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Archive guesses (past dates) require Plus
-  const todayStr = todayUTC();
+  const todayStr = todayDate();
   if (puzzleDate && puzzleDate < todayStr) {
     const { isPlus } = await getUserPlusStatus(user.id);
     if (!isPlus) {

@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
 import { getUserPlusStatus, consumeStreakShield } from "@/lib/plus";
 import { scoreGuess, isPerfect, MAX_SCORE_PER_EVENT } from "@/lib/scoring";
-import { todayUTC } from "@/lib/dates";
+import { todayDate } from "@/lib/dates";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Guess, ScoredGuess, SessionResult, DbEvent, DbUserStreak } from "@/types";
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   const { isPlus } = await getUserPlusStatus(user.id);
 
   // Archive submissions (past dates) require Plus
-  const todayStr = todayUTC();
+  const todayStr = todayDate();
   if (puzzleDate && puzzleDate < todayStr) {
     if (!isPlus) {
       return NextResponse.json({ error: "Circa+ required." }, { status: 403 });

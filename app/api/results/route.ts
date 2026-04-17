@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
-import { todayUTC } from "@/lib/dates";
+import { todayDate } from "@/lib/dates";
 import type { SessionResult, DbUserStreak } from "@/types";
 import { MAX_SCORE_PER_EVENT } from "@/lib/scoring";
 
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Resolve active puzzle date with fallback (mirrors /api/daily logic)
-  let date = todayUTC();
+  let date = todayDate();
   const { data: todaysPuzzle } = await serviceClient
     .from("daily_puzzles")
     .select("date")
