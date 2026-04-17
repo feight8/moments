@@ -31,10 +31,10 @@ export default function LinkAccountPrompt() {
     return (
       <div className="rounded-2xl border border-dot-green/30 bg-dot-green/5 p-6 text-center space-y-2">
         <p className="text-2xl">✓</p>
-        <p className="font-serif text-lg font-bold text-ink">account saved</p>
+        <p className="font-serif text-lg font-bold text-ink">check your email</p>
         <p className="font-sans text-sm text-ink-muted">
-          Your streak and history are now linked to your email. You can sign in
-          from any device to pick up where you left off.
+          We sent a confirmation link to your address. Click it to finish linking
+          your account - then your streak is preserved across devices and browsers.
         </p>
       </div>
     );

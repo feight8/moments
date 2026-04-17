@@ -57,6 +57,9 @@ interface State {
   sliderYear: number;
   guesses: Guess[];
   currentResult: GuessResult | null;
+  /** Inline error shown below the guess button — does NOT exit the guessing phase. */
+  guessError: string | null;
+  /** Full-screen error (submit failures, auth errors, no puzzle). */
   error: string | null;
 }
 
@@ -65,6 +68,7 @@ type Action =
   | { type: "PUZZLE_RESTORED"; puzzle: DailyPuzzle; guesses: Guess[] }
   | { type: "SLIDER_CHANGED"; year: number }
   | { type: "GUESS_REVEALED"; result: GuessResult; guess: Guess }
+  | { type: "GUESS_ERROR"; message: string }
   | { type: "NEXT_EVENT" }
   | { type: "SUBMITTING" }
   | { type: "ERROR"; message: string };
@@ -89,7 +93,9 @@ function reducer(state: State, action: Action): State {
       };
 
     case "SLIDER_CHANGED":
-      return state.phase === "guessing" ? { ...state, sliderYear: action.year } : state;
+      return state.phase === "guessing"
+        ? { ...state, sliderYear: action.year, guessError: null }
+        : state;
 
     case "GUESS_REVEALED":
       return {
@@ -97,7 +103,12 @@ function reducer(state: State, action: Action): State {
         phase: "revealing",
         guesses: [...state.guesses, action.guess],
         currentResult: action.result,
+        guessError: null,
       };
+
+    // Inline guess error — stays in "guessing" phase so the user can retry.
+    case "GUESS_ERROR":
+      return { ...state, guessError: action.message };
 
     case "NEXT_EVENT":
       return {
@@ -106,6 +117,7 @@ function reducer(state: State, action: Action): State {
         currentIndex: state.currentIndex + 1,
         sliderYear: MID_YEAR,
         currentResult: null,
+        guessError: null,
       };
 
     case "SUBMITTING":
@@ -126,6 +138,7 @@ const initialState: State = {
   sliderYear: MID_YEAR,
   guesses: [],
   currentResult: null,
+  guessError: null,
   error: null,
 };
 
@@ -183,7 +196,7 @@ function PlayPageInner() {
     const authHeaders = await getAuthHeaders();
     return fetch(url, {
       ...options,
-      headers: { ...(options.headers ?? {}), ...authHeaders },
+      headers: { ...(options.headers as Record<string, string> ?? {}), ...authHeaders },
     });
   }
 
@@ -199,11 +212,22 @@ function PlayPageInner() {
     savePending(puzzleDate, guesses);
 
     const authHeaders = await getAuthHeaders();
-    const res = await fetch("/api/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...authHeaders },
-      body: JSON.stringify({ guesses, puzzleDate }),
-    });
+
+    let res: Response;
+    try {
+      res = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders },
+        body: JSON.stringify({ guesses, puzzleDate }),
+      });
+    } catch {
+      // Network drop, iOS connection loss, Vercel timeout, etc.
+      dispatch({
+        type: "ERROR",
+        message: "Connection lost. Your guesses are saved - tap to try again.",
+      });
+      return;
+    }
 
     if (!res.ok) {
       let serverMsg = "";
@@ -242,7 +266,7 @@ function PlayPageInner() {
         ({ data: { session } } = await supabase.auth.getSession());
       }
 
-      const authHeader = session?.access_token
+      const authHeader: Record<string, string> = session?.access_token
         ? { Authorization: `Bearer ${session.access_token}` }
         : {};
 
@@ -269,6 +293,21 @@ function PlayPageInner() {
             }
           }
           // Pending is stale (different day) — discard it
+          clearPending();
+        }
+      } else {
+        // Archive play — check for a pending submission for this specific date.
+        // Handles the case where an archive submit failed and the user refreshed.
+        const pending = loadPending();
+        if (pending?.guesses.length === 5 && pending.puzzleDate === archiveDate) {
+          const puzzleRes = await fetch(`/api/daily?date=${archiveDate}`, { headers: authHeader });
+          if (puzzleRes.ok) {
+            const puzzle: DailyPuzzle = await puzzleRes.json();
+            dispatch({ type: "PUZZLE_RESTORED", puzzle, guesses: pending.guesses });
+            await doSubmit(pending.puzzleDate, pending.guesses);
+            return;
+          }
+          // Couldn't load the puzzle — clear and fall through to normal load
           clearPending();
         }
       }
@@ -299,20 +338,28 @@ function PlayPageInner() {
     const event = state.puzzle.events[state.currentIndex];
     const guess: Guess = { eventId: event.id, guessYear: state.sliderYear };
 
-    const res = await authFetch("/api/guess", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...guess,
-        ...(archiveDate ? { puzzleDate: archiveDate } : {}),
-      }),
-    });
+    let res: Response;
+    try {
+      res = await authFetch("/api/guess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...guess,
+          ...(archiveDate ? { puzzleDate: archiveDate } : {}),
+        }),
+      });
+    } catch {
+      // Network drop — show inline error so the user can retry without losing progress
+      dispatch({ type: "GUESS_ERROR", message: "Connection lost. Please try again." });
+      return;
+    }
 
     if (!res.ok) {
       let message = "Something went wrong. Please try again.";
       try { const body = await res.json(); if (body?.error) message = body.error; }
       catch { /* ignore */ }
-      dispatch({ type: "ERROR", message });
+      // Dispatch as inline error, not full-screen error — progress is preserved
+      dispatch({ type: "GUESS_ERROR", message });
       return;
     }
 
@@ -414,6 +461,9 @@ function PlayPageInner() {
           >
             Lock In {state.sliderYear}
           </button>
+          {state.guessError && (
+            <p className="text-center font-sans text-sm text-red-600">{state.guessError}</p>
+          )}
         </>
       )}
 

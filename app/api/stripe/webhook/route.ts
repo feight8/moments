@@ -37,7 +37,14 @@ export async function POST(req: NextRequest) {
         const userId = session.metadata?.user_id;
         const plan = session.metadata?.plan as "monthly" | "annual" | undefined;
 
-        if (!userId || !plan) break;
+        if (!userId || !plan) {
+          console.error("[stripe webhook] checkout.session.completed: missing metadata", {
+            sessionId: session.id,
+            userId,
+            plan,
+          });
+          break;
+        }
 
         // Both monthly and annual are subscriptions — provision now.
         // The subscription.updated event will keep period_end up to date.

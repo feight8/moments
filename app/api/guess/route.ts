@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
 import { getUserPlusStatus } from "@/lib/plus";
-import { scoreGuess, isPerfect } from "@/lib/scoring";
+import { scoreGuess, isPerfect, YEAR_MIN, YEAR_MAX } from "@/lib/scoring";
 import { todayDate } from "@/lib/dates";
 import type { GuessResult, DbEvent, DbDailyPuzzle } from "@/types";
 
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
   const { eventId, guessYear, puzzleDate } = body;
 
-  if (!eventId || !Number.isInteger(guessYear) || guessYear < 1000 || guessYear > 2025) {
+  if (!eventId || !Number.isInteger(guessYear) || guessYear < YEAR_MIN || guessYear > YEAR_MAX) {
     return NextResponse.json({ error: "Invalid guess." }, { status: 400 });
   }
 
