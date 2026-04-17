@@ -15,7 +15,7 @@ const features = [
   {
     emoji: "📚",
     title: "Full Puzzle Archive",
-    desc: "Play any past daily puzzle — hundreds of moments to explore at your own pace.",
+    desc: "Play any past daily puzzle, hundreds of moments to explore at your own pace.",
   },
   {
     emoji: "🛡️",

@@ -3,7 +3,7 @@ import SettingsProvider from "@/components/SettingsProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "circa — daily history puzzle",
+  title: "circa - daily history puzzle",
   description:
     "Five historical events a day. No dates given. Drag a slider to guess the year and score points for accuracy. Build your streak.",
   openGraph: {

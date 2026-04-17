@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ResultsCard from "@/components/ResultsCard";
-import ScoreDistribution from "@/components/ScoreDistribution";
 import LinkAccountPrompt from "@/components/LinkAccountPrompt";
 import NavHeader from "@/components/NavHeader";
 import type { SessionResult } from "@/types";
@@ -17,6 +16,13 @@ export default function ResultsPage() {
 
   useEffect(() => {
     async function load() {
+      // Get auth session once — used for both fetches below
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const authHeader: Record<string, string> = session?.access_token
+        ? { Authorization: `Bearer ${session.access_token}` }
+        : {};
+
       // 1. Load today's result (sessionStorage first, then API)
       let sessionResult: SessionResult | null = null;
       const cached = sessionStorage.getItem("circa_result");
@@ -25,7 +31,7 @@ export default function ResultsPage() {
       }
 
       if (!sessionResult) {
-        const res = await fetch("/api/results");
+        const res = await fetch("/api/results", { headers: authHeader });
         if (!res.ok) {
           setError("Could not load your results. Please try again.");
           return;
@@ -34,15 +40,11 @@ export default function ResultsPage() {
       }
       setResult(sessionResult);
 
-      // 2. Fetch distribution + link-prompt flag (auth header for Plus check)
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      // 2. Fetch distribution + link-prompt flag
       const date = sessionResult!.date;
 
       const distRes = await fetch(`/api/distribution?date=${date}`, {
-        headers: session?.access_token
-          ? { Authorization: `Bearer ${session.access_token}` }
-          : {},
+        headers: authHeader,
       });
 
       if (distRes.ok) {
@@ -76,13 +78,10 @@ export default function ResultsPage() {
           </div>
         )}
 
-        {result && <ResultsCard result={result} />}
-
-        {result && distribution && (
-          <ScoreDistribution
-            buckets={distribution.buckets}
-            totalPlayers={distribution.totalPlayers}
-            userScore={result.totalScore}
+        {result && (
+          <ResultsCard
+            result={result}
+            distribution={distribution ?? null}
           />
         )}
 

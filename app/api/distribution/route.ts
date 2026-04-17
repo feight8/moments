@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
 import { getUserPlusStatus } from "@/lib/plus";
-import { todayUTC } from "@/lib/dates";
+import { todayDate } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 
   // Determine puzzle date — default to today, allow ?date= override
   const paramDate = new URL(req.url).searchParams.get("date");
-  const puzzleDate = paramDate ?? todayUTC();
+  const puzzleDate = paramDate ?? todayDate();
 
   // Fetch all scores for this puzzle date (aggregate — no PII exposed)
   const { data: rows } = await serviceClient

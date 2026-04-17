@@ -41,8 +41,13 @@ export async function getUserPlusStatus(userId: string): Promise<PlusStatus> {
     return { isPlus: false, plan, currentPeriodEnd: current_period_end };
   }
 
-  // Annual/monthly: validate period hasn't expired
-  if (current_period_end && new Date(current_period_end) > new Date()) {
+  // If period_end hasn't arrived yet (race between checkout.session.completed
+  // and customer.subscription.updated webhook), trust the "active" status.
+  if (!current_period_end) {
+    return { isPlus: true, plan, currentPeriodEnd: null };
+  }
+
+  if (new Date(current_period_end) > new Date()) {
     return { isPlus: true, plan, currentPeriodEnd: current_period_end };
   }
 
@@ -87,11 +92,11 @@ export async function consumeStreakShield(userId: string, date: string): Promise
     .eq("user_id", userId)
     .single();
 
-  // Reset shield if it's a new month
-  const currentMonthKey = data?.month_key;
-  const shieldsRemaining = currentMonthKey === monthKey
-    ? (data?.shields_remaining ?? 0)
-    : 1; // New month — reset to 1
+  // Determine remaining shields with explicit cases for clarity
+  const shieldsRemaining: number =
+    data === null                  ? 1               // No record yet — fresh Plus user
+    : data.month_key !== monthKey  ? 1               // New month — reset to 1
+    : data.shields_remaining;                        // Same month — use stored count
 
   if (shieldsRemaining <= 0) return false;
 

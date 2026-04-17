@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
-import { todayUTC } from "@/lib/dates";
+import { resolveActivePuzzleDate } from "@/lib/puzzle";
 import type { SessionResult, DbUserStreak } from "@/types";
 import { MAX_SCORE_PER_EVENT } from "@/lib/scoring";
 
@@ -15,22 +15,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
-  // Resolve active puzzle date with fallback (mirrors /api/daily logic)
-  let date = todayUTC();
-  const { data: todaysPuzzle } = await serviceClient
-    .from("daily_puzzles")
-    .select("date")
-    .eq("date", date)
-    .single();
-
-  if (!todaysPuzzle) {
-    const { data: latestPuzzle } = await serviceClient
-      .from("daily_puzzles")
-      .select("date")
-      .order("date", { ascending: false })
-      .limit(1)
-      .single();
-    if (latestPuzzle) date = latestPuzzle.date;
+  // Resolve active puzzle date using shared helper (keeps in sync with /api/submit)
+  const date = await resolveActivePuzzleDate(serviceClient);
+  if (!date) {
+    return NextResponse.json({ error: "No puzzle available." }, { status: 404 });
   }
 
   const { data: result } = await serviceClient

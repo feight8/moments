@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
 import { getUserPlusStatus, consumeStreakShield } from "@/lib/plus";
-import { scoreGuess, isPerfect, MAX_SCORE_PER_EVENT } from "@/lib/scoring";
-import { todayUTC } from "@/lib/dates";
+import { scoreGuess, isPerfect, MAX_SCORE_PER_EVENT, YEAR_MIN, YEAR_MAX } from "@/lib/scoring";
+import { todayDate } from "@/lib/dates";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Guess, ScoredGuess, SessionResult, DbEvent, DbUserStreak } from "@/types";
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   const { isPlus } = await getUserPlusStatus(user.id);
 
   // Archive submissions (past dates) require Plus
-  const todayStr = todayUTC();
+  const todayStr = todayDate();
   if (puzzleDate && puzzleDate < todayStr) {
     if (!isPlus) {
       return NextResponse.json({ error: "Circa+ required." }, { status: 403 });
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
     if (!validIds.has(g.eventId)) {
       return NextResponse.json({ error: `Invalid event ID: ${g.eventId}` }, { status: 400 });
     }
-    if (!Number.isInteger(g.guessYear) || g.guessYear < 1000 || g.guessYear > 2025) {
+    if (!Number.isInteger(g.guessYear) || g.guessYear < YEAR_MIN || g.guessYear > YEAR_MAX) {
       return NextResponse.json({ error: `Guess year out of range: ${g.guessYear}` }, { status: 400 });
     }
   }
@@ -192,13 +192,17 @@ async function updateStreak(userId: string, date: string, isPlus: boolean, clien
     longestStreak = Math.max(longestStreak, newStreak);
   }
 
-  await client.from("user_streaks").upsert({
+  const { error: upsertError } = await client.from("user_streaks").upsert({
     user_id: userId,
     current_streak: newStreak,
     longest_streak: longestStreak,
     last_completed_date: date,
     updated_at: new Date().toISOString(),
   });
+
+  if (upsertError) {
+    console.error("[streak] upsert failed for user", userId, ":", upsertError.message);
+  }
 
   return newStreak;
 }

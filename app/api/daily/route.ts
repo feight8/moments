@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
 import { getUserPlusStatus } from "@/lib/plus";
-import { todayUTC } from "@/lib/dates";
+import { todayDate } from "@/lib/dates";
 import type { DailyPuzzle, PublicEvent, DbDailyPuzzle, DbEvent } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
   const requestedDate = req.nextUrl.searchParams.get("date");
-  const today = todayUTC();
+  const today = todayDate();
 
   // Archive requests (past dates) require Plus
   if (requestedDate && requestedDate < today) {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
 import { getUserPlusStatus } from "@/lib/plus";
-import { todayUTC } from "@/lib/dates";
+import { todayDate } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   }
 
   const client = createServiceClient();
-  const today = todayUTC();
+  const today = todayDate();
 
   // All past puzzles (exclude today — play today via /play)
   const { data: puzzles, error } = await client
