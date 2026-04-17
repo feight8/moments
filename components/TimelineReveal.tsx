@@ -106,7 +106,7 @@ export default function TimelineReveal({ guessYear, correctYear }: TimelineRevea
         {isPerfect ? (
           <div className="flex justify-center">
             <span className="rounded-full bg-gold/15 px-4 py-1.5 font-sans text-sm font-semibold text-gold">
-              {correctYear} — perfect!
+              {correctYear} - perfect!
             </span>
           </div>
         ) : (

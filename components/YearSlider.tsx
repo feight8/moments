@@ -164,7 +164,7 @@ export default function YearSlider({ value, onChange, disabled = false }: YearSl
           onChange={handleYearInputChange}
           onBlur={commitYearInput}
           onKeyDown={handleYearInputKeyDown}
-          aria-label="Year guess — type or use the slider"
+          aria-label="Year guess - type or use the slider"
           className={`w-32 bg-transparent text-center font-serif text-5xl font-bold tabular-nums outline-none transition-colors duration-75 disabled:cursor-not-allowed
             ${isDragging || isEditing ? "text-gold" : "text-ink"}
             ${!disabled ? "cursor-text border-b-2 border-transparent focus:border-gold" : ""}

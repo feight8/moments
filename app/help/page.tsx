@@ -148,7 +148,7 @@ export default function HelpPage() {
         <Section title="Scoring">
           <Card>
             <p className="font-sans text-sm text-ink-muted mb-4">
-              Each event is worth up to <span className="font-semibold text-ink">100 points</span>, plus a <span className="font-semibold text-gold">+10 bonus</span> for an exact year. Score drops smoothly the further off you are — zero points at 150+ years.
+              Each event is worth up to <span className="font-semibold text-ink">100 points</span>, plus a <span className="font-semibold text-gold">+10 bonus</span> for an exact year. Score drops smoothly the further off you are, zeroing out at 150+ years.
             </p>
             <div className="divide-y divide-ink/8">
               <ScoreRow distance="Exact year" score="110 pts" dot="gem" />
@@ -173,7 +173,7 @@ export default function HelpPage() {
           <Card>
             <div className="divide-y divide-ink/8 font-sans text-sm">
               {[
-                { emoji: "💎", label: "Gem", desc: "Exact year — perfect find!" },
+                { emoji: "💎", label: "Gem", desc: "Exact year - perfect find!" },
                 { emoji: "🏺", label: "Artifact", desc: "within ~10 years (85+ pts)" },
                 { emoji: "🪙", label: "Coin", desc: "within ~25 years (65+ pts)" },
                 { emoji: "🦴", label: "Fossil", desc: "within ~75 years (20+ pts)" },
@@ -241,7 +241,7 @@ export default function HelpPage() {
         <Section title="About">
           <Card>
             <div className="font-sans text-sm text-ink-muted space-y-2 leading-relaxed">
-              <p>circa is a daily history guessing game. A new puzzle drops every day — same events for everyone, same time to play.</p>
+              <p>circa is a daily history guessing game. A new puzzle drops every day, same events for everyone, same time to play.</p>
               <p>Found a bug or have a suggestion? The project is on <a href="https://github.com/feight8/circa" target="_blank" rel="noopener noreferrer" className="text-ink underline hover:text-gold transition-colors">GitHub</a>.</p>
             </div>
           </Card>

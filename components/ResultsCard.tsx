@@ -5,10 +5,13 @@ import { buildEmojiRow, scoreToDot, DOT_EMOJI } from "@/lib/scoring";
 import { formatPuzzleDate } from "@/lib/dates";
 import StreakBadge from "@/components/StreakBadge";
 import ScoreDisplay from "@/components/ScoreDisplay";
+import ScoreDistribution from "@/components/ScoreDistribution";
 import type { SessionResult } from "@/types";
+import type { DistributionBucket } from "@/app/api/distribution/route";
 
 interface ResultsCardProps {
   result: SessionResult;
+  distribution?: { buckets: DistributionBucket[]; totalPlayers: number } | null;
 }
 
 const dotBorderClass: Record<string, string> = {
@@ -19,7 +22,7 @@ const dotBorderClass: Record<string, string> = {
   rock:     "ring-dot-red/40",
 };
 
-export default function ResultsCard({ result }: ResultsCardProps) {
+export default function ResultsCard({ result, distribution }: ResultsCardProps) {
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
 
@@ -32,7 +35,7 @@ export default function ResultsCard({ result }: ResultsCardProps) {
   const bonusScore = result.totalScore - baseScore;
 
   const shareText = [
-    `Circa — ${dateLabel}`,
+    `Circa - ${dateLabel}`,
     emojiRow,
     `Score: ${result.totalScore}/500${bonusScore > 0 ? ` (+${bonusScore} perfect)` : ""}`,
     result.streak > 0 ? `Streak: 🔥 ${result.streak}` : "",
@@ -50,7 +53,7 @@ export default function ResultsCard({ result }: ResultsCardProps) {
         setTimeout(() => setShared(false), 2000);
         return;
       } catch {
-        // user cancelled or share failed — fall through to clipboard
+        // user cancelled or share failed - fall through to clipboard
       }
     }
     await navigator.clipboard.writeText(shareText);
@@ -89,7 +92,7 @@ export default function ResultsCard({ result }: ResultsCardProps) {
         })}
       </div>
 
-      {/* Score summary */}
+      {/* Total score */}
       <div className="rounded-2xl border border-ink/10 bg-white/60 p-5 text-center backdrop-blur-sm">
         <p className="font-sans text-xs text-ink-muted uppercase tracking-widest mb-1">
           total score
@@ -106,13 +109,6 @@ export default function ResultsCard({ result }: ResultsCardProps) {
         )}
       </div>
 
-      {/* Per-event breakdown */}
-      <div className="space-y-3">
-        {result.guesses.map((g, i) => (
-          <ScoreDisplay key={g.eventId} result={g} />
-        ))}
-      </div>
-
       {/* Share button */}
       <button
         onClick={handleShare}
@@ -125,6 +121,22 @@ export default function ResultsCard({ result }: ResultsCardProps) {
       <div className="rounded-xl border border-ink/10 bg-white/40 p-4 font-sans text-sm text-ink-muted">
         <p className="text-xs uppercase tracking-widest mb-2 text-ink-muted/60">preview</p>
         <pre className="whitespace-pre-wrap font-sans text-sm text-ink">{shareText}</pre>
+      </div>
+
+      {/* Score distribution chart */}
+      {distribution && distribution.totalPlayers > 0 && (
+        <ScoreDistribution
+          buckets={distribution.buckets}
+          totalPlayers={distribution.totalPlayers}
+          userScore={result.totalScore}
+        />
+      )}
+
+      {/* Per-event breakdown */}
+      <div className="space-y-3">
+        {result.guesses.map((g) => (
+          <ScoreDisplay key={g.eventId} result={g} />
+        ))}
       </div>
     </div>
   );

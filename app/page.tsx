@@ -54,7 +54,7 @@ export default function HomePage() {
                 <PlusBadge />
               </div>
               <p className="font-sans text-xs text-ink-muted mt-0.5">
-                Archive · streak shields · stats — from $2.99/mo
+                Archive · streak shields · stats - from $2.99/mo
               </p>
             </div>
           </div>

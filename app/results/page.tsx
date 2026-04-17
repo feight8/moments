@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ResultsCard from "@/components/ResultsCard";
-import ScoreDistribution from "@/components/ScoreDistribution";
 import LinkAccountPrompt from "@/components/LinkAccountPrompt";
 import NavHeader from "@/components/NavHeader";
 import type { SessionResult } from "@/types";
@@ -76,13 +75,10 @@ export default function ResultsPage() {
           </div>
         )}
 
-        {result && <ResultsCard result={result} />}
-
-        {result && distribution && (
-          <ScoreDistribution
-            buckets={distribution.buckets}
-            totalPlayers={distribution.totalPlayers}
-            userScore={result.totalScore}
+        {result && (
+          <ResultsCard
+            result={result}
+            distribution={distribution ?? null}
           />
         )}
 
