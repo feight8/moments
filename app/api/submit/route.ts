@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
-import { getUserPlusStatus, consumeStreakShield } from "@/lib/plus";
+import { getUserPlusStatus, consumeStreakShield, isAdminUser } from "@/lib/plus";
 import { scoreGuess, isPerfect, MAX_SCORE_PER_EVENT, YEAR_MIN, YEAR_MAX } from "@/lib/scoring";
 import { todayDate } from "@/lib/dates";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -41,10 +41,14 @@ export async function POST(req: NextRequest) {
   // Resolve Plus status once — used for archive gate and streak shield
   const { isPlus } = await getUserPlusStatus(user.id);
 
-  // Archive submissions (past dates) require Plus
+  // Past dates require Plus; future dates require admin access.
   const todayStr = todayDate();
-  if (puzzleDate && puzzleDate < todayStr) {
-    if (!isPlus) {
+  if (puzzleDate && puzzleDate !== todayStr) {
+    if (puzzleDate > todayStr) {
+      if (!isAdminUser(user.id)) {
+        return NextResponse.json({ error: "Not found." }, { status: 404 });
+      }
+    } else if (!isPlus) {
       return NextResponse.json({ error: "Circa+ required." }, { status: 403 });
     }
   }

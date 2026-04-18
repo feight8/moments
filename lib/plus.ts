@@ -11,13 +11,24 @@ export interface PlusStatus {
 }
 
 /**
+ * Returns true if the user ID is in the PLUS_ADMIN_USER_IDS env var.
+ * Used to gate admin-only features like previewing future puzzles.
+ */
+export function isAdminUser(userId: string): boolean {
+  return (process.env.PLUS_ADMIN_USER_IDS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .includes(userId);
+}
+
+/**
  * Check whether a user has an active Circa+ subscription.
  * Returns false for anonymous users and expired subscriptions.
  */
 export async function getUserPlusStatus(userId: string): Promise<PlusStatus> {
   // Admin bypass — set PLUS_ADMIN_USER_IDS to a comma-separated list of Supabase UUIDs
-  const adminIds = (process.env.PLUS_ADMIN_USER_IDS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-  if (adminIds.includes(userId)) {
+  if (isAdminUser(userId)) {
     return { isPlus: true, plan: "annual", currentPeriodEnd: null };
   }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
-import { getUserPlusStatus } from "@/lib/plus";
+import { getUserPlusStatus, isAdminUser } from "@/lib/plus";
 import { scoreGuess, isPerfect, YEAR_MIN, YEAR_MAX } from "@/lib/scoring";
 import { todayDate } from "@/lib/dates";
 import type { GuessResult, DbEvent, DbDailyPuzzle } from "@/types";
@@ -35,12 +35,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid guess." }, { status: 400 });
   }
 
-  // Archive guesses (past dates) require Plus
+  // Past dates require Plus; future dates require admin access.
   const todayStr = todayDate();
-  if (puzzleDate && puzzleDate < todayStr) {
-    const { isPlus } = await getUserPlusStatus(user.id);
-    if (!isPlus) {
-      return NextResponse.json({ error: "Circa+ required." }, { status: 403 });
+  if (puzzleDate && puzzleDate !== todayStr) {
+    if (puzzleDate > todayStr) {
+      if (!isAdminUser(user.id)) {
+        return NextResponse.json({ error: "Not found." }, { status: 404 });
+      }
+    } else {
+      const { isPlus } = await getUserPlusStatus(user.id);
+      if (!isPlus) {
+        return NextResponse.json({ error: "Circa+ required." }, { status: 403 });
+      }
     }
   }
 
