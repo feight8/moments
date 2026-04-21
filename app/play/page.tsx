@@ -223,8 +223,9 @@ function PlayPageInner() {
         headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({ guesses, puzzleDate }),
       });
-    } catch {
+    } catch (err) {
       // Network drop, iOS connection loss, Vercel timeout, etc.
+      console.error("[submit] fetch threw:", err);
       dispatch({
         type: "ERROR",
         message: "Connection lost. Your guesses are saved - tap to try again.",
@@ -235,6 +236,7 @@ function PlayPageInner() {
     if (!res.ok) {
       let serverMsg = "";
       try { serverMsg = (await res.json())?.error ?? ""; } catch { /* ignore */ }
+      console.error(`[submit] failed — HTTP ${res.status}:`, serverMsg || "(no body)");
       dispatch({
         type: "ERROR",
         message: serverMsg.includes("Circa+")
@@ -382,6 +384,8 @@ function PlayPageInner() {
     const isLast = state.currentIndex === state.puzzle.events.length - 1;
 
     if (isLast) {
+      // Guard against stale-closure race where GUESS_REVEALED hasn't settled yet
+      if (state.guesses.length !== state.puzzle.events.length) return;
       const puzzleDate = archiveDate ?? state.puzzle.date;
       await doSubmit(puzzleDate, state.guesses);
     } else {

@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
   const { guesses, puzzleDate } = body;
 
   if (!Array.isArray(guesses) || guesses.length !== 5) {
+    console.error("[submit] bad guess count:", guesses?.length ?? "not an array", "user:", user.id);
     return NextResponse.json(
       { error: "Exactly 5 guesses are required." },
       { status: 400 }
