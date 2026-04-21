@@ -10,6 +10,8 @@ import ProgressBar from "@/components/ProgressBar";
 import RevealCard from "@/components/RevealCard";
 import NavHeader from "@/components/NavHeader";
 import { formatPuzzleDate } from "@/lib/dates";
+import { useSettings } from "@/lib/settings";
+import { playLockIn, playReveal } from "@/lib/sounds";
 import type { DailyPuzzle, Guess, GuessResult, SessionResult } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -164,6 +166,7 @@ function PlayPageInner() {
   const archiveDate = searchParams.get("date") ?? undefined;
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { settings } = useSettings();
 
   // ---------------------------------------------------------------------------
   // Auth helper — refreshes the session if needed before each request.
@@ -335,6 +338,9 @@ function PlayPageInner() {
   // ---------------------------------------------------------------------------
   async function handleLockGuess() {
     if (!state.puzzle) return;
+
+    if (settings.soundEnabled) playLockIn();
+
     const event = state.puzzle.events[state.currentIndex];
     const guess: Guess = { eventId: event.id, guessYear: state.sliderYear };
 
@@ -364,6 +370,7 @@ function PlayPageInner() {
     }
 
     const result: GuessResult = await res.json();
+    if (settings.soundEnabled) playReveal(result.score);
     dispatch({ type: "GUESS_REVEALED", result, guess });
   }
 

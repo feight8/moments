@@ -210,27 +210,8 @@ export default function HelpPage() {
             <Toggle
               label="Sound effects"
               description="Play audio feedback when locking in a guess and revealing results."
-              badge="coming soon"
               checked={settings.soundEnabled}
               onChange={(v) => update("soundEnabled", v)}
-            />
-            <Toggle
-              label="Reduced motion"
-              description="Suppress spinning and transition animations. Useful if you have motion sensitivity."
-              checked={settings.reducedMotion}
-              onChange={(v) => update("reducedMotion", v)}
-            />
-            <Toggle
-              label="Colorblind mode"
-              description="Add a letter label (G / Y / O / R) alongside each result dot so colour isn't the only indicator."
-              checked={settings.colorblindMode}
-              onChange={(v) => update("colorblindMode", v)}
-            />
-            <Toggle
-              label="Show slider tick marks"
-              description="Display century markers along the year slider for easier navigation."
-              checked={settings.showSliderTicks}
-              onChange={(v) => update("showSliderTicks", v)}
             />
           </Card>
         </Section>
@@ -242,7 +223,6 @@ export default function HelpPage() {
           <Card>
             <div className="font-sans text-sm text-ink-muted space-y-2 leading-relaxed">
               <p>circa is a daily history guessing game. A new puzzle drops every day, same events for everyone, same time to play.</p>
-              <p>Found a bug or have a suggestion? The project is on <a href="https://github.com/feight8/circa" target="_blank" rel="noopener noreferrer" className="text-ink underline hover:text-gold transition-colors">GitHub</a>.</p>
             </div>
           </Card>
         </Section>
