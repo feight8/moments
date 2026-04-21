@@ -9,14 +9,6 @@ interface YearSliderProps {
   disabled?: boolean;
 }
 
-const ERA_LABELS = [
-  { year: 1000, label: "1000" },
-  { year: 1300, label: "1300" },
-  { year: 1600, label: "1600" },
-  { year: 1800, label: "1800" },
-  { year: 2025, label: "Today" },
-];
-
 function clamp(val: number) {
   return Math.min(YEAR_MAX, Math.max(YEAR_MIN, val));
 }
@@ -214,20 +206,6 @@ export default function YearSlider({ value, onChange, disabled = false }: YearSl
         />
       </div>
 
-      {/* Era labels */}
-      <div className="flex justify-between px-1">
-        {ERA_LABELS.map(({ year, label }) => (
-          <button
-            key={year}
-            type="button"
-            disabled={disabled}
-            onClick={() => onChange(year)}
-            className="text-xs font-sans text-ink-muted hover:text-ink transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {label}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

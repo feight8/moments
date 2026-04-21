@@ -10,6 +10,8 @@ import ProgressBar from "@/components/ProgressBar";
 import RevealCard from "@/components/RevealCard";
 import NavHeader from "@/components/NavHeader";
 import { formatPuzzleDate } from "@/lib/dates";
+import { useSettings } from "@/lib/settings";
+import { playLockIn, playReveal } from "@/lib/sounds";
 import type { DailyPuzzle, Guess, GuessResult, SessionResult } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -164,6 +166,7 @@ function PlayPageInner() {
   const archiveDate = searchParams.get("date") ?? undefined;
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { settings } = useSettings();
 
   // ---------------------------------------------------------------------------
   // Auth helper — refreshes the session if needed before each request.
@@ -220,8 +223,9 @@ function PlayPageInner() {
         headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({ guesses, puzzleDate }),
       });
-    } catch {
+    } catch (err) {
       // Network drop, iOS connection loss, Vercel timeout, etc.
+      console.error("[submit] fetch threw:", err);
       dispatch({
         type: "ERROR",
         message: "Connection lost. Your guesses are saved - tap to try again.",
@@ -232,6 +236,7 @@ function PlayPageInner() {
     if (!res.ok) {
       let serverMsg = "";
       try { serverMsg = (await res.json())?.error ?? ""; } catch { /* ignore */ }
+      console.error(`[submit] failed — HTTP ${res.status}:`, serverMsg || "(no body)");
       dispatch({
         type: "ERROR",
         message: serverMsg.includes("Circa+")
@@ -335,6 +340,9 @@ function PlayPageInner() {
   // ---------------------------------------------------------------------------
   async function handleLockGuess() {
     if (!state.puzzle) return;
+
+    if (settings.soundEnabled) playLockIn();
+
     const event = state.puzzle.events[state.currentIndex];
     const guess: Guess = { eventId: event.id, guessYear: state.sliderYear };
 
@@ -364,6 +372,7 @@ function PlayPageInner() {
     }
 
     const result: GuessResult = await res.json();
+    if (settings.soundEnabled) playReveal(result.score);
     dispatch({ type: "GUESS_REVEALED", result, guess });
   }
 
@@ -375,6 +384,8 @@ function PlayPageInner() {
     const isLast = state.currentIndex === state.puzzle.events.length - 1;
 
     if (isLast) {
+      // Guard against stale-closure race where GUESS_REVEALED hasn't settled yet
+      if (state.guesses.length !== state.puzzle.events.length) return;
       const puzzleDate = archiveDate ?? state.puzzle.date;
       await doSubmit(puzzleDate, state.guesses);
     } else {

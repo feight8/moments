@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
-import { getUserPlusStatus } from "@/lib/plus";
+import { getUserPlusStatus, isAdminUser } from "@/lib/plus";
 import { todayDate } from "@/lib/dates";
 import type { DailyPuzzle, PublicEvent, DbDailyPuzzle, DbEvent } from "@/types";
 
@@ -12,15 +12,25 @@ export async function GET(req: NextRequest) {
   const requestedDate = req.nextUrl.searchParams.get("date");
   const today = todayDate();
 
-  // Archive requests (past dates) require Plus
-  if (requestedDate && requestedDate < today) {
+  // Archive requests (past dates) require Plus;
+  // future dates require admin access.
+  if (requestedDate && requestedDate !== today) {
     const { user } = await getUserFromRequest(req);
     if (!user) {
       return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
     }
-    const { isPlus } = await getUserPlusStatus(user.id);
-    if (!isPlus) {
-      return NextResponse.json({ error: "Circa+ required to play archive puzzles." }, { status: 403 });
+
+    if (requestedDate > today) {
+      // Future puzzle — admin preview only; return 404 to everyone else
+      if (!isAdminUser(user.id)) {
+        return NextResponse.json({ error: "No puzzle found for that date." }, { status: 404 });
+      }
+    } else {
+      // Past puzzle — Plus required
+      const { isPlus } = await getUserPlusStatus(user.id);
+      if (!isPlus) {
+        return NextResponse.json({ error: "Circa+ required to play archive puzzles." }, { status: 403 });
+      }
     }
   }
 

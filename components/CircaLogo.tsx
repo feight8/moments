@@ -12,7 +12,7 @@ interface CircaLogoProps {
 export default function CircaLogo({ className = "" }: CircaLogoProps) {
   return (
     <svg
-      viewBox="0 0 102 44"
+      viewBox="0 -4 102 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
