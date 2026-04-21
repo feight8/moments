@@ -51,6 +51,18 @@ export default function NavHeader({ backHref }: NavHeaderProps) {
           </svg>
         </Link>
 
+        {/* Groups */}
+        <Link
+          href="/groups"
+          aria-label="Groups"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 bg-white/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
+          title="Groups"
+        >
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <path d="M5.5 4a2 2 0 100 4 2 2 0 000-4zM2 10.5C2 9.12 3.12 8 4.5 8h2a2.5 2.5 0 012.45 2H2zm7.5-6a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm0 4c.46 0 .9.1 1.29.28A2.49 2.49 0 0113 11H9.12A2.5 2.5 0 009.5 8.5z" fill="currentColor"/>
+          </svg>
+        </Link>
+
         {/* Help */}
         <Link
           href="/help"
