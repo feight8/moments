@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 // ---------------------------------------------------------------------------
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error: authError } = await getUserFromRequest(req);
   if (authError || !user) {
@@ -28,7 +28,7 @@ export async function GET(
   }
 
   const client = createServiceClient();
-  const groupId = params.id;
+  const { id: groupId } = await params;
   const dateParam = new URL(req.url).searchParams.get("date");
   const puzzleDate = dateParam ?? todayDate();
 

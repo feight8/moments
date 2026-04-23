@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 // DELETE /api/groups/[id]/members/[userId] — owner removes a specific member
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  { params }: { params: Promise<{ id: string; userId: string }> }
 ) {
   const { user, error: authError } = await getUserFromRequest(req);
   if (authError || !user) {
@@ -15,7 +15,7 @@ export async function DELETE(
   }
 
   const client = createServiceClient();
-  const { id: groupId, userId: targetUserId } = params;
+  const { id: groupId, userId: targetUserId } = await params;
 
   // Verify requester is the group owner
   const { data: group } = await client
