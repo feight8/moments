@@ -4,16 +4,6 @@ import { getUserFromRequest } from "@/lib/supabase/auth";
 
 export const dynamic = "force-dynamic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-03-25.dahlia",
-});
-
-// Stripe Price IDs — create these in your Stripe Dashboard and set as env vars.
-const PRICE_IDS: Record<string, string> = {
-  monthly: process.env.STRIPE_PRICE_MONTHLY!,  // $2.99/month recurring
-  annual:  process.env.STRIPE_PRICE_ANNUAL!,   // $14.99/year recurring
-};
-
 interface CheckoutBody {
   plan: "monthly" | "annual";
 }
@@ -46,13 +36,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid plan." }, { status: 400 });
   }
 
-  const priceId = PRICE_IDS[plan];
+  const priceIds: Record<string, string | undefined> = {
+    monthly: process.env.STRIPE_PRICE_MONTHLY,
+    annual:  process.env.STRIPE_PRICE_ANNUAL,
+  };
+  const priceId = priceIds[plan];
   if (!priceId) {
     return NextResponse.json(
       { error: "Stripe price not configured. Set STRIPE_PRICE_MONTHLY / STRIPE_PRICE_ANNUAL." },
       { status: 500 }
     );
   }
+
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: "Stripe not configured." }, { status: 500 });
+  }
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2026-03-25.dahlia",
+  });
 
   const origin = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 

@@ -123,3 +123,42 @@ export interface DbStreakShield {
   shields_remaining: number;
   updated_at: string;
 }
+
+// ---------------------------------------------------------------------------
+// Groups types
+// ---------------------------------------------------------------------------
+
+export interface Group {
+  id: string;
+  name: string;
+  ownerId: string;
+  inviteCode: string;
+  memberCount: number;
+  createdAt: string;
+}
+
+export interface GroupMember {
+  userId: string;
+  displayName: string;
+  joinedAt: string;
+  isOwner: boolean;
+}
+
+export interface GroupMemberScore {
+  userId: string;
+  displayName: string;
+  isOwner: boolean;
+  /** null = hasn't played yet (or viewer hasn't played) */
+  totalScore: number | null;
+  emojiRow: string | null;
+  perfectCount: number | null;
+}
+
+export interface GroupScoresResponse {
+  groupId: string;
+  groupName: string;
+  puzzleDate: string;
+  /** true once the requesting user has submitted today's puzzle */
+  viewerHasPlayed: boolean;
+  members: GroupMemberScore[];
+}
