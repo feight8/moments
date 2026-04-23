@@ -255,8 +255,8 @@ export default function PlusPage() {
           </p>
           <p className="font-sans text-xs text-ink-muted">
             Already have Plus?{" "}
-            <Link href="/" className="underline hover:text-gold transition-colors">
-              Back to home
+            <Link href="/login?next=/" className="underline hover:text-gold transition-colors">
+              Sign in
             </Link>
           </p>
         </div>
