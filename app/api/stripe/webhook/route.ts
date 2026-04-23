@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
   const rawBody = await req.text();
   const sig = req.headers.get("stripe-signature") ?? "";
 
+  console.log("[stripe webhook] received, sig present:", !!sig, "body length:", rawBody.length);
+
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(
@@ -28,8 +30,11 @@ export async function POST(req: NextRequest) {
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
+    console.error("[stripe webhook] signature verification failed:", msg);
     return NextResponse.json({ error: `Webhook verification failed: ${msg}` }, { status: 400 });
   }
+
+  console.log("[stripe webhook] verified event:", event.type, event.id);
 
   try {
     switch (event.type) {
@@ -59,6 +64,7 @@ export async function POST(req: NextRequest) {
           stripeCustomerId: session.customer as string,
           stripeSubscriptionId: session.subscription as string,
         });
+        console.log("[stripe webhook] provisioned Plus for user:", userId, "plan:", plan);
         break;
       }
 
