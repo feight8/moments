@@ -12,12 +12,6 @@ interface CheckoutBody {
 }
 
 export async function POST(req: NextRequest) {
-  const { user, error: authError } = await getUserFromRequest(req);
-
-  if (authError || !user) {
-    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
-  }
-
   let body: CheckoutBody;
   try {
     body = await req.json();
@@ -30,12 +24,43 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid plan." }, { status: 400 });
   }
 
-  // Determine the email to use for this checkout session
-  let customerEmail = user.email ?? null;
+  const priceIds: Record<string, string | undefined> = {
+    monthly: process.env.STRIPE_PRICE_MONTHLY,
+    annual:  process.env.STRIPE_PRICE_ANNUAL,
+  };
+  const priceId = priceIds[plan];
+  if (!priceId) {
+    return NextResponse.json(
+      { error: "Stripe price not configured." },
+      { status: 500 }
+    );
+  }
 
-  // Anonymous user — create their account now using the admin API so we can
-  // proceed to checkout immediately without a confirmation-click gate.
-  if (!customerEmail) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: "Stripe not configured." }, { status: 500 });
+  }
+
+  const admin = createServiceClient();
+
+  // ------------------------------------------------------------------
+  // Resolve the user and their email across three possible states:
+  //
+  //  1. Linked account — user has email already, just use it
+  //  2. Anonymous session — user played but never signed up; link email now
+  //  3. No session — brand new visitor; create a fresh account
+  // ------------------------------------------------------------------
+  let userId: string;
+  let customerEmail: string;
+
+  const { user } = await getUserFromRequest(req);
+
+  if (user?.email) {
+    // Case 1: already has a full account
+    userId = user.id;
+    customerEmail = user.email;
+
+  } else if (user) {
+    // Case 2: anonymous session — link email + password via admin API
     if (!bodyEmail || !bodyPassword || bodyPassword.length < 8) {
       return NextResponse.json(
         { error: "Please enter your email and a password (8+ characters)." },
@@ -43,7 +68,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const admin = createServiceClient();
     const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
       email: bodyEmail,
       password: bodyPassword,
@@ -52,29 +76,40 @@ export async function POST(req: NextRequest) {
 
     if (updateError) {
       return NextResponse.json(
-        { error: updateError.message ?? "Failed to create account. Try a different email." },
+        { error: updateError.message ?? "Could not save your account. Try a different email." },
         { status: 400 }
       );
     }
 
+    userId = user.id;
+    customerEmail = bodyEmail;
+
+  } else {
+    // Case 3: no session at all — create a new Supabase account
+    if (!bodyEmail || !bodyPassword || bodyPassword.length < 8) {
+      return NextResponse.json(
+        { error: "Please enter your email and a password (8+ characters)." },
+        { status: 400 }
+      );
+    }
+
+    const { data: created, error: createError } = await admin.auth.admin.createUser({
+      email: bodyEmail,
+      password: bodyPassword,
+      email_confirm: true,
+    });
+
+    if (createError || !created.user) {
+      return NextResponse.json(
+        { error: createError?.message ?? "Could not create account. Try a different email." },
+        { status: 400 }
+      );
+    }
+
+    userId = created.user.id;
     customerEmail = bodyEmail;
   }
 
-  const priceIds: Record<string, string | undefined> = {
-    monthly: process.env.STRIPE_PRICE_MONTHLY,
-    annual:  process.env.STRIPE_PRICE_ANNUAL,
-  };
-  const priceId = priceIds[plan];
-  if (!priceId) {
-    return NextResponse.json(
-      { error: "Stripe price not configured. Set STRIPE_PRICE_MONTHLY / STRIPE_PRICE_ANNUAL." },
-      { status: 500 }
-    );
-  }
-
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return NextResponse.json({ error: "Stripe not configured." }, { status: 500 });
-  }
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2026-03-25.dahlia",
   });
@@ -87,8 +122,8 @@ export async function POST(req: NextRequest) {
     customer_email: customerEmail,
     success_url: `${origin}/plus/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/plus`,
-    metadata: { user_id: user.id, plan },
-    subscription_data: { metadata: { user_id: user.id, plan } },
+    metadata: { user_id: userId, plan },
+    subscription_data: { metadata: { user_id: userId, plan } },
   });
 
   return NextResponse.json({ url: session.url });

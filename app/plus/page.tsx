@@ -125,6 +125,7 @@ export default function PlusPage() {
 
   useEffect(() => {
     createClient().auth.getSession().then(({ data: { session } }) => {
+      // Show account form if no session at all, or session has no linked email
       setIsAnonymous(!session?.user?.email);
     });
   }, []);
