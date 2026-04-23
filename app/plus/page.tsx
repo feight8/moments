@@ -27,6 +27,11 @@ const features = [
     desc: "Score trends, era accuracy, completion calendar, and all-time personal bests.",
   },
   {
+    emoji: "👥",
+    title: "Friend Groups",
+    desc: "Create private groups, invite friends, and compare daily scores on a shared leaderboard.",
+  },
+  {
     emoji: "🚫",
     title: "Ad-Free",
     desc: "No ads, ever. A clean, distraction-free experience across all devices.",
@@ -114,44 +119,41 @@ export default function PlusPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAnonymous, setIsAnonymous] = useState<boolean | null>(null);
 
-  // Account linking form state
+  // Only collected for anonymous users — sent to the server to create the account
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [linkStatus, setLinkStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [linkError, setLinkError] = useState("");
 
   useEffect(() => {
     createClient().auth.getSession().then(({ data: { session } }) => {
+      // Show account form if no session at all, or session has no linked email
       setIsAnonymous(!session?.user?.email);
     });
   }, []);
 
-  async function handleLinkAccount(e: React.FormEvent) {
-    e.preventDefault();
-    setLinkStatus("loading");
-    setLinkError("");
-    const { error: err } = await createClient().auth.updateUser({ email, password });
-    if (err) { setLinkError(err.message); setLinkStatus("error"); return; }
-    setLinkStatus("done");
-    setIsAnonymous(false);
-  }
-
   async function handleSelect(plan: "monthly" | "annual") {
     setError(null);
+
+    // Validate account fields before hitting the API
+    if (isAnonymous) {
+      if (!email) { setError("Please enter your email address."); return; }
+      if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    }
+
     setLoadingPlan(plan);
 
     const supabase = createClient();
     const { data: { session } } = await supabase.auth.getSession();
 
+    const body: Record<string, string> = { plan };
+    if (isAnonymous) { body.email = email; body.password = password; }
+
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(session?.access_token
-          ? { Authorization: `Bearer ${session.access_token}` }
-          : {}),
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
       },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify(body),
     });
 
     const data = await res.json();
@@ -196,65 +198,31 @@ export default function PlusPage() {
           ))}
         </div>
 
-        {/* Step 1: Create account (anonymous users only) */}
+        {/* Account fields — anonymous users only */}
         {isAnonymous && (
-          <div className="rounded-2xl border border-gold/40 bg-gold/5 p-6 space-y-4">
+          <div className="space-y-3">
             <div className="space-y-1">
-              <p className="font-sans text-xs font-semibold uppercase tracking-widest text-gold">
-                step 1 — create your account
-              </p>
-              <p className="font-serif text-lg font-bold text-ink">first, save your progress</p>
-              <p className="font-sans text-sm text-ink-muted leading-relaxed">
-                Enter an email and password so your streak and scores are tied to your account — not just this browser.
+              <p className="font-sans text-sm font-semibold text-ink">create your account</p>
+              <p className="font-sans text-xs text-ink-muted">
+                Your email and password keep your streak and scores safe across devices.
               </p>
             </div>
-
-            {linkStatus === "done" ? (
-              <div className="rounded-xl bg-white/80 border border-ink/10 px-4 py-3 text-center space-y-1">
-                <p className="font-sans text-sm font-semibold text-ink">check your email</p>
-                <p className="font-sans text-xs text-ink-muted">
-                  Click the confirmation link, then scroll down to subscribe.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleLinkAccount} className="space-y-3">
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
-                />
-                <input
-                  type="password"
-                  placeholder="choose a password (8+ characters)"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
-                />
-                {linkStatus === "error" && (
-                  <p className="font-sans text-xs text-red-600">{linkError}</p>
-                )}
-                <button
-                  type="submit"
-                  disabled={linkStatus === "loading"}
-                  className="w-full rounded-xl bg-gold py-3 font-sans font-semibold text-white transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
-                >
-                  {linkStatus === "loading" ? "saving…" : "save my account"}
-                </button>
-              </form>
-            )}
+            <input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+            />
+            <input
+              type="password"
+              placeholder="choose a password (8+ characters)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              minLength={8}
+              className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+            />
           </div>
-        )}
-
-        {/* Step 2 label for anonymous users */}
-        {isAnonymous && (
-          <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted text-center">
-            step 2 — choose a plan
-          </p>
         )}
 
         {/* Pricing cards */}
