@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getUserFromRequest } from "@/lib/supabase/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -30,62 +31,29 @@ export async function POST(req: NextRequest) {
   };
   const priceId = priceIds[plan];
   if (!priceId) {
-    return NextResponse.json(
-      { error: "Stripe price not configured." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Stripe price not configured." }, { status: 500 });
   }
-
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: "Stripe not configured." }, { status: 500 });
   }
 
   const admin = createServiceClient();
+  const { user } = await getUserFromRequest(req);
 
-  // ------------------------------------------------------------------
-  // Resolve the user and their email across three possible states:
-  //
-  //  1. Linked account — user has email already, just use it
-  //  2. Anonymous session — user played but never signed up; link email now
-  //  3. No session — brand new visitor; create a fresh account
-  // ------------------------------------------------------------------
   let userId: string;
   let customerEmail: string;
 
-  const { user } = await getUserFromRequest(req);
-
   if (user?.email) {
-    // Case 1: already has a full account
+    // ----------------------------------------------------------------
+    // Case 1: already has a full linked account
+    // ----------------------------------------------------------------
     userId = user.id;
     customerEmail = user.email;
 
-  } else if (user) {
-    // Case 2: anonymous session — link email + password via admin API
-    if (!bodyEmail || !bodyPassword || bodyPassword.length < 8) {
-      return NextResponse.json(
-        { error: "Please enter your email and a password (8+ characters)." },
-        { status: 400 }
-      );
-    }
-
-    const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
-      email: bodyEmail,
-      password: bodyPassword,
-      email_confirm: true,
-    });
-
-    if (updateError) {
-      return NextResponse.json(
-        { error: updateError.message ?? "Could not save your account. Try a different email." },
-        { status: 400 }
-      );
-    }
-
-    userId = user.id;
-    customerEmail = bodyEmail;
-
   } else {
-    // Case 3: no session at all — create a new Supabase account
+    // ----------------------------------------------------------------
+    // Cases 2 & 3: anonymous or no session — need email + password
+    // ----------------------------------------------------------------
     if (!bodyEmail || !bodyPassword || bodyPassword.length < 8) {
       return NextResponse.json(
         { error: "Please enter your email and a password (8+ characters)." },
@@ -93,20 +61,59 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email: bodyEmail,
-      password: bodyPassword,
-      email_confirm: true,
-    });
+    // Try to create a new account (works for brand-new emails).
+    // If the email already exists, fall through to sign-in below.
+    let resolvedId: string | null = null;
 
-    if (createError || !created.user) {
-      return NextResponse.json(
-        { error: createError?.message ?? "Could not create account. Try a different email." },
-        { status: 400 }
-      );
+    if (user) {
+      // Case 2: anonymous session — upgrade it to a full account
+      const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
+        email: bodyEmail,
+        password: bodyPassword,
+        email_confirm: true,
+      });
+
+      if (!updateError) {
+        resolvedId = user.id;
+      }
+      // If update failed (e.g. email taken), fall through to sign-in
+    } else {
+      // Case 3: no session — create fresh account
+      const { data: created, error: createError } = await admin.auth.admin.createUser({
+        email: bodyEmail,
+        password: bodyPassword,
+        email_confirm: true,
+      });
+
+      if (!createError && created.user) {
+        resolvedId = created.user.id;
+      }
+      // If create failed (e.g. email taken), fall through to sign-in
     }
 
-    userId = created.user.id;
+    if (!resolvedId) {
+      // Account already exists — verify the password by signing in with
+      // the anon key client (service role bypasses password checks).
+      const anonClient = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: signIn, error: signInError } = await anonClient.auth.signInWithPassword({
+        email: bodyEmail,
+        password: bodyPassword,
+      });
+
+      if (signInError || !signIn.user) {
+        return NextResponse.json(
+          { error: "Incorrect password for that email. Please try again." },
+          { status: 400 }
+        );
+      }
+
+      resolvedId = signIn.user.id;
+    }
+
+    userId = resolvedId;
     customerEmail = bodyEmail;
   }
 
