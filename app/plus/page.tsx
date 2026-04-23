@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import NavHeader from "@/components/NavHeader";
 import PlusBadge from "@/components/PlusBadge";
@@ -111,15 +110,36 @@ function PricingCard({ plan, price, period, badge, onSelect, loading }: PricingC
 // ---------------------------------------------------------------------------
 
 export default function PlusPage() {
-  const router = useRouter();
   const [loadingPlan, setLoadingPlan] = useState<"monthly" | "annual" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAnonymous, setIsAnonymous] = useState<boolean | null>(null);
+
+  // Account linking form state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [linkStatus, setLinkStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [linkError, setLinkError] = useState("");
+
+  useEffect(() => {
+    createClient().auth.getSession().then(({ data: { session } }) => {
+      setIsAnonymous(!session?.user?.email);
+    });
+  }, []);
+
+  async function handleLinkAccount(e: React.FormEvent) {
+    e.preventDefault();
+    setLinkStatus("loading");
+    setLinkError("");
+    const { error: err } = await createClient().auth.updateUser({ email, password });
+    if (err) { setLinkError(err.message); setLinkStatus("error"); return; }
+    setLinkStatus("done");
+    setIsAnonymous(false);
+  }
 
   async function handleSelect(plan: "monthly" | "annual") {
     setError(null);
     setLoadingPlan(plan);
 
-    // Attach auth token
     const supabase = createClient();
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -138,10 +158,6 @@ export default function PlusPage() {
     setLoadingPlan(null);
 
     if (!res.ok) {
-      if (data?.error?.includes("create an account")) {
-        router.push("/login?next=/plus");
-        return;
-      }
       setError(data?.error ?? "Something went wrong. Please try again.");
       return;
     }
@@ -179,6 +195,67 @@ export default function PlusPage() {
             </div>
           ))}
         </div>
+
+        {/* Step 1: Create account (anonymous users only) */}
+        {isAnonymous && (
+          <div className="rounded-2xl border border-gold/40 bg-gold/5 p-6 space-y-4">
+            <div className="space-y-1">
+              <p className="font-sans text-xs font-semibold uppercase tracking-widest text-gold">
+                step 1 — create your account
+              </p>
+              <p className="font-serif text-lg font-bold text-ink">first, save your progress</p>
+              <p className="font-sans text-sm text-ink-muted leading-relaxed">
+                Enter an email and password so your streak and scores are tied to your account — not just this browser.
+              </p>
+            </div>
+
+            {linkStatus === "done" ? (
+              <div className="rounded-xl bg-white/80 border border-ink/10 px-4 py-3 text-center space-y-1">
+                <p className="font-sans text-sm font-semibold text-ink">check your email</p>
+                <p className="font-sans text-xs text-ink-muted">
+                  Click the confirmation link, then scroll down to subscribe.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleLinkAccount} className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+                />
+                <input
+                  type="password"
+                  placeholder="choose a password (8+ characters)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+                />
+                {linkStatus === "error" && (
+                  <p className="font-sans text-xs text-red-600">{linkError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={linkStatus === "loading"}
+                  className="w-full rounded-xl bg-gold py-3 font-sans font-semibold text-white transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
+                >
+                  {linkStatus === "loading" ? "saving…" : "save my account"}
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+
+        {/* Step 2 label for anonymous users */}
+        {isAnonymous && (
+          <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted text-center">
+            step 2 — choose a plan
+          </p>
+        )}
 
         {/* Pricing cards */}
         <div className="space-y-4">
