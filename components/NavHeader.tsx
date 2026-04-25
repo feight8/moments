@@ -26,6 +26,18 @@ export default function NavHeader({ backHref }: NavHeaderProps) {
       )}
 
       <nav className="flex items-center gap-1">
+        {/* Account */}
+        <Link
+          href="/account"
+          aria-label="Account"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 bg-white/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
+          title="Account"
+        >
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <path d="M7.5 1a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.76 2.46-5 5.5-5s5.5 2.24 5.5 5H2z" fill="currentColor"/>
+          </svg>
+        </Link>
+
         {/* Archive */}
         <Link
           href="/archive"

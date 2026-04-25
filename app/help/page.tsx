@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import NavHeader from "@/components/NavHeader";
 import { DOT_EMOJI, type DigTier } from "@/lib/scoring";
 import { useSettings } from "@/lib/settings";
-import { createClient } from "@/lib/supabase/client";
 
 // ---------------------------------------------------------------------------
 // Toggle component
@@ -96,18 +93,6 @@ function ScoreRow({ distance, score, dot }: { distance: string; score: string; d
 
 export default function HelpPage() {
   const { settings, update } = useSettings();
-  const [accountEmail, setAccountEmail] = useState<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    createClient().auth.getSession().then(({ data: { session } }) => {
-      setAccountEmail(session?.user?.email ?? null);
-    });
-  }, []);
-
-  async function handleSignOut() {
-    await createClient().auth.signOut();
-    setAccountEmail(null);
-  }
 
   return (
     <main className="min-h-screen bg-parchment px-4 py-8">
@@ -228,43 +213,6 @@ export default function HelpPage() {
               checked={settings.soundEnabled}
               onChange={(v) => update("soundEnabled", v)}
             />
-          </Card>
-        </Section>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* ACCOUNT                                                              */}
-        {/* ------------------------------------------------------------------ */}
-        <Section title="Account">
-          <Card>
-            {accountEmail === undefined ? (
-              <div className="h-9" />
-            ) : accountEmail ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-sans text-sm font-semibold text-ink">signed in</p>
-                  <p className="font-sans text-xs text-ink-muted mt-0.5">{accountEmail}</p>
-                </div>
-                <button
-                  onClick={handleSignOut}
-                  className="font-sans text-xs text-ink-muted hover:text-ink underline transition-colors"
-                >
-                  sign out
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-sans text-sm font-semibold text-ink">not signed in</p>
-                  <p className="font-sans text-xs text-ink-muted mt-0.5">Sign in to access your Circa+ features.</p>
-                </div>
-                <Link
-                  href="/login"
-                  className="font-sans text-sm font-semibold text-gold hover:text-gold/80 transition-colors"
-                >
-                  sign in →
-                </Link>
-              </div>
-            )}
           </Card>
         </Section>
 
