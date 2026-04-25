@@ -19,6 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-parchment text-ink antialiased">
           <SettingsProvider />
           {children}
+          <footer className="py-6 text-center">
+            <p className="font-sans text-xs text-ink-muted/50">Powered by Charbella Games LLC</p>
+          </footer>
         </body>
     </html>
   );
