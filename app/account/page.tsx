@@ -155,9 +155,8 @@ export default function AccountPage() {
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
-  const inputClass = "w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors";
-  const btnPrimary = "w-full rounded-2xl bg-ink py-3.5 font-sans font-semibold text-parchment transition-colors hover:bg-ink/80 active:scale-95 disabled:opacity-60";
-  const btnGold = "w-full rounded-2xl bg-gold py-3.5 font-sans font-semibold text-white transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60";
+  const inputClass = "w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors";
+  const btnPrimary = "btn-primary w-full py-3.5";
 
   return (
     <main className="min-h-screen bg-parchment px-4 py-8">
@@ -165,7 +164,7 @@ export default function AccountPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-2xl font-bold text-ink">account</h1>
+          <h1 className="font-serif text-2xl font-bold text-teal">account</h1>
         </div>
 
         {/* ---------------------------------------------------------------- */}
@@ -182,7 +181,7 @@ export default function AccountPage() {
         {/* ---------------------------------------------------------------- */}
         {view === "signed-out" && (
           <div className="space-y-6">
-            <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 space-y-4">
+            <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
               <p className="font-sans text-sm font-semibold text-ink">sign in</p>
               <form onSubmit={handleSignIn} className="space-y-3">
                 <input type="email" placeholder="your@email.com" value={email}
@@ -202,11 +201,11 @@ export default function AccountPage() {
               </button>
             </div>
 
-            <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 space-y-3">
+            <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-3">
               <p className="font-sans text-sm font-semibold text-ink">new to circa+?</p>
-              <p className="font-sans text-xs text-ink-muted">Create a free account to save your progress, then subscribe to unlock Plus features.</p>
+              <p className="font-sans text-xs text-ink-muted">create a free account to save your progress, then subscribe to unlock plus features.</p>
               <button onClick={() => { setView("create"); clearMessage(); }}
-                className="w-full rounded-2xl border border-ink/15 bg-white py-3 font-sans text-sm font-semibold text-ink hover:bg-ink/5 transition-colors">
+                className="w-full rounded-2xl border border-ink/15 bg-teal py-3 font-sans text-sm font-semibold text-parchment hover:bg-teal/80 transition-colors">
                 create account
               </button>
               <Link href="/plus" className="block w-full text-center font-sans text-sm font-semibold text-gold hover:text-gold/80 transition-colors">
@@ -221,7 +220,7 @@ export default function AccountPage() {
         {/* ---------------------------------------------------------------- */}
         {view === "create" && (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 space-y-4">
+            <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
               <p className="font-sans text-sm font-semibold text-ink">create account</p>
               <form onSubmit={handleCreate} className="space-y-3">
                 <input type="email" placeholder="your@email.com" value={email}
@@ -249,7 +248,7 @@ export default function AccountPage() {
         {/* Forgot password                                                   */}
         {/* ---------------------------------------------------------------- */}
         {view === "forgot" && (
-          <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 space-y-4">
+          <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
             <div className="space-y-1">
               <p className="font-sans text-sm font-semibold text-ink">reset password</p>
               <p className="font-sans text-xs text-ink-muted">Enter your email and we'll send a reset link.</p>
@@ -277,7 +276,7 @@ export default function AccountPage() {
         {view === "signed-in" && account && (
           <div className="space-y-4">
             {/* Account info */}
-            <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 space-y-3">
+            <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-sans text-xs text-ink-muted uppercase tracking-widest font-semibold">signed in as</p>
@@ -289,7 +288,7 @@ export default function AccountPage() {
               {account.isPlus ? (
                 <div className="space-y-1 pt-1 border-t border-ink/8">
                   <p className="font-sans text-xs text-ink-muted">
-                    {account.plan === "annual" ? "Annual plan" : "Monthly plan"}
+                    {account.plan === "annual" ? "annual plan" : "monthly plan"}
                     {account.periodEnd && (
                       <> · renews {new Date(account.periodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</>
                     )}
@@ -307,13 +306,13 @@ export default function AccountPage() {
             {/* Subscription management */}
             {account.isPlus && (
               <button onClick={handleManageSubscription} disabled={busy}
-                className={btnGold}>
+                className={btnPrimary}>
                 {busy ? "opening…" : "manage subscription"}
               </button>
             )}
 
             {/* Change password */}
-            <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 space-y-4">
+            <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
               <p className="font-sans text-sm font-semibold text-ink">change password</p>
               <form onSubmit={handleChangePassword} className="space-y-3">
                 <input type="password" placeholder="new password (8+ characters)" value={newPassword}
@@ -331,7 +330,7 @@ export default function AccountPage() {
 
             {/* Sign out */}
             <button onClick={handleSignOut}
-              className="w-full rounded-2xl border border-ink/15 bg-white/60 py-3 font-sans text-sm text-ink-muted hover:text-ink transition-colors">
+              className={btnPrimary}>
               sign out
             </button>
           </div>

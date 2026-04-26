@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 
 export interface Settings {
   soundEnabled: boolean;
+  darkMode: boolean;
 }
 
 const DEFAULTS: Settings = {
   soundEnabled: true,
+  darkMode: false,
 };
 
 const STORAGE_KEY = "circa_settings";

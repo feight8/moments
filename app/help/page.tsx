@@ -65,7 +65,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Card({ children, divided }: { children: React.ReactNode; divided?: boolean }) {
   return (
-    <div className={`rounded-2xl border border-ink/10 bg-white/60 px-5 backdrop-blur-sm ${divided ? "divide-y divide-ink/8" : "py-5"}`}>
+    <div className={`rounded-2xl border border-ink/10 bg-surface/60 px-5 backdrop-blur-sm ${divided ? "divide-y divide-ink/8" : "py-5"}`}>
       {children}
     </div>
   );
@@ -100,7 +100,7 @@ export default function HelpPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-3xl font-bold text-ink">help & settings</h1>
+          <h1 className="font-serif text-3xl font-bold text-teal">help & settings</h1>
           <p className="font-sans text-sm text-ink-muted">how to play, scoring, and preferences</p>
         </div>
 
@@ -113,29 +113,29 @@ export default function HelpPage() {
               <li className="flex gap-3">
                 <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-parchment">1</span>
                 <div>
-                  <p className="font-semibold">Read the event</p>
-                  <p className="mt-0.5 text-ink-muted">Each puzzle has 5 historical events described in 2-3 sentences. The year is always omitted.</p>
+                  <p className="font-semibold">read the event</p>
+                  <p className="mt-0.5 text-ink-muted">each puzzle has 5 historical events described in 2-3 sentences. the year is always omitted.</p>
                 </div>
               </li>
               <li className="flex gap-3">
                 <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-parchment">2</span>
                 <div>
-                  <p className="font-semibold">Guess the year</p>
-                  <p className="mt-0.5 text-ink-muted">Drag the slider or tap the year display to type a number. The range is 1000 CE - 2025.</p>
+                  <p className="font-semibold">guess the year</p>
+                  <p className="mt-0.5 text-ink-muted">drag the slider or tap the year display to type a number. the range is 1000 ce - 2025.</p>
                 </div>
               </li>
               <li className="flex gap-3">
                 <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-parchment">3</span>
                 <div>
-                  <p className="font-semibold">Lock it in</p>
-                  <p className="mt-0.5 text-ink-muted">Press <span className="rounded bg-ink/8 px-1.5 py-0.5 font-mono text-xs">Lock In</span> to submit your guess. You'll immediately see the correct year, your score, and the story behind the event.</p>
+                  <p className="font-semibold">lock it in</p>
+                  <p className="mt-0.5 text-ink-muted">press <span className="rounded bg-ink/8 px-1.5 py-0.5 font-mono text-xs">lock in</span> to submit your guess. you'll immediately see the correct year, your score, and the story behind the event.</p>
                 </div>
               </li>
               <li className="flex gap-3">
                 <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-parchment">4</span>
                 <div>
-                  <p className="font-semibold">Repeat for all 5</p>
-                  <p className="mt-0.5 text-ink-muted">Complete all five events to finish the day's puzzle and see your final score. Share your results with the emoji card.</p>
+                  <p className="font-semibold">repeat for all 5</p>
+                  <p className="mt-0.5 text-ink-muted">complete all five events to finish the day's puzzle and see your final score. share your results with the emoji card.</p>
                 </div>
               </li>
             </ol>
@@ -148,10 +148,10 @@ export default function HelpPage() {
         <Section title="Scoring">
           <Card>
             <p className="font-sans text-sm text-ink-muted mb-4">
-              Each event is worth up to <span className="font-semibold text-ink">100 points</span>, plus a <span className="font-semibold text-gold">+10 bonus</span> for an exact year. Score drops smoothly the further off you are, zeroing out at 150+ years.
+              each event is worth up to <span className="font-semibold text-ink">100 points</span>, plus a <span className="font-semibold text-gold">+10 bonus</span> for an exact year. score drops smoothly the further off you are, zeroing out at 150+ years.
             </p>
             <div className="divide-y divide-ink/8">
-              <ScoreRow distance="Exact year" score="110 pts" dot="gem" />
+              <ScoreRow distance="exact year" score="110 pts" dot="gem" />
               <ScoreRow distance="~5 years off" score="~93 pts" dot="artifact" />
               <ScoreRow distance="~10 years off" score="~87 pts" dot="artifact" />
               <ScoreRow distance="~25 years off" score="~69 pts" dot="coin" />
@@ -161,7 +161,7 @@ export default function HelpPage() {
               <ScoreRow distance="150+ years off" score="0 pts" dot="rock" />
             </div>
             <p className="mt-4 font-sans text-xs text-ink-muted">
-              Max session score: <span className="font-semibold text-ink">550 pts</span> (5 perfect guesses)
+              max session score: <span className="font-semibold text-ink">550 pts</span> (5 perfect guesses)
             </p>
           </Card>
         </Section>
@@ -173,11 +173,11 @@ export default function HelpPage() {
           <Card>
             <div className="divide-y divide-ink/8 font-sans text-sm">
               {[
-                { emoji: "💎", label: "Gem", desc: "Exact year - perfect find!" },
-                { emoji: "🏺", label: "Artifact", desc: "within ~10 years (85+ pts)" },
-                { emoji: "🪙", label: "Coin", desc: "within ~25 years (65+ pts)" },
-                { emoji: "🦴", label: "Fossil", desc: "within ~75 years (20+ pts)" },
-                { emoji: "🪨", label: "Rock", desc: "75+ years off, or 150+ for zero" },
+                { emoji: "💎", label: "gem", desc: "exact year - perfect find!" },
+                { emoji: "🏺", label: "artifact", desc: "within ~10 years (85+ pts)" },
+                { emoji: "🪙", label: "coin", desc: "within ~25 years (65+ pts)" },
+                { emoji: "🦴", label: "fossil", desc: "within ~75 years (20+ pts)" },
+                { emoji: "🪨", label: "rock", desc: "75+ years off, or 150+ for zero" },
               ].map(({ emoji, label, desc }) => (
                 <div key={label} className="flex items-center gap-3 py-2.5">
                   <span className="text-xl">{emoji}</span>
@@ -197,7 +197,7 @@ export default function HelpPage() {
         <Section title="Streaks">
           <Card>
             <p className="font-sans text-sm text-ink-muted leading-relaxed">
-              Complete the daily puzzle to start a streak. Come back the next day to keep it going - missing a day resets your streak to zero. Your longest ever streak is saved separately. Streaks are shown on your results card and in the share text.
+              complete the daily puzzle to start a streak. come back the next day to keep it going - missing a day resets your streak to zero. your longest ever streak is saved separately. streaks are shown on your results card and in the share text.
             </p>
           </Card>
         </Section>
@@ -208,8 +208,14 @@ export default function HelpPage() {
         <Section title="Settings">
           <Card divided>
             <Toggle
-              label="Sound effects"
-              description="Play audio feedback when locking in a guess and revealing results."
+              label="dark mode"
+              description="switch to a deep teal and plum colour scheme that's easier on the eyes at night."
+              checked={settings.darkMode}
+              onChange={(v) => update("darkMode", v)}
+            />
+            <Toggle
+              label="sound effects"
+              description="play audio feedback when locking in a guess and revealing results."
               checked={settings.soundEnabled}
               onChange={(v) => update("soundEnabled", v)}
             />
@@ -222,7 +228,7 @@ export default function HelpPage() {
         <Section title="About">
           <Card>
             <div className="font-sans text-sm text-ink-muted space-y-2 leading-relaxed">
-              <p>circa is a daily history guessing game. A new puzzle drops every day, same events for everyone, same time to play.</p>
+              <p>circa is a daily history guessing game. a new puzzle drops every day, same events for everyone, same time to play.</p>
             </div>
           </Card>
         </Section>

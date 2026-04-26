@@ -6,12 +6,13 @@ import { formatPuzzleDate } from "@/lib/dates";
 import StreakBadge from "@/components/StreakBadge";
 import ScoreDisplay from "@/components/ScoreDisplay";
 import ScoreDistribution from "@/components/ScoreDistribution";
-import type { SessionResult } from "@/types";
+import type { SessionResult, Group } from "@/types";
 import type { DistributionBucket } from "@/app/api/distribution/route";
 
 interface ResultsCardProps {
   result: SessionResult;
   distribution?: { buckets: DistributionBucket[]; totalPlayers: number } | null;
+  groups?: Group[] | null;
 }
 
 const dotBorderClass: Record<string, string> = {
@@ -22,7 +23,7 @@ const dotBorderClass: Record<string, string> = {
   rock:     "ring-dot-red/40",
 };
 
-export default function ResultsCard({ result, distribution }: ResultsCardProps) {
+export default function ResultsCard({ result, distribution, groups }: ResultsCardProps) {
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
 
@@ -35,10 +36,10 @@ export default function ResultsCard({ result, distribution }: ResultsCardProps) 
   const bonusScore = result.totalScore - baseScore;
 
   const shareText = [
-    `Circa - ${dateLabel}`,
+    `circa - ${dateLabel}`,
     emojiRow,
-    `Score: ${result.totalScore}/500${bonusScore > 0 ? ` (+${bonusScore} perfect)` : ""}`,
-    result.streak > 0 ? `Streak: 🔥 ${result.streak}` : "",
+    `score: ${result.totalScore}/500${bonusScore > 0 ? ` (+${bonusScore} perfect)` : ""}`,
+    result.streak > 0 ? `streak: 🔥 ${result.streak}` : "",
     "",
     "play at circagame.com",
   ]
@@ -68,7 +69,7 @@ export default function ResultsCard({ result, distribution }: ResultsCardProps) 
         <p className="text-xs font-sans font-semibold uppercase tracking-widest text-ink-muted">
           {dateLabel}
         </p>
-        <h2 className="font-serif text-3xl font-bold text-ink">today&apos;s results</h2>
+        <h2 className="font-serif text-3xl font-bold text-teal">today&apos;s results</h2>
         <div className="flex justify-center pt-1">
           <StreakBadge streak={result.streak} />
         </div>
@@ -81,8 +82,8 @@ export default function ResultsCard({ result, distribution }: ResultsCardProps) 
           return (
             <div
               key={i}
-              className={`flex h-10 w-10 items-center justify-center rounded-full bg-white ring-2 ${dotBorderClass[dot]} shadow-sm`}
-              title={`Event ${i + 1}: ${g.score} pts`}
+              className={`flex h-10 w-10 items-center justify-center rounded-full bg-surface ring-2 ${dotBorderClass[dot]} shadow-sm`}
+              title={`event ${i + 1}: ${g.score} pts`}
             >
               <span className="text-xl" role="img" aria-label={dot}>
                 {DOT_EMOJI[dot]}
@@ -93,7 +94,7 @@ export default function ResultsCard({ result, distribution }: ResultsCardProps) 
       </div>
 
       {/* Total score */}
-      <div className="rounded-2xl border border-ink/10 bg-white/60 p-5 text-center backdrop-blur-sm">
+      <div className="rounded-2xl border border-ink/10 bg-surface/60 p-5 text-center backdrop-blur-sm">
         <p className="font-sans text-xs text-ink-muted uppercase tracking-widest mb-1">
           total score
         </p>
@@ -112,13 +113,13 @@ export default function ResultsCard({ result, distribution }: ResultsCardProps) 
       {/* Share button */}
       <button
         onClick={handleShare}
-        className="w-full rounded-2xl bg-ink py-4 font-sans font-semibold text-parchment transition-colors hover:bg-ink/80 active:scale-95"
+        className="btn-primary w-full py-4 transition-colors active:scale-95"
       >
         {shared ? "shared!" : copied ? "copied!" : "share results"}
       </button>
 
       {/* Share preview */}
-      <div className="rounded-xl border border-ink/10 bg-white/40 p-4 font-sans text-sm text-ink-muted">
+      <div className="rounded-xl border border-ink/10 bg-surface/40 p-4 font-sans text-sm text-ink-muted">
         <p className="text-xs uppercase tracking-widest mb-2 text-ink-muted/60">preview</p>
         <pre className="whitespace-pre-wrap font-sans text-sm text-ink">{shareText}</pre>
       </div>
@@ -130,6 +131,41 @@ export default function ResultsCard({ result, distribution }: ResultsCardProps) 
           totalPlayers={distribution.totalPlayers}
           userScore={result.totalScore}
         />
+      )}
+
+      {/* Groups */}
+      {groups !== null && groups !== undefined && (
+        <section className="space-y-3">
+          <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+            your groups
+          </h2>
+          {groups.length > 0 ? (
+            <div className="space-y-2">
+              {groups.map((g) => (
+                <a
+                  key={g.id}
+                  href={`/groups/${g.id}`}
+                  className="flex items-center justify-between rounded-2xl border border-ink/10 bg-surface/60 px-5 py-4 hover:bg-surface/80 transition-colors group"
+                >
+                  <div>
+                    <p className="font-serif text-base font-bold text-ink">{g.name}</p>
+                    <p className="font-sans text-xs text-ink-muted mt-0.5">
+                      {g.memberCount} {g.memberCount === 1 ? "member" : "members"}
+                    </p>
+                  </div>
+                  <span className="text-ink-muted group-hover:translate-x-0.5 transition-transform">→</span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-ink/10 bg-surface/60 p-5 text-center space-y-2">
+              <p className="font-sans text-sm text-ink-muted">play with friends and compare scores</p>
+              <a href="/groups" className="font-sans text-sm font-semibold text-gold hover:text-gold/80 transition-colors">
+                create a group →
+              </a>
+            </div>
+          )}
+        </section>
       )}
 
       {/* Per-event breakdown */}

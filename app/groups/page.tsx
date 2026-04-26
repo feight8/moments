@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import NavHeader from "@/components/NavHeader";
+import PlusGate from "@/components/PlusGate";
 import type { Group } from "@/types";
 
 export default function GroupsPage() {
   const router = useRouter();
   const [groups, setGroups] = useState<Group[] | null>(null);
+  const [locked, setLocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [joining, setJoining] = useState(false);
@@ -27,10 +29,7 @@ export default function GroupsPage() {
   async function load() {
     const headers = await authHeader();
     const res = await fetch("/api/groups", { headers });
-    if (res.status === 403) {
-      setError("plus");
-      return;
-    }
+    if (res.status === 403) { setLocked(true); return; }
     if (!res.ok) { setError("Failed to load groups."); return; }
     setGroups(await res.json());
   }
@@ -82,29 +81,23 @@ export default function GroupsPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-2xl font-bold text-ink">groups</h1>
+          <h1 className="font-serif text-3xl font-bold text-teal">groups</h1>
           <p className="font-sans text-sm text-ink-muted">play with friends and compare scores</p>
         </div>
 
-        {/* Plus gate */}
-        {error === "plus" && (
-          <div className="rounded-2xl border border-gold/30 bg-gold/5 p-6 text-center space-y-3">
-            <p className="font-serif text-lg text-ink">groups is a circa+ feature</p>
-            <a
-              href="/plus"
-              className="inline-block rounded-xl bg-gold px-6 py-2.5 font-sans font-semibold text-white hover:bg-gold/80 transition-colors"
-            >
-              upgrade to plus
-            </a>
-          </div>
-        )}
+        {locked && <PlusGate locked feature="friend groups" />}
 
-        {/* Generic error */}
-        {error && error !== "plus" && (
+        {error && (
           <p className="font-sans text-sm text-red-600">{error}</p>
         )}
 
-        {groups !== null && error !== "plus" && (
+        {!locked && !error && !groups && (
+          <div className="flex justify-center py-16">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-ink/20 border-t-gold" />
+          </div>
+        )}
+
+        {groups !== null && (
           <>
             {/* Your groups */}
             {groups.length > 0 ? (
@@ -117,7 +110,7 @@ export default function GroupsPage() {
                     <a
                       key={g.id}
                       href={`/groups/${g.id}`}
-                      className="flex items-center justify-between rounded-2xl border border-ink/10 bg-white/60 px-5 py-4 hover:bg-white/80 transition-colors group"
+                      className="flex items-center justify-between rounded-2xl border border-ink/10 bg-surface/60 px-5 py-4 hover:bg-surface/80 transition-colors group"
                     >
                       <div>
                         <p className="font-serif text-base font-bold text-ink">{g.name}</p>
@@ -131,7 +124,7 @@ export default function GroupsPage() {
                 </div>
               </section>
             ) : (
-              <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 text-center space-y-1">
+              <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 text-center space-y-1">
                 <p className="font-serif text-base text-ink">no groups yet</p>
                 <p className="font-sans text-sm text-ink-muted">create one below or enter a friend&apos;s invite code</p>
               </div>
@@ -155,12 +148,12 @@ export default function GroupsPage() {
                   onChange={(e) => setNewName(e.target.value)}
                   maxLength={40}
                   required
-                  className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+                  className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
                 />
                 <button
                   type="submit"
                   disabled={creating || newName.trim().length < 2}
-                  className="w-full rounded-2xl bg-ink py-3 font-sans font-semibold text-parchment transition-colors hover:bg-ink/80 active:scale-95 disabled:opacity-50"
+                  className="btn-primary w-full py-3"
                 >
                   {creating ? "creating…" : "create group"}
                 </button>
@@ -180,12 +173,12 @@ export default function GroupsPage() {
                   onChange={(e) => setInviteInput(e.target.value)}
                   maxLength={8}
                   required
-                  className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors font-mono tracking-widest uppercase"
+                  className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors font-mono tracking-widest uppercase"
                 />
                 <button
                   type="submit"
                   disabled={joining || inviteInput.trim().length < 4}
-                  className="w-full rounded-2xl bg-gold py-3 font-sans font-semibold text-white transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-50"
+                  className="btn-primary w-full py-3"
                 >
                   {joining ? "joining…" : "join group"}
                 </button>

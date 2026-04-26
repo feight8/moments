@@ -14,7 +14,7 @@ export default function ProgressBar({ current, total }: ProgressBarProps) {
               i < current - 1
                 ? "bg-gold"
                 : i === current - 1
-                ? "bg-gold-light"
+                ? "bg-gold/60"
                 : "bg-ink/15"
             }`}
           />
