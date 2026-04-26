@@ -36,7 +36,7 @@ function LoginForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-serif text-2xl font-bold text-ink">sign in</h1>
+        <h1 className="font-serif text-2xl font-bold text-teal">sign in</h1>
         <p className="font-sans text-sm text-ink-muted">
           Access your Circa+ features and saved progress.
         </p>
@@ -50,7 +50,7 @@ function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
         />
         <input
           type="password"
@@ -59,7 +59,7 @@ function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
-          className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
         />
 
         {status === "error" && (
@@ -69,7 +69,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full rounded-2xl bg-ink py-3.5 font-sans font-semibold text-parchment transition-colors hover:bg-ink/80 active:scale-95 disabled:opacity-60"
+          className="w-full rounded-2xl bg-gold py-3.5 font-sans font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
         >
           {status === "loading" ? "signing in…" : "sign in"}
         </button>

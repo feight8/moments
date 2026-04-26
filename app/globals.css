@@ -3,6 +3,28 @@
 @tailwind utilities;
 
 @layer base {
+  /* -----------------------------------------------------------------------
+   * Brand color tokens
+   * RGB channels only (no rgb() wrapper) so Tailwind alpha modifiers work:
+   *   bg-parchment/50  →  rgb(var(--color-bg) / 0.5)
+   * --------------------------------------------------------------------- */
+  :root {
+    /* Light theme */
+    --color-bg:        255 255 250;   /* #fffffa  off-white page bg */
+    --color-surface:   212 245 245;   /* #d4f5f5  light cyan card bg */
+    --color-ink:       85  67  72;    /* #554348  body text         */
+    --color-ink-muted: 120 108 104;   /* #786c68  secondary text    */
+    --color-accent:    255 173 105;   /* #ffad69  orange CTA        */
+  }
+
+  [data-theme="dark"] {
+    --color-bg:        37  89  87;    /* #255957  deep teal page bg */
+    --color-surface:   85  67  72;    /* #554348  dark plum panels  */
+    --color-ink:       255 255 250;   /* #fffffa  off-white text    */
+    --color-ink-muted: 212 245 245;   /* #d4f5f5  cyan muted text   */
+    --color-accent:    255 173 105;   /* #ffad69  orange (unchanged) */
+  }
+
   /* Custom range input — hides the native thumb; we render our own via JS */
   input[type="range"] {
     -webkit-appearance: none;
@@ -29,5 +51,13 @@
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Primary teal button — add w-full and py-* per usage site */
+  .btn-primary {
+    @apply rounded-2xl bg-teal font-sans font-semibold text-parchment
+           transition-colors hover:bg-teal/80 active:scale-95 disabled:opacity-60;
   }
 }

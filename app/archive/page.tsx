@@ -66,13 +66,13 @@ export default function ArchivePage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-3xl font-bold text-ink">archive</h1>
+          <h1 className="font-serif text-3xl font-bold text-teal">archive</h1>
           <p className="font-sans text-sm text-ink-muted">every puzzle, playable anytime</p>
         </div>
 
         {/* Plus gate */}
         {locked && (
-          <PlusGate locked feature="The puzzle archive" />
+          <PlusGate locked feature="the puzzle archive" />
         )}
 
         {/* Error */}
@@ -97,7 +97,7 @@ export default function ArchivePage() {
 
         {/* Archive list */}
         {entries && entries.length > 0 && (
-          <div className="rounded-2xl border border-ink/10 bg-white/60 divide-y divide-ink/8 backdrop-blur-sm overflow-hidden">
+          <div className="rounded-2xl border border-ink/10 bg-surface/60 divide-y divide-ink/8 backdrop-blur-sm overflow-hidden">
             {entries.map((entry) => {
               const { display, sub } = formatArchiveDate(entry.date);
               return (
@@ -122,7 +122,7 @@ export default function ArchivePage() {
                   </div>
                   <div className="flex items-center gap-2 text-ink-muted">
                     {entry.played && (
-                      <span className="font-sans text-xs text-gold font-semibold">replay</span>
+                      <span className="font-sans text-xs text-ink-muted font-semibold">replay</span>
                     )}
                     <span className="text-lg group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>

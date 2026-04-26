@@ -73,7 +73,7 @@ function JoinPageInner() {
   }
 
   return (
-    <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 space-y-5">
+    <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-5">
       <div className="text-center space-y-2">
         <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
           you&apos;re invited
@@ -91,7 +91,7 @@ function JoinPageInner() {
       {error?.includes("Circa+") && (
         <a
           href="/plus"
-          className="block w-full rounded-2xl bg-gold py-3 font-sans font-semibold text-white text-center hover:bg-gold/80 transition-colors"
+          className="block w-full rounded-2xl bg-gold py-3 font-sans font-semibold text-teal text-center hover:bg-gold/80 transition-colors"
         >
           upgrade to Circa+
         </a>
@@ -100,7 +100,7 @@ function JoinPageInner() {
       <button
         onClick={handleJoin}
         disabled={joining}
-        className="w-full rounded-2xl bg-ink py-4 font-sans font-semibold text-parchment transition-colors hover:bg-ink/80 active:scale-95 disabled:opacity-50"
+        className="w-full rounded-2xl bg-gold py-4 font-sans font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-50"
       >
         {joining ? "joining…" : "join group"}
       </button>

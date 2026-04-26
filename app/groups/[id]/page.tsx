@@ -112,15 +112,15 @@ export default function GroupPage() {
     <PageShell>
       {/* Group header */}
       <div className="space-y-1">
-        <h1 className="font-serif text-2xl font-bold text-ink">{group.name}</h1>
+        <h1 className="font-serif text-2xl font-bold text-teal">{group.name}</h1>
         <p className="font-sans text-sm text-ink-muted">{dateLabel}</p>
       </div>
 
       {/* Scoreboard */}
-      <section className="rounded-2xl border border-ink/10 bg-white/60 overflow-hidden">
+      <section className="rounded-2xl border border-ink/10 bg-surface/60 overflow-hidden">
         {scores && !scores.viewerHasPlayed && (
-          <div className="px-5 py-3 bg-gold/10 border-b border-gold/20">
-            <p className="font-sans text-xs text-gold font-semibold text-center">
+          <div className="px-5 py-3 bg-cyan/80 border-b border-teal/15">
+            <p className="font-sans text-xs text-teal font-semibold text-center">
               play today&apos;s puzzle to see your friends&apos; scores
             </p>
           </div>
@@ -130,7 +130,7 @@ export default function GroupPage() {
           <div
             key={m.userId}
             className={`flex items-center gap-3 px-5 py-3.5 border-b border-ink/5 last:border-0 ${
-              m.userId === viewerUserId ? "bg-gold/5" : ""
+              m.userId === viewerUserId ? "bg-cyan/40" : ""
             }`}
           >
             {/* Rank */}
@@ -170,7 +170,7 @@ export default function GroupPage() {
         <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
           members ({group.memberCount})
         </h2>
-        <div className="rounded-2xl border border-ink/10 bg-white/60 divide-y divide-ink/5">
+        <div className="rounded-2xl border border-ink/10 bg-surface/60 divide-y divide-ink/5">
           {members.map((m) => (
             <div key={m.userId} className="flex items-center justify-between px-5 py-3">
               <span className="font-sans text-sm text-ink">{m.displayName}</span>
@@ -192,13 +192,13 @@ export default function GroupPage() {
       </section>
 
       {/* Invite code */}
-      <section className="rounded-2xl border border-ink/10 bg-white/60 p-5 space-y-3">
+      <section className="rounded-2xl border border-ink/10 bg-surface/60 p-5 space-y-3">
         <div className="space-y-0.5">
           <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
             invite friends
           </p>
           <p className="font-sans text-xs text-ink-muted">
-            share this code or link — only Circa+ members can join
+            share this code or link — only circa+ members can join
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -207,7 +207,7 @@ export default function GroupPage() {
           </code>
           <button
             onClick={handleCopyCode}
-            className="rounded-xl bg-ink px-4 py-2.5 font-sans text-sm font-semibold text-parchment hover:bg-ink/80 transition-colors shrink-0"
+            className="btn-primary px-4 py-2.5 transition-colors shrink-0"
           >
             {copied ? "copied!" : "copy link"}
           </button>
@@ -228,7 +228,7 @@ export default function GroupPage() {
           <button
             onClick={handleLeave}
             disabled={leaving}
-            className="w-full rounded-2xl border border-ink/15 bg-white/60 py-3 font-sans text-sm text-ink-muted hover:text-ink transition-colors disabled:opacity-50"
+            className="w-full rounded-2xl border border-ink/15 bg-surface/60 py-3 font-sans text-sm text-ink-muted hover:text-ink transition-colors disabled:opacity-50"
           >
             {leaving ? "leaving…" : "leave group"}
           </button>

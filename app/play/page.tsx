@@ -422,7 +422,7 @@ function PlayPageInner() {
             {canRetry && (
               <button
                 onClick={handleRetrySubmit}
-                className="block w-full rounded-2xl bg-gold py-3 font-sans font-semibold text-white hover:bg-gold/80 active:scale-95 transition-colors"
+                className="block w-full rounded-2xl bg-gold py-3 font-sans font-semibold text-teal hover:bg-gold/80 active:scale-95 transition-colors"
               >
                 Try again
               </button>
@@ -468,9 +468,9 @@ function PlayPageInner() {
           />
           <button
             onClick={handleLockGuess}
-            className="w-full rounded-2xl bg-ink py-4 font-sans font-semibold text-parchment transition-colors hover:bg-ink/80 active:scale-95"
+            className="btn-primary w-full py-4 transition-colors active:scale-95"
           >
-            Lock In {state.sliderYear}
+            lock in {state.sliderYear}
           </button>
           {state.guessError && (
             <p className="text-center font-sans text-sm text-red-600">{state.guessError}</p>
@@ -487,9 +487,9 @@ function PlayPageInner() {
           />
           <button
             onClick={handleNext}
-            className="w-full rounded-2xl bg-gold py-4 font-sans font-semibold text-white transition-colors hover:bg-gold/80 active:scale-95"
+            className="btn-primary w-full py-4 transition-colors active:scale-95"
           >
-            {isLast ? "See Final Results" : "Next Event"}
+            {isLast ? "See Final Results" : "next event"}
           </button>
         </>
       )}

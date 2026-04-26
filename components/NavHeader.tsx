@@ -26,11 +26,23 @@ export default function NavHeader({ backHref }: NavHeaderProps) {
       )}
 
       <nav className="flex items-center gap-1">
+        {/* Account */}
+        <Link
+          href="/account"
+          aria-label="Account"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 bg-surface/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
+          title="Account"
+        >
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <path d="M7.5 1a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.76 2.46-5 5.5-5s5.5 2.24 5.5 5H2z" fill="currentColor"/>
+          </svg>
+        </Link>
+
         {/* Archive */}
         <Link
           href="/archive"
           aria-label="Puzzle archive"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 bg-white/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 bg-surface/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
           title="Archive"
         >
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
@@ -43,7 +55,7 @@ export default function NavHeader({ backHref }: NavHeaderProps) {
         <Link
           href="/stats"
           aria-label="Personal stats"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 bg-white/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 bg-surface/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
           title="Stats"
         >
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
@@ -55,7 +67,7 @@ export default function NavHeader({ backHref }: NavHeaderProps) {
         <Link
           href="/groups"
           aria-label="Groups"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 bg-white/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 bg-surface/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
           title="Groups"
         >
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
@@ -67,7 +79,7 @@ export default function NavHeader({ backHref }: NavHeaderProps) {
         <Link
           href="/help"
           aria-label="Help and settings"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 bg-white/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 bg-surface/60 text-ink-muted hover:text-ink hover:border-ink/30 transition-colors"
           title="Help & settings"
         >
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">

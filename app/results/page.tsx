@@ -34,7 +34,7 @@ export default function ResultsPage() {
       if (!sessionResult) {
         const res = await fetch("/api/results", { headers: authHeader });
         if (!res.ok) {
-          setError("Could not load your results. Please try again.");
+          setError("could not load your results. please try again.");
           return;
         }
         sessionResult = await res.json();
@@ -89,45 +89,11 @@ export default function ResultsPage() {
           <ResultsCard
             result={result}
             distribution={distribution ?? null}
+            groups={groups}
           />
         )}
 
         {showLinkPrompt && <LinkAccountPrompt />}
-
-        {/* Groups section (Plus members only) */}
-        {groups !== null && (
-          <section className="space-y-3">
-            <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
-              your groups
-            </h2>
-            {groups.length > 0 ? (
-              <div className="space-y-2">
-                {groups.map((g) => (
-                  <a
-                    key={g.id}
-                    href={`/groups/${g.id}`}
-                    className="flex items-center justify-between rounded-2xl border border-ink/10 bg-white/60 px-5 py-4 hover:bg-white/80 transition-colors group"
-                  >
-                    <div>
-                      <p className="font-serif text-base font-bold text-ink">{g.name}</p>
-                      <p className="font-sans text-xs text-ink-muted mt-0.5">
-                        {g.memberCount} {g.memberCount === 1 ? "member" : "members"}
-                      </p>
-                    </div>
-                    <span className="text-ink-muted group-hover:translate-x-0.5 transition-transform">→</span>
-                  </a>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-ink/10 bg-white/60 p-5 text-center space-y-2">
-                <p className="font-sans text-sm text-ink-muted">play with friends and compare scores</p>
-                <a href="/groups" className="font-sans text-sm font-semibold text-gold hover:text-gold/80 transition-colors">
-                  create a group →
-                </a>
-              </div>
-            )}
-          </section>
-        )}
 
         {result && (
           <p className="text-center font-sans text-xs text-ink-muted pb-4">

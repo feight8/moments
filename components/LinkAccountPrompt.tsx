@@ -41,7 +41,7 @@ export default function LinkAccountPrompt() {
   }
 
   return (
-    <div className="rounded-2xl border border-gold/30 bg-gold/5 p-6 space-y-4">
+    <div className="rounded-2xl border border-teal/20 bg-cyan/60 p-6 space-y-4">
       <div className="space-y-1">
         <p className="font-serif text-lg font-bold text-ink">protect your streak</p>
         <p className="font-sans text-sm text-ink-muted leading-relaxed">
@@ -57,7 +57,7 @@ export default function LinkAccountPrompt() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
         />
         <input
           type="password"
@@ -66,7 +66,7 @@ export default function LinkAccountPrompt() {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={8}
-          className="w-full rounded-xl border border-ink/15 bg-white/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
         />
 
         {status === "error" && (
@@ -76,7 +76,7 @@ export default function LinkAccountPrompt() {
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full rounded-xl bg-gold py-3 font-sans font-semibold text-white transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
+          className="w-full rounded-xl bg-gold py-3 font-sans font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
         >
           {status === "loading" ? "saving…" : "save my account"}
         </button>

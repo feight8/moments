@@ -88,7 +88,7 @@ export default function RevealCard({ result, eventNumber, description }: RevealC
 
       {/* Additional context */}
       {result.additionalContext && (
-        <div className="rounded-2xl border border-ink/10 bg-white/60 p-5 backdrop-blur-sm">
+        <div className="rounded-2xl border border-ink/10 bg-surface/60 p-5 backdrop-blur-sm">
           <p className="mb-2 text-xs font-sans font-semibold uppercase tracking-widest text-ink-muted">
             the story
           </p>

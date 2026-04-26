@@ -51,7 +51,7 @@ export default function ScoreDistribution({
         </p>
       </div>
 
-      <div className="rounded-2xl border border-ink/10 bg-white/60 px-5 pt-5 pb-4 backdrop-blur-sm space-y-2">
+      <div className="rounded-2xl border border-ink/10 bg-surface/60 px-5 pt-5 pb-4 backdrop-blur-sm space-y-2">
         {buckets.map((bucket) => {
           const pct = Math.round((bucket.count / maxCount) * 100);
           const active = isUserBucket(bucket);
@@ -75,7 +75,7 @@ export default function ScoreDistribution({
                 {bucket.count > 0 && (
                   <span
                     className={`absolute inset-y-0 left-2 flex items-center font-sans text-xs ${
-                      active ? "text-white font-semibold" : "text-ink-muted"
+                      active ? "text-teal font-semibold" : "text-ink-muted"
                     }`}
                   >
                     {bucket.count}

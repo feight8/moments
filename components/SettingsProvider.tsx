@@ -1,9 +1,14 @@
 "use client";
 
-/**
- * Placeholder component kept in the layout for forward compatibility.
- * Settings no longer need DOM data-attributes — renders nothing.
- */
+import { useEffect } from "react";
+import { useSettings } from "@/lib/settings";
+
 export default function SettingsProvider() {
+  const { settings } = useSettings();
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = settings.darkMode ? "dark" : "light";
+  }, [settings.darkMode]);
+
   return null;
 }
