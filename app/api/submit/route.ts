@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 interface SubmitBody {
   guesses: Guess[];
   puzzleDate?: string; // YYYY-MM-DD; provided for archive play
+  category?: string | null;
 }
 
 export async function POST(req: NextRequest) {
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
-  const { guesses, puzzleDate } = body;
+  const { guesses, puzzleDate, category = null } = body;
 
   if (!Array.isArray(guesses) || guesses.length !== 5) {
     console.error("[submit] bad guess count:", guesses?.length ?? "not an array", "user:", user.id);
@@ -54,32 +55,28 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Resolve the active puzzle
+  // Resolve the puzzle, matching on category
   let puzzle: { event_ids: string[]; date: string } | null = null;
 
   if (puzzleDate) {
-    const { data } = await serviceClient
-      .from("daily_puzzles")
-      .select("event_ids, date")
-      .eq("date", puzzleDate)
-      .single();
+    const { data } = await (category
+      ? serviceClient.from("daily_puzzles").select("event_ids, date").eq("date", puzzleDate).eq("category", category)
+      : serviceClient.from("daily_puzzles").select("event_ids, date").eq("date", puzzleDate).is("category", null)
+    ).single();
     puzzle = data ?? null;
   } else {
-    const { data: todaysPuzzle } = await serviceClient
-      .from("daily_puzzles")
-      .select("event_ids, date")
-      .eq("date", todayStr)
-      .single();
+    const { data: todaysPuzzle } = await (category
+      ? serviceClient.from("daily_puzzles").select("event_ids, date").eq("date", todayStr).eq("category", category)
+      : serviceClient.from("daily_puzzles").select("event_ids, date").eq("date", todayStr).is("category", null)
+    ).single();
 
     if (todaysPuzzle) {
       puzzle = todaysPuzzle;
     } else {
-      const { data: latestPuzzle } = await serviceClient
-        .from("daily_puzzles")
-        .select("event_ids, date")
-        .order("date", { ascending: false })
-        .limit(1)
-        .single();
+      const { data: latestPuzzle } = await (category
+        ? serviceClient.from("daily_puzzles").select("event_ids, date").eq("category", category).order("date", { ascending: false }).limit(1)
+        : serviceClient.from("daily_puzzles").select("event_ids, date").is("category", null).order("date", { ascending: false }).limit(1)
+      ).single();
       puzzle = latestPuzzle ?? null;
     }
   }
@@ -91,22 +88,25 @@ export async function POST(req: NextRequest) {
   // Use the puzzle's own date as the idempotency key so dev fallback works.
   const date = puzzle.date;
 
-  // Idempotency — return existing result if already submitted for this puzzle
-  const { data: existing } = await serviceClient
+  // Idempotency — return existing result if already submitted for this puzzle + category
+  const idempotencyQuery = serviceClient
     .from("user_results")
     .select("*")
     .eq("user_id", user.id)
-    .eq("puzzle_date", date)
-    .single();
+    .eq("puzzle_date", date);
+
+  const { data: existing } = await (category
+    ? idempotencyQuery.eq("category", category)
+    : idempotencyQuery.is("category", null)
+  ).single();
 
   if (existing) {
-    // Already submitted — fetch streak and return existing result
     const { data: streakRow } = (await serviceClient
       .from("user_streaks")
       .select("current_streak")
       .eq("user_id", user.id)
       .single()) as { data: Pick<DbUserStreak, "current_streak"> | null };
-    return buildResultResponse(existing.guesses, existing.total_score, date, streakRow?.current_streak ?? 0);
+    return buildResultResponse(existing.guesses, existing.total_score, date, streakRow?.current_streak ?? 0, category);
   }
 
   const validIds = new Set<string>(puzzle.event_ids);
@@ -155,6 +155,7 @@ export async function POST(req: NextRequest) {
   const { error: insertError } = await serviceClient.from("user_results").insert({
     user_id: user.id,
     puzzle_date: date,
+    category,
     guesses: scoredGuesses,
     total_score: totalScore,
   });
@@ -164,9 +165,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save results. Please try again." }, { status: 500 });
   }
 
-  const newStreak = await updateStreak(user.id, date, isPlus, serviceClient);
+  // Only update streak for the main daily puzzle (not category puzzles)
+  const newStreak = category === null
+    ? await updateStreak(user.id, date, isPlus, serviceClient)
+    : await getCurrentStreak(user.id, serviceClient);
 
-  return buildResultResponse(scoredGuesses, totalScore, date, newStreak);
+  return buildResultResponse(scoredGuesses, totalScore, date, newStreak, category);
 }
 
 /** Returns the new current streak count after updating. */
@@ -181,7 +185,6 @@ async function updateStreak(userId: string, date: string, isPlus: boolean, clien
   yesterday.setUTCDate(yesterday.getUTCDate() - 1);
   const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-  // Already submitted today — idempotent, return existing streak
   if (streakRow?.last_completed_date === date) return streakRow.current_streak;
 
   let newStreak = 1;
@@ -212,22 +215,30 @@ async function updateStreak(userId: string, date: string, isPlus: boolean, clien
   return newStreak;
 }
 
+async function getCurrentStreak(userId: string, client: SupabaseClient): Promise<number> {
+  const { data } = (await client
+    .from("user_streaks")
+    .select("current_streak")
+    .eq("user_id", userId)
+    .single()) as { data: Pick<DbUserStreak, "current_streak"> | null };
+  return data?.current_streak ?? 0;
+}
+
 function buildResultResponse(
   scoredGuesses: ScoredGuess[],
   totalScore: number,
   date: string,
-  streak: number
+  streak: number,
+  category: string | null
 ): NextResponse {
-  const perfectCount = scoredGuesses.filter((g) => g.isPerfect).length;
-
   const result: SessionResult = {
     date,
+    category,
     guesses: scoredGuesses,
     totalScore,
     maxScore: MAX_SCORE_PER_EVENT * 5,
-    perfectCount,
+    perfectCount: scoredGuesses.filter((g) => g.isPerfect).length,
     streak,
   };
-
   return NextResponse.json(result);
 }

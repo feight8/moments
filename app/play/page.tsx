@@ -20,26 +20,32 @@ import type { DailyPuzzle, Guess, GuessResult, SessionResult } from "@/types";
 // survive page reloads, iOS Safari background-unloads, and accidental refreshes.
 // ---------------------------------------------------------------------------
 
-const PENDING_KEY = "circa_pending_submit";
-
 interface PendingSubmit {
   puzzleDate: string;
   guesses: Guess[];
 }
 
-function savePending(puzzleDate: string, guesses: Guess[]) {
+function pendingKey(category: string | null) {
+  return category ? `circa_pending_submit_${category}` : "circa_pending_submit";
+}
+
+function resultKey(category: string | null) {
+  return category ? `circa_result_${category}` : "circa_result";
+}
+
+function savePending(puzzleDate: string, guesses: Guess[], category: string | null) {
   try {
-    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ puzzleDate, guesses }));
+    sessionStorage.setItem(pendingKey(category), JSON.stringify({ puzzleDate, guesses }));
   } catch { /* sessionStorage unavailable */ }
 }
 
-function clearPending() {
-  try { sessionStorage.removeItem(PENDING_KEY); } catch { /* ignore */ }
+function clearPending(category: string | null) {
+  try { sessionStorage.removeItem(pendingKey(category)); } catch { /* ignore */ }
 }
 
-function loadPending(): PendingSubmit | null {
+function loadPending(category: string | null): PendingSubmit | null {
   try {
-    const raw = sessionStorage.getItem(PENDING_KEY);
+    const raw = sessionStorage.getItem(pendingKey(category));
     if (!raw) return null;
     const p = JSON.parse(raw) as PendingSubmit;
     return p.puzzleDate && Array.isArray(p.guesses) ? p : null;
@@ -164,6 +170,7 @@ function PlayPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const archiveDate = searchParams.get("date") ?? undefined;
+  const category = searchParams.get("category") ?? null;
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const { settings } = useSettings();
@@ -210,9 +217,7 @@ function PlayPageInner() {
   async function doSubmit(puzzleDate: string, guesses: Guess[]) {
     dispatch({ type: "SUBMITTING" });
 
-    // Persist before sending — if the request fails or the page reloads,
-    // the next init will detect these and auto-retry.
-    savePending(puzzleDate, guesses);
+    savePending(puzzleDate, guesses, category);
 
     const authHeaders = await getAuthHeaders();
 
@@ -221,10 +226,9 @@ function PlayPageInner() {
       res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders },
-        body: JSON.stringify({ guesses, puzzleDate }),
+        body: JSON.stringify({ guesses, puzzleDate, category }),
       });
     } catch (err) {
-      // Network drop, iOS connection loss, Vercel timeout, etc.
       console.error("[submit] fetch threw:", err);
       dispatch({
         type: "ERROR",
@@ -246,11 +250,10 @@ function PlayPageInner() {
       return;
     }
 
-    // Success — clear the pending marker and go to results
-    clearPending();
+    clearPending(category);
     const result: SessionResult = await res.json();
-    sessionStorage.setItem("circa_result", JSON.stringify(result));
-    router.push("/results");
+    sessionStorage.setItem(resultKey(category), JSON.stringify(result));
+    router.push(category ? `/results?category=${category}` : "/results");
   }
 
   // ---------------------------------------------------------------------------
@@ -260,7 +263,6 @@ function PlayPageInner() {
     async function init() {
       const supabase = createClient();
 
-      // Ensure we have a session before making authenticated requests
       let { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         const { error } = await supabase.auth.signInAnonymously();
@@ -275,49 +277,50 @@ function PlayPageInner() {
         ? { Authorization: `Bearer ${session.access_token}` }
         : {};
 
-      // For today's puzzle, redirect if already played
+      const resultsUrl = category ? `/api/results?category=${category}` : "/api/results";
+
       if (!archiveDate) {
-        const existingRes = await fetch("/api/results", { headers: authHeader });
+        const existingRes = await fetch(resultsUrl, { headers: authHeader });
         if (existingRes.ok) {
-          router.replace("/results");
+          router.replace(category ? `/results?category=${category}` : "/results");
           return;
         }
 
-        // Check for a pending submission from a previous failed attempt.
-        // This fires when: the user refreshed, iOS unloaded the tab, etc.
-        const pending = loadPending();
+        const pending = loadPending(category);
         if (pending?.guesses.length === 5) {
-          const puzzleRes = await fetch("/api/daily", { headers: authHeader });
+          const dailyUrl = category ? `/api/daily?category=${category}` : "/api/daily";
+          const puzzleRes = await fetch(dailyUrl, { headers: authHeader });
           if (puzzleRes.ok) {
             const puzzle: DailyPuzzle = await puzzleRes.json();
             if (puzzle.date === pending.puzzleDate) {
-              // Same puzzle is still active — restore and auto-submit
               dispatch({ type: "PUZZLE_RESTORED", puzzle, guesses: pending.guesses });
               await doSubmit(pending.puzzleDate, pending.guesses);
               return;
             }
           }
-          // Pending is stale (different day) — discard it
-          clearPending();
+          clearPending(category);
         }
       } else {
-        // Archive play — check for a pending submission for this specific date.
-        // Handles the case where an archive submit failed and the user refreshed.
-        const pending = loadPending();
+        const pending = loadPending(category);
         if (pending?.guesses.length === 5 && pending.puzzleDate === archiveDate) {
-          const puzzleRes = await fetch(`/api/daily?date=${archiveDate}`, { headers: authHeader });
+          const archiveUrl = category
+            ? `/api/daily?date=${archiveDate}&category=${category}`
+            : `/api/daily?date=${archiveDate}`;
+          const puzzleRes = await fetch(archiveUrl, { headers: authHeader });
           if (puzzleRes.ok) {
             const puzzle: DailyPuzzle = await puzzleRes.json();
             dispatch({ type: "PUZZLE_RESTORED", puzzle, guesses: pending.guesses });
             await doSubmit(pending.puzzleDate, pending.guesses);
             return;
           }
-          // Couldn't load the puzzle — clear and fall through to normal load
-          clearPending();
+          clearPending(category);
         }
       }
 
-      const dailyUrl = archiveDate ? `/api/daily?date=${archiveDate}` : "/api/daily";
+      const dailyUrl = archiveDate
+        ? `/api/daily?date=${archiveDate}${category ? `&category=${category}` : ""}`
+        : category ? `/api/daily?category=${category}` : "/api/daily";
+
       const puzzleRes = await fetch(dailyUrl, { headers: authHeader });
       if (!puzzleRes.ok) {
         if (puzzleRes.status === 403) {
@@ -354,10 +357,10 @@ function PlayPageInner() {
         body: JSON.stringify({
           ...guess,
           ...(archiveDate ? { puzzleDate: archiveDate } : {}),
+          ...(category ? { category } : {}),
         }),
       });
     } catch {
-      // Network drop — show inline error so the user can retry without losing progress
       dispatch({ type: "GUESS_ERROR", message: "Connection lost. Please try again." });
       return;
     }
@@ -366,7 +369,6 @@ function PlayPageInner() {
       let message = "Something went wrong. Please try again.";
       try { const body = await res.json(); if (body?.error) message = body.error; }
       catch { /* ignore */ }
-      // Dispatch as inline error, not full-screen error — progress is preserved
       dispatch({ type: "GUESS_ERROR", message });
       return;
     }
@@ -384,7 +386,6 @@ function PlayPageInner() {
     const isLast = state.currentIndex === state.puzzle.events.length - 1;
 
     if (isLast) {
-      // Guard against stale-closure race where GUESS_REVEALED hasn't settled yet
       if (state.guesses.length !== state.puzzle.events.length) return;
       const puzzleDate = archiveDate ?? state.puzzle.date;
       await doSubmit(puzzleDate, state.guesses);
@@ -393,8 +394,6 @@ function PlayPageInner() {
     }
   }
 
-  // Dedicated retry — called only from the error screen.
-  // Uses state directly rather than going through handleNext's isLast logic.
   async function handleRetrySubmit() {
     if (!state.puzzle || state.guesses.length !== 5) return;
     await doSubmit(archiveDate ?? state.puzzle.date, state.guesses);
@@ -405,17 +404,17 @@ function PlayPageInner() {
   // ---------------------------------------------------------------------------
 
   if (state.phase === "loading") {
-    return <PageShell archiveDate={archiveDate}><LoadingSpinner message="Loading puzzle..." /></PageShell>;
+    return <PageShell archiveDate={archiveDate} category={category}><LoadingSpinner message="Loading puzzle..." /></PageShell>;
   }
 
   if (state.phase === "submitting") {
-    return <PageShell archiveDate={archiveDate}><LoadingSpinner message="Saving your results..." /></PageShell>;
+    return <PageShell archiveDate={archiveDate} category={category}><LoadingSpinner message="Saving your results..." /></PageShell>;
   }
 
   if (state.phase === "error") {
     const canRetry = state.error?.includes("Your guesses are saved");
     return (
-      <PageShell archiveDate={archiveDate}>
+      <PageShell archiveDate={archiveDate} category={category}>
         <div className="text-center space-y-4 py-12">
           <p className="font-serif text-xl text-ink">{state.error}</p>
           <div className="space-y-2">
@@ -451,7 +450,7 @@ function PlayPageInner() {
   const isRevealing = state.phase === "revealing";
 
   return (
-    <PageShell archiveDate={archiveDate}>
+    <PageShell archiveDate={archiveDate} category={category}>
       <ProgressBar current={state.currentIndex + 1} total={state.puzzle.events.length} />
 
       <EventCard
@@ -489,7 +488,7 @@ function PlayPageInner() {
             onClick={handleNext}
             className="btn-primary w-full py-4 transition-colors active:scale-95"
           >
-            {isLast ? "See Final Results" : "next event"}
+            {isLast ? "see final results" : "next event"}
           </button>
         </>
       )}
@@ -497,15 +496,20 @@ function PlayPageInner() {
   );
 }
 
-function PageShell({ children, archiveDate }: { children: React.ReactNode; archiveDate?: string }) {
-  const label = archiveDate ? formatPuzzleDate(archiveDate) : undefined;
+function PageShell({ children, archiveDate, category }: { children: React.ReactNode; archiveDate?: string; category?: string | null }) {
+  const dateLabel = archiveDate ? formatPuzzleDate(archiveDate) : undefined;
+  const sublabel = [
+    category,
+    dateLabel ? `archive · ${dateLabel}` : null,
+  ].filter(Boolean).join(" · ");
+
   return (
     <main className="min-h-screen bg-parchment px-4 py-8">
       <div className="mx-auto max-w-lg space-y-6">
         <NavHeader backHref={archiveDate ? "/archive" : "/"} />
-        {label && (
+        {sublabel && (
           <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted text-center">
-            archive · {label}
+            {sublabel}
           </p>
         )}
         {children}

@@ -3,6 +3,7 @@ import { formatPuzzleDate, todayDate } from "@/lib/dates";
 import NavHeader from "@/components/NavHeader";
 import CircaLogo from "@/components/CircaLogo";
 import PlusBadge from "@/components/PlusBadge";
+import CategorySection from "@/components/CategorySection";
 
 export default function HomePage() {
   const dateLabel = formatPuzzleDate(todayDate());
@@ -40,6 +41,9 @@ export default function HomePage() {
         >
           play today&apos;s puzzle
         </Link>
+
+        {/* Category puzzles (admin-only until CATEGORIES_ENABLED=true) */}
+        <CategorySection />
 
         {/* Plus teaser */}
         <Link
