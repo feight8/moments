@@ -6,7 +6,7 @@ import NavHeader from "@/components/NavHeader";
 import PlusBadge from "@/components/PlusBadge";
 import { createClient } from "@/lib/supabase/client";
 
-type View = "loading" | "signed-out" | "create" | "forgot" | "signed-in";
+type View = "loading" | "signed-out" | "create" | "forgot" | "reset" | "signed-in";
 
 interface AccountInfo {
   email: string;
@@ -35,6 +35,18 @@ export default function AccountPage() {
   async function loadAccount() {
     const supabase = createClient();
     const { data: { session } } = await supabase.auth.getSession();
+
+    // Check for password reset callback
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("reset") === "1") {
+      if (session?.user) {
+        setView("reset");
+        return;
+      }
+    }
+    if (params.get("error") === "reset_failed") {
+      setMessage({ type: "error", text: "Reset link expired or invalid — please request a new one." });
+    }
 
     if (!session?.user?.email) {
       setView("signed-out");
@@ -103,11 +115,27 @@ export default function AccountPage() {
     e.preventDefault();
     setBusy(true); clearMessage();
     const { error } = await createClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/account`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/account&type=recovery`,
     });
     if (error) { setMessage({ type: "error", text: error.message }); setBusy(false); return; }
     setMessage({ type: "success", text: "Password reset email sent — check your inbox." });
     setBusy(false);
+  }
+
+  // -------------------------------------------------------------------------
+  // Set password (from reset email link)
+  // -------------------------------------------------------------------------
+  async function handleSetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: "error", text: "Passwords don't match." }); return;
+    }
+    setBusy(true); clearMessage();
+    const { error } = await createClient().auth.updateUser({ password: newPassword });
+    if (error) { setMessage({ type: "error", text: error.message }); setBusy(false); return; }
+    setNewPassword(""); setConfirmPassword("");
+    window.history.replaceState({}, "", "/account");
+    loadAccount();
   }
 
   // -------------------------------------------------------------------------
@@ -267,6 +295,30 @@ export default function AccountPage() {
               className="w-full text-center font-sans text-xs text-ink-muted hover:text-ink underline transition-colors">
               back to sign in
             </button>
+          </div>
+        )}
+
+        {/* ---------------------------------------------------------------- */}
+        {/* Reset password (arrived via email link)                          */}
+        {/* ---------------------------------------------------------------- */}
+        {view === "reset" && (
+          <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
+            <div className="space-y-1">
+              <p className="font-sans text-sm font-semibold text-ink">set new password</p>
+              <p className="font-sans text-xs text-ink-muted">Choose a new password for your account.</p>
+            </div>
+            <form onSubmit={handleSetPassword} className="space-y-3">
+              <input type="password" placeholder="new password (8+ characters)" value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)} required minLength={8} autoComplete="new-password" className={inputClass} />
+              <input type="password" placeholder="confirm new password" value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)} required autoComplete="new-password" className={inputClass} />
+              {message && (
+                <p className={`font-sans text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
+              )}
+              <button type="submit" disabled={busy} className={btnPrimary}>
+                {busy ? "updating…" : "set password"}
+              </button>
+            </form>
           </div>
         )}
 
