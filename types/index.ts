@@ -21,6 +21,7 @@ export interface Event extends PublicEvent {
 /** Today's puzzle as returned by GET /api/daily. */
 export interface DailyPuzzle {
   date: string; // YYYY-MM-DD
+  category: string | null;
   events: PublicEvent[];
 }
 
@@ -60,6 +61,7 @@ export interface ScoredGuess {
 /** Full session result returned by POST /api/submit and GET /api/results. */
 export interface SessionResult {
   date: string;
+  category: string | null;
   guesses: ScoredGuess[];
   totalScore: number;
   maxScore: number;
@@ -85,6 +87,7 @@ export interface DbEvent {
 export interface DbDailyPuzzle {
   id: string;
   date: string;
+  category: string | null;
   event_ids: string[];
   created_at: string;
 }
@@ -93,6 +96,7 @@ export interface DbUserResult {
   id: string;
   user_id: string;
   puzzle_date: string;
+  category: string | null;
   guesses: ScoredGuess[];
   total_score: number;
   completed_at: string;

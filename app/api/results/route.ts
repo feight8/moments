@@ -15,18 +15,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
-  // Resolve active puzzle date using shared helper (keeps in sync with /api/submit)
-  const date = await resolveActivePuzzleDate(serviceClient);
+  const category = req.nextUrl.searchParams.get("category") ?? null;
+
+  // Resolve active puzzle date for the given category (null = main daily)
+  const date = await resolveActivePuzzleDate(serviceClient, category);
   if (!date) {
     return NextResponse.json({ error: "No puzzle available." }, { status: 404 });
   }
 
-  const { data: result } = await serviceClient
+  const resultQuery = serviceClient
     .from("user_results")
     .select("*")
     .eq("user_id", user.id)
-    .eq("puzzle_date", date)
-    .single();
+    .eq("puzzle_date", date);
+
+  const { data: result } = await (category
+    ? resultQuery.eq("category", category)
+    : resultQuery.is("category", null)
+  ).single();
 
   if (!result) {
     return NextResponse.json({ error: "No result found for today." }, { status: 404 });
@@ -45,6 +51,7 @@ export async function GET(req: NextRequest) {
 
   const response: SessionResult = {
     date,
+    category,
     guesses: scoredGuesses,
     totalScore: result.total_score,
     maxScore: MAX_SCORE_PER_EVENT * 5,

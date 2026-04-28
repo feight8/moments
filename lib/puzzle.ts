@@ -7,33 +7,50 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { todayDate } from "./dates";
 
 /**
- * Resolves the active puzzle date: today's puzzle if it exists, otherwise
- * the most recently seeded puzzle. Returns null if no puzzles exist at all.
- *
- * Use this wherever a route needs today's puzzle date without also fetching
- * event_ids (e.g. /api/results). Routes that need the full puzzle row should
- * call this and then select the row, or replicate the two-query pattern with
- * the additional columns they need.
+ * Resolves the active puzzle date for a given category (null = main daily).
+ * Returns today's puzzle date if it exists, otherwise the most recently
+ * seeded puzzle for that category. Returns null if no puzzles exist.
  */
 export async function resolveActivePuzzleDate(
-  client: SupabaseClient
+  client: SupabaseClient,
+  category: string | null = null
 ): Promise<string | null> {
   const today = todayDate();
 
+  if (category) {
+    const { data: todaysPuzzle } = await client
+      .from("daily_puzzles")
+      .select("date")
+      .eq("date", today)
+      .eq("category", category)
+      .single();
+    if (todaysPuzzle) return todaysPuzzle.date;
+
+    const { data: latestPuzzle } = await client
+      .from("daily_puzzles")
+      .select("date")
+      .eq("category", category)
+      .order("date", { ascending: false })
+      .limit(1)
+      .single();
+    return latestPuzzle?.date ?? null;
+  }
+
+  // Main puzzle (category IS NULL)
   const { data: todaysPuzzle } = await client
     .from("daily_puzzles")
     .select("date")
     .eq("date", today)
+    .is("category", null)
     .single();
-
   if (todaysPuzzle) return todaysPuzzle.date;
 
   const { data: latestPuzzle } = await client
     .from("daily_puzzles")
     .select("date")
+    .is("category", null)
     .order("date", { ascending: false })
     .limit(1)
     .single();
-
   return latestPuzzle?.date ?? null;
 }
