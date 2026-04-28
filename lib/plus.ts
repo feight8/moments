@@ -12,7 +12,7 @@ export interface PlusStatus {
 
 /**
  * Returns true if the user ID is in the PLUS_ADMIN_USER_IDS env var.
- * Used to gate admin-only features like previewing future puzzles.
+ * Used to gate admin-only features like previewing future puzzles and categories.
  */
 export function isAdminUser(userId: string): boolean {
   return (process.env.PLUS_ADMIN_USER_IDS ?? "")
@@ -20,6 +20,14 @@ export function isAdminUser(userId: string): boolean {
     .map((s) => s.trim())
     .filter(Boolean)
     .includes(userId);
+}
+
+/**
+ * Returns true when category puzzles are open to all users.
+ * Set CATEGORIES_ENABLED=true to flip from admin-only to public.
+ */
+export function isCategoriesEnabled(): boolean {
+  return process.env.CATEGORIES_ENABLED === "true";
 }
 
 /**
@@ -78,7 +86,7 @@ export async function upsertPlusRecord(params: {
   currentPeriodEnd?: Date | null;
 }) {
   const client = createServiceClient();
-  await client.from("user_plus").upsert({
+  const { error } = await client.from("user_plus").upsert({
     user_id: params.userId,
     plan: params.plan,
     status: params.status,
@@ -87,6 +95,11 @@ export async function upsertPlusRecord(params: {
     current_period_end: params.currentPeriodEnd?.toISOString() ?? null,
     updated_at: new Date().toISOString(),
   });
+
+  if (error) {
+    console.error("[upsertPlusRecord] failed for user:", params.userId, error.message, error.code);
+    throw new Error(`Failed to upsert Plus record: ${error.message}`);
+  }
 }
 
 /**
