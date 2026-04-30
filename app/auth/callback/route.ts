@@ -5,8 +5,6 @@ import { cookies } from "next/headers";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const type = searchParams.get("type"); // "recovery" passed via redirectTo
-  const next = searchParams.get("next") ?? "/";
 
   if (code) {
     const cookieStore = await cookies();
@@ -27,10 +25,7 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      const dest = type === "recovery"
-        ? `${origin}/account?reset=1`
-        : `${origin}${next}`;
-      return NextResponse.redirect(dest);
+      return NextResponse.redirect(`${origin}/account?reset=1`);
     }
   }
 
