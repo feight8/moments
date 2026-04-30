@@ -115,7 +115,7 @@ export default function AccountPage() {
     e.preventDefault();
     setBusy(true); clearMessage();
     const { error } = await createClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/account&type=recovery`,
+      redirectTo: `${window.location.origin}/auth/callback`,
     });
     if (error) { setMessage({ type: "error", text: error.message }); setBusy(false); return; }
     setMessage({ type: "success", text: "Password reset email sent — check your inbox." });
