@@ -134,6 +134,7 @@ export default function AccountPage() {
     const { error } = await createClient().auth.updateUser({ password: newPassword });
     if (error) { setMessage({ type: "error", text: error.message }); setBusy(false); return; }
     setNewPassword(""); setConfirmPassword("");
+    setBusy(false);
     window.history.replaceState({}, "", "/account");
     loadAccount();
   }
