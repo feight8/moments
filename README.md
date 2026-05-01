@@ -90,6 +90,87 @@ Score: 382 / 500 | Streak: 🔥 4
 
 See [CLAUDE.md](CLAUDE.md) for a detailed breakdown of the codebase structure and architecture decisions.
 
+## Admin Guide
+
+### Becoming an Admin
+
+Add your Supabase user UUID to the `PLUS_ADMIN_USER_IDS` environment variable (comma-separated for multiple admins):
+
+```
+PLUS_ADMIN_USER_IDS=your-uuid-here,another-uuid-here
+```
+
+Admins get full Circa+ access and can preview future puzzles and category puzzles before they go public.
+
+---
+
+### Playing a Future Date
+
+Append `?date=YYYY-MM-DD` to the play URL:
+
+```
+https://circagame.com/play?date=2026-05-10
+```
+
+A puzzle must be seeded for that date in the `daily_puzzles` table first. Only admins can access future dates — other users get a 404.
+
+---
+
+### Playing a Category Puzzle
+
+Append `?category=<slug>` to the play URL:
+
+```
+https://circagame.com/play?category=sports
+https://circagame.com/play?category=pop-culture
+https://circagame.com/play?category=science
+https://circagame.com/play?category=arts
+https://circagame.com/play?category=politics
+```
+
+Category puzzles are admin-only by default. Set `CATEGORIES_ENABLED=true` in your environment to open them to all users.
+
+You can combine both params to preview a future category puzzle:
+
+```
+https://circagame.com/play?date=2026-05-10&category=sports
+```
+
+---
+
+### Seeding a Category Puzzle
+
+Insert a row into `daily_puzzles` with the `category` column set:
+
+```sql
+-- First, insert the events
+INSERT INTO events (description, year) VALUES
+  ('Description of event one.', 1969),
+  ('Description of event two.', 1815),
+  -- ... (5 total)
+;
+
+-- Then create the puzzle pointing to those events
+INSERT INTO daily_puzzles (date, category, event_ids)
+VALUES ('2026-05-10', 'sports', ARRAY[<id1>, <id2>, <id3>, <id4>, <id5>]);
+```
+
+Leave `category` as `NULL` for the main daily puzzle.
+
+---
+
+### Opening Categories to All Users
+
+Once you're ready to launch categories publicly, set:
+
+```
+CATEGORIES_ENABLED=true
+```
+
+This makes the category section visible on the homepage and removes the admin gate from the category play routes. No code deploy needed — just an environment variable change in Vercel.
+
+---
+
 ## Roadmap
 
 - [x] Project planning and schema design
