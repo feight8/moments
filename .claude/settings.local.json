@@ -8,7 +8,12 @@
       "WebFetch(domain:upload.wikimedia.org)",
       "WebSearch",
       "Bash(node -e \"const s = require\\('stripe'\\); console.log\\(s.LATEST_API_VERSION\\)\")",
-      "Bash(node -e \"const Stripe = require\\('stripe'\\); const s = new Stripe\\('sk_test_x'\\); console.log\\(s.VERSION\\)\")"
+      "Bash(node -e \"const Stripe = require\\('stripe'\\); const s = new Stripe\\('sk_test_x'\\); console.log\\(s.VERSION\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(python3 \"C:\\\\Users\\\\andre\\\\.claude\\\\plugins\\\\cache\\\\ui-ux-pro-max-skill\\\\ui-ux-pro-max\\\\2.5.0\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"daily trivia puzzle history game casual consumer\" --design-system -p \"Moments\" -f markdown)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\andre\\OneDrive\\Projects\\moments\\app\\api\\groups\\[id]\\members"
     ]
   }
 }
