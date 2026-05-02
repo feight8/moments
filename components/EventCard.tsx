@@ -6,7 +6,7 @@ interface EventCardProps {
 
 export default function EventCard({ description, eventNumber, imageUrl }: EventCardProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-ink/10 bg-surface/60 shadow-sm backdrop-blur-sm">
+    <div data-testid="event-card" className="overflow-hidden rounded-2xl border border-ink/10 bg-surface/60 shadow-sm backdrop-blur-sm">
       {imageUrl && (
         <div className="relative h-48 w-full overflow-hidden bg-ink/5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
