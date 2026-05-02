@@ -31,19 +31,39 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // Auth setup runs once before browser tests — creates one anonymous Supabase
+    // session shared across all projects so we don't exhaust the anon sign-in
+    // rate limit (50/hour on the free tier) when tests run in parallel.
+    {
+      name: 'setup',
+      testMatch: /tests\/setup\/.*\.setup\.ts/,
+    },
+
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/user.json',
+      },
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: 'playwright/.auth/user.json',
+      },
     },
 
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Safari'],
+        storageState: 'playwright/.auth/user.json',
+      },
     },
 
     /* Test against mobile viewports. */
