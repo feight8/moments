@@ -100,9 +100,10 @@ interface PricingCardProps {
   badge?: string;
   onSelect: (plan: "monthly" | "annual") => void;
   loading: boolean;
+  disabled?: boolean;
 }
 
-function PricingCard({ plan, price, period, badge, onSelect, loading }: PricingCardProps) {
+function PricingCard({ plan, price, period, badge, onSelect, loading, disabled }: PricingCardProps) {
   const isAnnual = plan === "annual";
   return (
     <div
@@ -132,7 +133,7 @@ function PricingCard({ plan, price, period, badge, onSelect, loading }: PricingC
 
       <button
         onClick={() => onSelect(plan)}
-        disabled={loading}
+        disabled={loading || disabled}
         className="btn-primary w-full py-3.5"
       >
         {loading ? "Redirecting…" : isAnnual ? "subscribe annually" : "subscribe monthly"}
@@ -160,6 +161,7 @@ export default function PlusPage() {
   const [loadingPlan, setLoadingPlan] = useState<"monthly" | "annual" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAnonymous, setIsAnonymous] = useState<boolean | null>(null);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
 
   // Only collected for anonymous users — sent to the server to create the account
   const [email, setEmail] = useState("");
@@ -174,6 +176,9 @@ export default function PlusPage() {
 
   async function handleSelect(plan: "monthly" | "annual") {
     setError(null);
+
+    // COPPA age gate
+    if (!ageConfirmed) { setError("Please confirm you are 13 or older to continue."); return; }
 
     // Validate account fields before hitting the API
     if (isAnonymous) {
@@ -277,6 +282,20 @@ export default function PlusPage() {
           </div>
         )}
 
+        {/* Age gate — COPPA */}
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={ageConfirmed}
+            onChange={(e) => { setAgeConfirmed(e.target.checked); setError(null); }}
+            data-testid="age-gate-checkbox"
+            className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-ink/30 accent-teal cursor-pointer"
+          />
+          <span className="font-sans text-xs text-ink-muted leading-relaxed group-hover:text-ink transition-colors">
+            I confirm that I am 13 years of age or older.
+          </span>
+        </label>
+
         {/* Pricing cards */}
         <div className="space-y-4">
           <PricingCard
@@ -286,6 +305,7 @@ export default function PlusPage() {
             badge="best value"
             onSelect={handleSelect}
             loading={loadingPlan === "annual"}
+            disabled={!ageConfirmed}
           />
           <PricingCard
             plan="monthly"
@@ -293,6 +313,7 @@ export default function PlusPage() {
             period="/ month"
             onSelect={handleSelect}
             loading={loadingPlan === "monthly"}
+            disabled={!ageConfirmed}
           />
         </div>
 
