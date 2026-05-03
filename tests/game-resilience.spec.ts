@@ -101,19 +101,37 @@ test.describe('Game resilience — pointer and keyboard', () => {
     expect(await slider.inputValue()).toBe(yearBefore);
   });
 
-  test('page reload during guessing starts fresh at event 1 with default year', async ({ page }) => {
+  test('page reload before any guess submission stays on question 1', async ({ page }) => {
+    // Move slider but do not submit — no progress has been persisted yet
     const slider = page.locator('input[type="range"]');
     await slider.focus();
     for (let i = 0; i < 100; i++) await page.keyboard.press('ArrowRight');
 
-    // Simulate pull-to-refresh / accidental reload (no guesses saved yet — < 5)
     await page.reload();
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 20_000 });
 
-    // Clean start — event 1, default year, lock-in button present
+    // Still event 1 (no progress to restore) with default slider year
     await expect(page.getByText('1 / 5')).toBeVisible();
     await expect(page.getByRole('button', { name: /lock in/i })).toBeVisible();
     expect(parseInt(await slider.inputValue())).toBe(MID_YEAR);
+  });
+
+  test('page reload after advancing to question 2 resumes on question 2', async ({ page }) => {
+    // Lock in a guess for Q1
+    await page.getByRole('button', { name: /lock in/i }).click();
+    // Wait for the reveal — the "next event" button appears after the API responds
+    await expect(page.getByRole('button', { name: 'next event' })).toBeVisible({ timeout: 15_000 });
+    // Advance to Q2 — this triggers saveGameProgress({ currentIndex: 1, guesses: [g1] })
+    await page.getByRole('button', { name: 'next event' }).click();
+    await expect(page.getByText('2 / 5')).toBeVisible({ timeout: 5_000 });
+
+    // Simulate pull-to-refresh
+    await page.reload();
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 20_000 });
+
+    // Should resume on Q2, not reset to Q1
+    await expect(page.getByText('2 / 5')).toBeVisible();
+    await expect(page.getByRole('button', { name: /lock in/i })).toBeVisible();
   });
 
   test('rapid double-click on lock-in button leaves game in a valid state', async ({ page }) => {

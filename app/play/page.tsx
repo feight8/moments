@@ -53,6 +53,41 @@ function loadPending(category: string | null): PendingSubmit | null {
 }
 
 // ---------------------------------------------------------------------------
+// Mid-game progress persistence
+// Saved after every "next event" click so a reload or pull-to-refresh returns
+// the user to the question they were on, not question 1.
+// ---------------------------------------------------------------------------
+
+interface GameProgress {
+  puzzleDate: string;
+  currentIndex: number;
+  guesses: Guess[];
+}
+
+function progressKey(category: string | null) {
+  return category ? `circa_game_progress_${category}` : "circa_game_progress";
+}
+
+function saveGameProgress(puzzleDate: string, currentIndex: number, guesses: Guess[], category: string | null) {
+  try {
+    sessionStorage.setItem(progressKey(category), JSON.stringify({ puzzleDate, currentIndex, guesses }));
+  } catch { /* sessionStorage unavailable */ }
+}
+
+function clearGameProgress(category: string | null) {
+  try { sessionStorage.removeItem(progressKey(category)); } catch { /* ignore */ }
+}
+
+function loadGameProgress(category: string | null): GameProgress | null {
+  try {
+    const raw = sessionStorage.getItem(progressKey(category));
+    if (!raw) return null;
+    const p = JSON.parse(raw) as GameProgress;
+    return typeof p.puzzleDate === "string" && typeof p.currentIndex === "number" && Array.isArray(p.guesses) ? p : null;
+  } catch { return null; }
+}
+
+// ---------------------------------------------------------------------------
 // State machine
 // ---------------------------------------------------------------------------
 
@@ -79,7 +114,8 @@ type Action =
   | { type: "GUESS_ERROR"; message: string }
   | { type: "NEXT_EVENT" }
   | { type: "SUBMITTING" }
-  | { type: "ERROR"; message: string };
+  | { type: "ERROR"; message: string }
+  | { type: "GAME_PROGRESS_RESTORED"; puzzle: DailyPuzzle; currentIndex: number; guesses: Guess[] };
 
 const MID_YEAR = Math.round((YEAR_MIN + YEAR_MAX) / 2);
 
@@ -133,6 +169,16 @@ function reducer(state: State, action: Action): State {
 
     case "ERROR":
       return { ...state, phase: "error", error: action.message };
+
+    case "GAME_PROGRESS_RESTORED":
+      return {
+        ...state,
+        phase: "guessing",
+        puzzle: action.puzzle,
+        currentIndex: action.currentIndex,
+        guesses: action.guesses,
+        sliderYear: MID_YEAR,
+      };
 
     default:
       return state;
@@ -251,6 +297,7 @@ function PlayPageInner() {
     }
 
     clearPending(category);
+    clearGameProgress(category);
     const result: SessionResult = await res.json();
     sessionStorage.setItem(resultKey(category), JSON.stringify(result));
     router.push(category ? `/results?category=${category}` : "/results");
@@ -315,6 +362,29 @@ function PlayPageInner() {
           }
           clearPending(category);
         }
+      }
+
+      // Restore mid-game progress so a reload lands on the correct question.
+      const progress = loadGameProgress(category);
+      if (
+        progress &&
+        progress.currentIndex > 0 &&
+        progress.guesses.length > 0 &&
+        progress.guesses.length < 5 &&
+        (!archiveDate || progress.puzzleDate === archiveDate)
+      ) {
+        const resumeUrl = archiveDate
+          ? `/api/daily?date=${archiveDate}${category ? `&category=${category}` : ""}`
+          : category ? `/api/daily?category=${category}` : "/api/daily";
+        const resumeRes = await fetch(resumeUrl, { headers: authHeader });
+        if (resumeRes.ok) {
+          const puzzle: DailyPuzzle = await resumeRes.json();
+          if (puzzle.date === progress.puzzleDate) {
+            dispatch({ type: "GAME_PROGRESS_RESTORED", puzzle, currentIndex: progress.currentIndex, guesses: progress.guesses });
+            return;
+          }
+        }
+        clearGameProgress(category);
       }
 
       const dailyUrl = archiveDate
@@ -390,6 +460,8 @@ function PlayPageInner() {
       const puzzleDate = archiveDate ?? state.puzzle.date;
       await doSubmit(puzzleDate, state.guesses);
     } else {
+      // Persist progress so a reload resumes at the next question, not question 1.
+      saveGameProgress(archiveDate ?? state.puzzle.date, state.currentIndex + 1, state.guesses, category);
       dispatch({ type: "NEXT_EVENT" });
     }
   }
