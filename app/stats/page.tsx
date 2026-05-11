@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import NavHeader from "@/components/NavHeader";
 import PlusGate from "@/components/PlusGate";
 import { createClient } from "@/lib/supabase/client";
@@ -11,11 +11,24 @@ import type { UserStats, EraAccuracy } from "@/app/api/stats/route";
 // Stat tile
 // ---------------------------------------------------------------------------
 
-function StatTile({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+const FlameIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="inline-block align-middle mr-1 text-gold">
+    <path d="M10 2c0 3-2.5 4-2.5 7 0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5c0-1.5-1-2.5-1-4 1.5 1 3 3 3 5.5a5 5 0 01-10 0C4.5 7 7 4.5 7 2c.5 1.5 1 2.5 1 4 .5-.5 2-2 2-4z"/>
+  </svg>
+);
+
+const TrophyIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="inline-block align-middle mr-1 text-gold">
+    <path d="M10 13.5c-2.21 0-4-1.79-4-4V4h8v5.5c0 2.21-1.79 4-4 4zm-5-9.5H3.5A1.5 1.5 0 002 5.5C2 7.43 3.3 9 5 9.42V4zm10 0v5.42C16.7 9 18 7.43 18 5.5A1.5 1.5 0 0016.5 4H15zm-5 11v-1.5H9V15H7v1h6v-1h-2zm-2 0h.01"/>
+    <rect x="7" y="15" width="6" height="1.5" rx=".5"/>
+  </svg>
+);
+
+function StatTile({ label, value, sub, icon }: { label: string; value: string | number; sub?: string; icon?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-ink/10 bg-white/60 p-5 text-center backdrop-blur-sm">
+    <div className="rounded-2xl border border-ink/10 bg-surface/60 p-5 text-center backdrop-blur-sm">
       <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1">{label}</p>
-      <p className="font-serif text-3xl font-bold text-ink">{value}</p>
+      <p className="font-serif text-3xl font-bold text-ink">{icon}{value}</p>
       {sub && <p className="font-sans text-xs text-ink-muted mt-0.5">{sub}</p>}
     </div>
   );
@@ -34,7 +47,7 @@ function ScoreHistory({ scores }: { scores: { date: string; score: number }[] })
       <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-3">
         Recent scores
       </p>
-      <div className="rounded-2xl border border-ink/10 bg-white/60 px-4 pt-4 pb-3 backdrop-blur-sm">
+      <div className="rounded-2xl border border-ink/10 bg-surface/60 px-4 pt-4 pb-3 backdrop-blur-sm">
         <div className="flex items-end gap-1 h-20">
           {scores.map(({ date, score }) => {
             const h = Math.max(4, Math.round((score / max) * 80));
@@ -70,7 +83,7 @@ function EraBreakdown({ eras }: { eras: EraAccuracy[] }) {
       <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-3">
         Accuracy by era
       </p>
-      <div className="rounded-2xl border border-ink/10 bg-white/60 divide-y divide-ink/8 backdrop-blur-sm overflow-hidden">
+      <div className="rounded-2xl border border-ink/10 bg-surface/60 divide-y divide-ink/8 backdrop-blur-sm overflow-hidden">
         {eras.map(({ era, count, avgScore }) => {
           const pct = Math.round((avgScore / maxAvg) * 100);
           return (
@@ -127,11 +140,11 @@ export default function StatsPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-3xl font-bold text-ink">your stats</h1>
+          <h1 className="font-serif text-3xl font-bold text-teal">stats</h1>
           <p className="font-sans text-sm text-ink-muted">all-time performance</p>
         </div>
 
-        {locked && <PlusGate locked feature="Stats" />}
+        {locked && <PlusGate locked feature="stats" />}
         {error && <p className="font-sans text-sm text-ink-muted text-center py-8">{error}</p>}
 
         {!locked && !error && !stats && (
@@ -159,8 +172,8 @@ export default function StatsPage() {
 
             {/* Streak */}
             <div className="grid grid-cols-2 gap-3">
-              <StatTile label="Current streak" value={`🔥 ${stats.currentStreak}`} sub="days" />
-              <StatTile label="Longest streak" value={`🏆 ${stats.longestStreak}`} sub="days" />
+              <StatTile label="Current streak" value={stats.currentStreak} sub="days" icon={<FlameIcon />} />
+              <StatTile label="Longest streak" value={stats.longestStreak} sub="days" icon={<TrophyIcon />} />
             </div>
 
             {/* Score history chart */}

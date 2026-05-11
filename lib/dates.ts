@@ -1,6 +1,9 @@
-/** Returns today's date in UTC as YYYY-MM-DD. */
-export function todayUTC(): string {
-  return new Date().toISOString().split("T")[0];
+/**
+ * Returns today's puzzle date as YYYY-MM-DD, keyed to midnight US Central Time.
+ * Uses America/Chicago so DST transitions (CST UTC-6 / CDT UTC-5) are handled automatically.
+ */
+export function todayDate(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
 }
 
 /** Format a YYYY-MM-DD date string for display, e.g. "april 7, 2026". */

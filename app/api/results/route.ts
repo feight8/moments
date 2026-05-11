@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
-import { todayUTC } from "@/lib/dates";
+import { resolveActivePuzzleDate } from "@/lib/puzzle";
 import type { SessionResult, DbUserStreak } from "@/types";
 import { MAX_SCORE_PER_EVENT } from "@/lib/scoring";
 
@@ -15,30 +15,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
-  // Resolve active puzzle date with fallback (mirrors /api/daily logic)
-  let date = todayUTC();
-  const { data: todaysPuzzle } = await serviceClient
-    .from("daily_puzzles")
-    .select("date")
-    .eq("date", date)
-    .single();
+  const category = req.nextUrl.searchParams.get("category") ?? null;
 
-  if (!todaysPuzzle) {
-    const { data: latestPuzzle } = await serviceClient
-      .from("daily_puzzles")
-      .select("date")
-      .order("date", { ascending: false })
-      .limit(1)
-      .single();
-    if (latestPuzzle) date = latestPuzzle.date;
+  // Resolve active puzzle date for the given category (null = main daily)
+  const date = await resolveActivePuzzleDate(serviceClient, category);
+  if (!date) {
+    return NextResponse.json({ error: "No puzzle available." }, { status: 404 });
   }
 
-  const { data: result } = await serviceClient
+  const resultQuery = serviceClient
     .from("user_results")
     .select("*")
     .eq("user_id", user.id)
-    .eq("puzzle_date", date)
-    .single();
+    .eq("puzzle_date", date);
+
+  const { data: result } = await (category
+    ? resultQuery.eq("category", category)
+    : resultQuery.is("category", null)
+  ).single();
 
   if (!result) {
     return NextResponse.json({ error: "No result found for today." }, { status: 404 });
@@ -57,6 +51,7 @@ export async function GET(req: NextRequest) {
 
   const response: SessionResult = {
     date,
+    category,
     guesses: scoredGuesses,
     totalScore: result.total_score,
     maxScore: MAX_SCORE_PER_EVENT * 5,

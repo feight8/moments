@@ -4,28 +4,37 @@ import { upsertPlusRecord } from "@/lib/plus";
 
 export const dynamic = "force-dynamic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-03-25.dahlia",
-});
-
 // ---------------------------------------------------------------------------
 // Stripe sends webhooks as raw bytes — Next.js must NOT parse the body.
 // ---------------------------------------------------------------------------
 export async function POST(req: NextRequest) {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: "Stripe not configured." }, { status: 500 });
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2026-03-25.dahlia",
+  });
+
   const rawBody = await req.text();
   const sig = req.headers.get("stripe-signature") ?? "";
+
+  console.log("[stripe webhook] received, sig present:", !!sig, "body length:", rawBody.length);
 
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(
       rawBody,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
+    console.error("[stripe webhook] signature verification failed:", msg);
     return NextResponse.json({ error: `Webhook verification failed: ${msg}` }, { status: 400 });
   }
+
+  console.log("[stripe webhook] verified event:", event.type, event.id);
 
   try {
     switch (event.type) {
@@ -37,7 +46,14 @@ export async function POST(req: NextRequest) {
         const userId = session.metadata?.user_id;
         const plan = session.metadata?.plan as "monthly" | "annual" | undefined;
 
-        if (!userId || !plan) break;
+        if (!userId || !plan) {
+          console.error("[stripe webhook] checkout.session.completed: missing metadata", {
+            sessionId: session.id,
+            userId,
+            plan,
+          });
+          break;
+        }
 
         // Both monthly and annual are subscriptions — provision now.
         // The subscription.updated event will keep period_end up to date.
@@ -48,6 +64,7 @@ export async function POST(req: NextRequest) {
           stripeCustomerId: session.customer as string,
           stripeSubscriptionId: session.subscription as string,
         });
+        console.log("[stripe webhook] provisioned Plus for user:", userId, "plan:", plan);
         break;
       }
 

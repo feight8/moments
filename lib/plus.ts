@@ -11,13 +11,32 @@ export interface PlusStatus {
 }
 
 /**
+ * Returns true if the user ID is in the PLUS_ADMIN_USER_IDS env var.
+ * Used to gate admin-only features like previewing future puzzles and categories.
+ */
+export function isAdminUser(userId: string): boolean {
+  return (process.env.PLUS_ADMIN_USER_IDS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .includes(userId);
+}
+
+/**
+ * Returns true when category puzzles are open to all users.
+ * Set CATEGORIES_ENABLED=true to flip from admin-only to public.
+ */
+export function isCategoriesEnabled(): boolean {
+  return process.env.CATEGORIES_ENABLED === "true";
+}
+
+/**
  * Check whether a user has an active Circa+ subscription.
  * Returns false for anonymous users and expired subscriptions.
  */
 export async function getUserPlusStatus(userId: string): Promise<PlusStatus> {
   // Admin bypass — set PLUS_ADMIN_USER_IDS to a comma-separated list of Supabase UUIDs
-  const adminIds = (process.env.PLUS_ADMIN_USER_IDS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-  if (adminIds.includes(userId)) {
+  if (isAdminUser(userId)) {
     return { isPlus: true, plan: "annual", currentPeriodEnd: null };
   }
 
@@ -41,8 +60,13 @@ export async function getUserPlusStatus(userId: string): Promise<PlusStatus> {
     return { isPlus: false, plan, currentPeriodEnd: current_period_end };
   }
 
-  // Annual/monthly: validate period hasn't expired
-  if (current_period_end && new Date(current_period_end) > new Date()) {
+  // If period_end hasn't arrived yet (race between checkout.session.completed
+  // and customer.subscription.updated webhook), trust the "active" status.
+  if (!current_period_end) {
+    return { isPlus: true, plan, currentPeriodEnd: null };
+  }
+
+  if (new Date(current_period_end) > new Date()) {
     return { isPlus: true, plan, currentPeriodEnd: current_period_end };
   }
 
@@ -62,7 +86,7 @@ export async function upsertPlusRecord(params: {
   currentPeriodEnd?: Date | null;
 }) {
   const client = createServiceClient();
-  await client.from("user_plus").upsert({
+  const { error } = await client.from("user_plus").upsert({
     user_id: params.userId,
     plan: params.plan,
     status: params.status,
@@ -71,6 +95,11 @@ export async function upsertPlusRecord(params: {
     current_period_end: params.currentPeriodEnd?.toISOString() ?? null,
     updated_at: new Date().toISOString(),
   });
+
+  if (error) {
+    console.error("[upsertPlusRecord] failed for user:", params.userId, error.message, error.code);
+    throw new Error(`Failed to upsert Plus record: ${error.message}`);
+  }
 }
 
 /**
@@ -87,11 +116,11 @@ export async function consumeStreakShield(userId: string, date: string): Promise
     .eq("user_id", userId)
     .single();
 
-  // Reset shield if it's a new month
-  const currentMonthKey = data?.month_key;
-  const shieldsRemaining = currentMonthKey === monthKey
-    ? (data?.shields_remaining ?? 0)
-    : 1; // New month — reset to 1
+  // Determine remaining shields with explicit cases for clarity
+  const shieldsRemaining: number =
+    data === null                  ? 1               // No record yet — fresh Plus user
+    : data.month_key !== monthKey  ? 1               // New month — reset to 1
+    : data.shields_remaining;                        // Same month — use stored count
 
   if (shieldsRemaining <= 0) return false;
 

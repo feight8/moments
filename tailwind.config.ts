@@ -8,12 +8,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Moments brand palette
-        parchment: "#F5F0E8",
-        ink: "#1C1917",
-        "ink-muted": "#78716C",
-        gold: "#D97706",
-        "gold-light": "#FCD34D",
+        // Themed via CSS variables — auto-swap on data-theme="dark"
+        parchment: "rgb(var(--color-bg) / <alpha-value>)",
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
+        ink: "rgb(var(--color-ink) / <alpha-value>)",
+        "ink-muted": "rgb(var(--color-ink-muted) / <alpha-value>)",
+        gold: "rgb(var(--color-accent) / <alpha-value>)",
+        // Static brand colors
+        teal: "#255957",
+        cyan: "#d4f5f5",
         "dot-green": "#16A34A",
         "dot-yellow": "#CA8A04",
         "dot-orange": "#EA580C",

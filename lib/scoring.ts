@@ -1,16 +1,23 @@
 /**
- * Scoring logic for Moments.
+ * Scoring logic for Circa.
  *
  * Each event is worth up to 100 base points, plus a 10-point bonus for an
  * exact year match (110 max per event, 550 max per 5-event session).
  *
  * Score degrades along a smooth polynomial curve — no step cliffs.
- * At 1000+ years off, score is 0.
+ * The zero-score threshold scales with the event's era: ancient events
+ * are harder to pinpoint, so they get more leniency.
+ *
+ * Era leniency (max distance before scoring 0):
+ *   1900–present  → 150 years  (modern — dates are well-known)
+ *   1700–1899     → 200 years  (early modern)
+ *   1500–1699     → 275 years  (Renaissance / Age of Exploration)
+ *   1200–1499     → 375 years  (late medieval)
+ *   1000–1199     → 475 years  (early medieval — very hard)
  */
 
 const BASE_MAX = 100;
 const PERFECT_BONUS = 10;
-const MAX_DISTANCE = 150; // years; beyond this score is 0
 const EXPONENT = 2.0;
 
 export const MAX_SCORE_PER_EVENT = BASE_MAX + PERFECT_BONUS; // 110
@@ -22,6 +29,18 @@ export const YEAR_MIN = 1000;
 export const YEAR_MAX = 2025;
 
 /**
+ * Returns the max distance (years off) before a score hits 0,
+ * scaled by how ancient the event is.
+ */
+export function getEraMaxDistance(correctYear: number): number {
+  if (correctYear >= 1900) return 150;
+  if (correctYear >= 1700) return 200;
+  if (correctYear >= 1500) return 275;
+  if (correctYear >= 1200) return 375;
+  return 475;
+}
+
+/**
  * Score a single guess.
  *
  * @param guessYear   - The year the user guessed (integer, 1–2025)
@@ -30,11 +49,12 @@ export const YEAR_MAX = 2025;
  */
 export function scoreGuess(guessYear: number, correctYear: number): number {
   const distance = Math.abs(guessYear - correctYear);
+  const maxDistance = getEraMaxDistance(correctYear);
 
   if (distance === 0) return BASE_MAX + PERFECT_BONUS;
-  if (distance >= MAX_DISTANCE) return 0;
+  if (distance >= maxDistance) return 0;
 
-  const ratio = distance / MAX_DISTANCE;
+  const ratio = distance / maxDistance;
   return Math.round(BASE_MAX * Math.pow(1 - ratio, EXPONENT));
 }
 

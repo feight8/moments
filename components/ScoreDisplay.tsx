@@ -77,7 +77,7 @@ export default function ScoreDisplay({ result }: ScoreDisplayProps) {
           <div className="ml-auto text-right">
             <p className="text-xs text-ink-muted">off by</p>
             <p className="font-semibold text-ink">
-              {distance === 0 ? "—" : `${distance} yr${distance === 1 ? "" : "s"}`}
+              {distance === 0 ? "-" : `${distance} yr${distance === 1 ? "" : "s"}`}
             </p>
           </div>
         </div>

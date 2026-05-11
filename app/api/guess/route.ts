@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/supabase/auth";
-import { getUserPlusStatus } from "@/lib/plus";
-import { scoreGuess, isPerfect } from "@/lib/scoring";
-import { todayUTC } from "@/lib/dates";
+import { getUserPlusStatus, isAdminUser } from "@/lib/plus";
+import { scoreGuess, isPerfect, YEAR_MIN, YEAR_MAX } from "@/lib/scoring";
+import { todayDate } from "@/lib/dates";
 import type { GuessResult, DbEvent, DbDailyPuzzle } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +12,7 @@ interface GuessBody {
   eventId: string;
   guessYear: number;
   puzzleDate?: string; // YYYY-MM-DD; provided for archive play
+  category?: string | null;
 }
 
 export async function POST(req: NextRequest) {
@@ -29,47 +30,49 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
-  const { eventId, guessYear, puzzleDate } = body;
+  const { eventId, guessYear, puzzleDate, category = null } = body;
 
-  if (!eventId || !Number.isInteger(guessYear) || guessYear < 1000 || guessYear > 2025) {
+  if (!eventId || !Number.isInteger(guessYear) || guessYear < YEAR_MIN || guessYear > YEAR_MAX) {
     return NextResponse.json({ error: "Invalid guess." }, { status: 400 });
   }
 
-  // Archive guesses (past dates) require Plus
-  const todayStr = todayUTC();
-  if (puzzleDate && puzzleDate < todayStr) {
-    const { isPlus } = await getUserPlusStatus(user.id);
-    if (!isPlus) {
-      return NextResponse.json({ error: "Circa+ required." }, { status: 403 });
+  // Past dates require Plus; future dates require admin access.
+  const todayStr = todayDate();
+  if (puzzleDate && puzzleDate !== todayStr) {
+    if (puzzleDate > todayStr) {
+      if (!isAdminUser(user.id)) {
+        return NextResponse.json({ error: "Not found." }, { status: 404 });
+      }
+    } else {
+      const { isPlus } = await getUserPlusStatus(user.id);
+      if (!isPlus) {
+        return NextResponse.json({ error: "Circa+ required." }, { status: 403 });
+      }
     }
   }
 
-  // Resolve the active puzzle
+  // Resolve the puzzle, matching on category
   let puzzle: DbDailyPuzzle | null = null;
 
   if (puzzleDate) {
-    const { data } = await serviceClient
-      .from("daily_puzzles")
-      .select("*")
-      .eq("date", puzzleDate)
-      .single<DbDailyPuzzle>();
+    const { data } = await (category
+      ? serviceClient.from("daily_puzzles").select("*").eq("date", puzzleDate).eq("category", category)
+      : serviceClient.from("daily_puzzles").select("*").eq("date", puzzleDate).is("category", null)
+    ).single<DbDailyPuzzle>();
     puzzle = data ?? null;
   } else {
-    const { data: todaysPuzzle } = await serviceClient
-      .from("daily_puzzles")
-      .select("*")
-      .eq("date", todayStr)
-      .single<DbDailyPuzzle>();
+    const { data: todaysPuzzle } = await (category
+      ? serviceClient.from("daily_puzzles").select("*").eq("date", todayStr).eq("category", category)
+      : serviceClient.from("daily_puzzles").select("*").eq("date", todayStr).is("category", null)
+    ).single<DbDailyPuzzle>();
 
     if (todaysPuzzle) {
       puzzle = todaysPuzzle;
     } else {
-      const { data: latestPuzzle } = await serviceClient
-        .from("daily_puzzles")
-        .select("*")
-        .order("date", { ascending: false })
-        .limit(1)
-        .single<DbDailyPuzzle>();
+      const { data: latestPuzzle } = await (category
+        ? serviceClient.from("daily_puzzles").select("*").eq("category", category).order("date", { ascending: false }).limit(1)
+        : serviceClient.from("daily_puzzles").select("*").is("category", null).order("date", { ascending: false }).limit(1)
+      ).single<DbDailyPuzzle>();
       puzzle = latestPuzzle ?? null;
     }
   }
