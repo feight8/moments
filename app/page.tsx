@@ -5,6 +5,8 @@ import CircaLogo from "@/components/CircaLogo";
 import PlusBadge from "@/components/PlusBadge";
 import CategorySection from "@/components/CategorySection";
 
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   const dateLabel = formatPuzzleDate(todayDate());
 
