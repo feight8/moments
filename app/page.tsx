@@ -4,6 +4,8 @@ import NavHeader from "@/components/NavHeader";
 import CircaLogo from "@/components/CircaLogo";
 import PlusBadge from "@/components/PlusBadge";
 
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   const dateLabel = formatPuzzleDate(todayUTC());
 
