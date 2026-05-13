@@ -26,7 +26,7 @@ function ScoreDots({ score }: { score: number }) {
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="font-sans text-xs text-ink-muted">{score}</span>
+      <span className="font-recoleta text-xs text-ink-muted">{score}</span>
     </div>
   );
 }
@@ -66,8 +66,8 @@ export default function ArchivePage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-3xl font-bold text-teal">archive</h1>
-          <p className="font-sans text-sm text-ink-muted">every puzzle, playable anytime</p>
+          <h1 className="font-recoleta text-3xl font-bold text-teal">archive</h1>
+          <p className="font-recoleta text-sm text-ink-muted">every puzzle, playable anytime</p>
         </div>
 
         {/* Plus gate */}
@@ -77,7 +77,7 @@ export default function ArchivePage() {
 
         {/* Error */}
         {error && (
-          <p className="font-sans text-sm text-ink-muted text-center py-8">{error}</p>
+          <p className="font-recoleta text-sm text-ink-muted text-center py-8">{error}</p>
         )}
 
         {/* Loading */}
@@ -90,8 +90,8 @@ export default function ArchivePage() {
         {/* Empty */}
         {entries && entries.length === 0 && (
           <div className="text-center py-12">
-            <p className="font-serif text-lg text-ink">no past puzzles yet</p>
-            <p className="font-sans text-sm text-ink-muted mt-1">check back after the first puzzle goes live</p>
+            <p className="font-recoleta text-lg text-ink">no past puzzles yet</p>
+            <p className="font-recoleta text-sm text-ink-muted mt-1">check back after the first puzzle goes live</p>
           </div>
         )}
 
@@ -108,21 +108,21 @@ export default function ArchivePage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="text-center w-10">
-                      <p className="font-serif text-lg font-bold text-ink leading-tight">{display.split(" ")[1]}</p>
-                      <p className="font-sans text-[10px] text-ink-muted uppercase tracking-wide">{display.split(" ")[0]}</p>
+                      <p className="font-recoleta text-lg font-bold text-ink leading-tight">{display.split(" ")[1]}</p>
+                      <p className="font-recoleta text-[10px] text-ink-muted uppercase tracking-wide">{display.split(" ")[0]}</p>
                     </div>
                     <div>
-                      <p className="font-sans text-sm font-semibold text-ink">{sub}</p>
+                      <p className="font-recoleta text-sm font-semibold text-ink">{sub}</p>
                       {entry.played ? (
                         <ScoreDots score={entry.totalScore!} />
                       ) : (
-                        <p className="font-sans text-xs text-ink-muted">not played</p>
+                        <p className="font-recoleta text-xs text-ink-muted">not played</p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-ink-muted">
                     {entry.played && (
-                      <span className="font-sans text-xs text-ink-muted font-semibold">replay</span>
+                      <span className="font-recoleta text-xs text-ink-muted font-semibold">replay</span>
                     )}
                     <span className="text-lg group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>

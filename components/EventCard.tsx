@@ -25,11 +25,11 @@ export default function EventCard({ description, eventNumber, imageUrl }: EventC
         </div>
       )}
       <div className="p-6">
-        <p className="mb-2 text-xs font-sans font-semibold uppercase tracking-widest text-ink-muted">
+        <p className="mb-2 text-xs font-recoleta font-semibold uppercase tracking-widest text-ink-muted">
           Event {eventNumber}
         </p>
         <p className="font-serif text-lg leading-relaxed text-ink">{description}</p>
-        <p className="mt-4 text-xs font-sans text-ink-muted italic">when did this happen?</p>
+        <p className="mt-4 text-xs font-recoleta text-ink-muted italic">when did this happen?</p>
       </div>
     </div>
   );

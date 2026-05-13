@@ -20,15 +20,15 @@ export default function HomePage() {
           <div className="flex justify-center">
             <CircaLogo className="h-[140px] w-auto" />
           </div>
-          <p className="font-sans text-ink-muted">{dateLabel}</p>
+          <p className="font-recoleta text-ink-muted">{dateLabel}</p>
         </div>
 
         {/* Description */}
         <div className="rounded-2xl bg-cyan p-6 text-left space-y-3">
-          <p className="font-serif text-lg text-ink leading-relaxed">
+          <p className="font-recoleta text-lg text-ink leading-relaxed">
             five moments in history. when did they happen?
           </p>
-          <ul className="font-sans text-sm text-ink-muted space-y-1.5">
+          <ul className="font-recoleta text-sm text-ink-muted space-y-1.5">
             <li>- read the description</li>
             <li>- drag to your best guess</li>
             <li>- score up to 100 points per event</li>
@@ -39,7 +39,7 @@ export default function HomePage() {
         {/* CTA */}
         <Link
           href="/play"
-          className="inline-block w-full rounded-2xl bg-teal py-4 font-sans font-semibold text-parchment transition-colors hover:bg-teal/80 active:scale-95 text-center"
+          className="inline-block w-full rounded-2xl bg-teal py-4 font-recoleta font-semibold text-parchment transition-colors hover:bg-teal/80 active:scale-95 text-center"
         >
           play today&apos;s puzzle
         </Link>
@@ -55,8 +55,8 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <PlusBadge size="md" />
             <div>
-              <p className="font-sans text-sm font-semibold text-ink">circa+</p>
-              <p className="font-sans text-xs text-ink/70 mt-0.5">
+              <p className="font-recoleta text-sm font-semibold text-ink">circa+</p>
+              <p className="font-recoleta text-xs text-ink/70 mt-0.5">
                 archive · streak shields · stats - from $2.99/mo
               </p>
             </div>
@@ -64,7 +64,7 @@ export default function HomePage() {
           <span className="text-ink group-hover:translate-x-0.5 transition-transform">→</span>
         </Link>
 
-        <p className="text-center font-sans text-xs text-ink-muted">
+        <p className="text-center font-recoleta text-xs text-ink-muted">
           new puzzle every day
         </p>
       </div>

@@ -56,8 +56,8 @@ function JoinPageInner() {
   if (!code) {
     return (
       <div className="text-center py-12 space-y-3">
-        <p className="font-serif text-xl text-ink">no invite code provided</p>
-        <a href="/groups" className="font-sans text-sm text-ink-muted underline">go to groups</a>
+        <p className="font-recoleta text-xl text-ink">no invite code provided</p>
+        <a href="/groups" className="font-recoleta text-sm text-ink-muted underline">go to groups</a>
       </div>
     );
   }
@@ -65,9 +65,9 @@ function JoinPageInner() {
   if (notFound) {
     return (
       <div className="text-center py-12 space-y-3">
-        <p className="font-serif text-xl text-ink">invite code not found</p>
-        <p className="font-sans text-sm text-ink-muted">double-check the link and try again</p>
-        <a href="/groups" className="font-sans text-sm text-ink-muted underline">go to groups</a>
+        <p className="font-recoleta text-xl text-ink">invite code not found</p>
+        <p className="font-recoleta text-sm text-ink-muted">double-check the link and try again</p>
+        <a href="/groups" className="font-recoleta text-sm text-ink-muted underline">go to groups</a>
       </div>
     );
   }
@@ -75,10 +75,10 @@ function JoinPageInner() {
   return (
     <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-5">
       <div className="text-center space-y-2">
-        <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+        <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
           you&apos;re invited
         </p>
-        <p className="font-serif text-xl text-ink">
+        <p className="font-recoleta text-xl text-ink">
           join group{groupName ? `: ${groupName}` : ""}
         </p>
         <code className="inline-block rounded-lg bg-parchment border border-ink/10 px-3 py-1 font-mono text-sm font-bold tracking-widest text-ink uppercase">
@@ -86,12 +86,12 @@ function JoinPageInner() {
         </code>
       </div>
 
-      {error && <p className="font-sans text-sm text-red-600 text-center">{error}</p>}
+      {error && <p className="font-recoleta text-sm text-red-600 text-center">{error}</p>}
 
       {error?.includes("Circa+") && (
         <a
           href="/plus"
-          className="block w-full rounded-2xl bg-gold py-3 font-sans font-semibold text-teal text-center hover:bg-gold/80 transition-colors"
+          className="block w-full rounded-2xl bg-gold py-3 font-recoleta font-semibold text-teal text-center hover:bg-gold/80 transition-colors"
         >
           upgrade to Circa+
         </a>
@@ -100,14 +100,14 @@ function JoinPageInner() {
       <button
         onClick={handleJoin}
         disabled={joining}
-        className="w-full rounded-2xl bg-gold py-4 font-sans font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-50"
+        className="w-full rounded-2xl bg-gold py-4 font-recoleta font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-50"
       >
         {joining ? "joining…" : "join group"}
       </button>
 
       <a
         href="/groups"
-        className="block text-center font-sans text-sm text-ink-muted underline"
+        className="block text-center font-recoleta text-sm text-ink-muted underline"
       >
         go to my groups
       </a>

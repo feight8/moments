@@ -87,8 +87,8 @@ export default function GroupPage() {
   if (error) {
     return (
       <PageShell>
-        <p className="text-center font-serif text-xl text-ink py-12">{error}</p>
-        <a href="/groups" className="block text-center font-sans text-sm text-ink-muted underline">
+        <p className="text-center font-recoleta text-xl text-ink py-12">{error}</p>
+        <a href="/groups" className="block text-center font-recoleta text-sm text-ink-muted underline">
           back to groups
         </a>
       </PageShell>
@@ -112,15 +112,15 @@ export default function GroupPage() {
     <PageShell>
       {/* Group header */}
       <div className="space-y-1">
-        <h1 className="font-serif text-2xl font-bold text-teal">{group.name}</h1>
-        <p className="font-sans text-sm text-ink-muted">{dateLabel}</p>
+        <h1 className="font-recoleta text-2xl font-bold text-teal">{group.name}</h1>
+        <p className="font-recoleta text-sm text-ink-muted">{dateLabel}</p>
       </div>
 
       {/* Scoreboard */}
       <section className="rounded-2xl border border-ink/10 bg-surface/60 overflow-hidden">
         {scores && !scores.viewerHasPlayed && (
           <div className="px-5 py-3 bg-cyan/80 border-b border-teal/15">
-            <p className="font-sans text-xs text-teal font-semibold text-center">
+            <p className="font-recoleta text-xs text-teal font-semibold text-center">
               play today&apos;s puzzle to see your friends&apos; scores
             </p>
           </div>
@@ -134,24 +134,24 @@ export default function GroupPage() {
             }`}
           >
             {/* Rank */}
-            <span className="w-5 font-sans text-xs text-ink-muted tabular-nums shrink-0">
+            <span className="w-5 font-recoleta text-xs text-ink-muted tabular-nums shrink-0">
               {m.totalScore !== null ? `${i + 1}.` : "–"}
             </span>
 
             {/* Name + emoji row */}
             <div className="flex-1 min-w-0">
-              <p className="font-sans text-sm font-semibold text-ink truncate">{m.displayName}</p>
+              <p className="font-recoleta text-sm font-semibold text-ink truncate">{m.displayName}</p>
               {m.emojiRow && (
-                <p className="font-sans text-xs tracking-wide mt-0.5">{m.emojiRow}</p>
+                <p className="font-recoleta text-xs tracking-wide mt-0.5">{m.emojiRow}</p>
               )}
               {m.totalScore === null && (
-                <p className="font-sans text-xs text-ink-muted/60 mt-0.5">hasn&apos;t played yet</p>
+                <p className="font-recoleta text-xs text-ink-muted/60 mt-0.5">hasn&apos;t played yet</p>
               )}
             </div>
 
             {/* Score */}
             {m.totalScore !== null && (
-              <span className="font-serif text-lg font-bold text-ink tabular-nums shrink-0">
+              <span className="font-recoleta text-lg font-bold text-ink tabular-nums shrink-0">
                 {m.totalScore}
               </span>
             )}
@@ -159,7 +159,7 @@ export default function GroupPage() {
         ))}
 
         {(!scores || scores.members.length === 0) && (
-          <p className="px-5 py-6 text-center font-sans text-sm text-ink-muted">
+          <p className="px-5 py-6 text-center font-recoleta text-sm text-ink-muted">
             no scores yet for today
           </p>
         )}
@@ -167,16 +167,16 @@ export default function GroupPage() {
 
       {/* Members */}
       <section className="space-y-2">
-        <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+        <h2 className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
           members ({group.memberCount})
         </h2>
         <div className="rounded-2xl border border-ink/10 bg-surface/60 divide-y divide-ink/5">
           {members.map((m) => (
             <div key={m.userId} className="flex items-center justify-between px-5 py-3">
-              <span className="font-sans text-sm text-ink">{m.displayName}</span>
+              <span className="font-recoleta text-sm text-ink">{m.displayName}</span>
               <div className="flex items-center gap-2">
                 {m.isOwner && (
-                  <span className="font-sans text-xs text-gold font-semibold">owner</span>
+                  <span className="font-recoleta text-xs text-gold font-semibold">owner</span>
                 )}
                 {isOwner && !m.isOwner && (
                   <RemoveMemberButton
@@ -194,10 +194,10 @@ export default function GroupPage() {
       {/* Invite code */}
       <section className="rounded-2xl border border-ink/10 bg-surface/60 p-5 space-y-3">
         <div className="space-y-0.5">
-          <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+          <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
             invite friends
           </p>
-          <p className="font-sans text-xs text-ink-muted">
+          <p className="font-recoleta text-xs text-ink-muted">
             share this code or link — only circa+ members can join
           </p>
         </div>
@@ -220,7 +220,7 @@ export default function GroupPage() {
           <button
             onClick={handleLeave}
             disabled={leaving}
-            className="w-full rounded-2xl border border-red-200 bg-red-50 py-3 font-sans text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+            className="w-full rounded-2xl border border-red-200 bg-red-50 py-3 font-recoleta text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
           >
             {leaving ? "deleting…" : "delete group"}
           </button>
@@ -228,7 +228,7 @@ export default function GroupPage() {
           <button
             onClick={handleLeave}
             disabled={leaving}
-            className="w-full rounded-2xl border border-ink/15 bg-surface/60 py-3 font-sans text-sm text-ink-muted hover:text-ink transition-colors disabled:opacity-50"
+            className="w-full rounded-2xl border border-ink/15 bg-surface/60 py-3 font-recoleta text-sm text-ink-muted hover:text-ink transition-colors disabled:opacity-50"
           >
             {leaving ? "leaving…" : "leave group"}
           </button>
@@ -267,7 +267,7 @@ function RemoveMemberButton({
     <button
       onClick={handleRemove}
       disabled={removing}
-      className="font-sans text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+      className="font-recoleta text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
     >
       remove
     </button>

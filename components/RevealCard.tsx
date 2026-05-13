@@ -49,20 +49,20 @@ export default function RevealCard({ result, eventNumber, description }: RevealC
             <span className="text-2xl" role="img" aria-label={dot}>
               {DOT_EMOJI[dot]}
             </span>
-            <span className={`font-serif text-2xl font-bold ${dotTextClass[dot]}`}>
+            <span className={`font-recoleta text-2xl font-bold ${dotTextClass[dot]}`}>
               {result.score}
-              <span className="text-sm font-sans font-normal text-ink-muted"> / 100</span>
+              <span className="text-sm font-recoleta font-normal text-ink-muted"> / 100</span>
             </span>
           </div>
           {result.isPerfect && (
-            <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-sans font-semibold text-gold">
+            <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-recoleta font-semibold text-gold">
               perfect +10
             </span>
           )}
         </div>
 
         {/* Feedback line */}
-        <p className="mt-2 font-sans text-sm font-medium text-ink">{feedback}</p>
+        <p className="mt-2 font-recoleta text-sm font-medium text-ink">{feedback}</p>
 
         {/* Timeline reveal */}
         <div className="mt-4">
@@ -89,7 +89,7 @@ export default function RevealCard({ result, eventNumber, description }: RevealC
       {/* Additional context */}
       {result.additionalContext && (
         <div className="rounded-2xl border border-ink/10 bg-surface/60 p-5 backdrop-blur-sm">
-          <p className="mb-2 text-xs font-sans font-semibold uppercase tracking-widest text-ink-muted">
+          <p className="mb-2 text-xs font-recoleta font-semibold uppercase tracking-widest text-ink-muted">
             the story
           </p>
           <p className="font-serif text-base leading-relaxed text-ink">

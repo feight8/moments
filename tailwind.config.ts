@@ -23,6 +23,7 @@ const config: Config = {
         "dot-red": "#DC2626",
       },
       fontFamily: {
+        recoleta: ["Recoleta", "Georgia", "serif"],
         serif: ["Georgia", "Cambria", "Times New Roman", "serif"],
         sans: ["Inter", "system-ui", "sans-serif"],
       },

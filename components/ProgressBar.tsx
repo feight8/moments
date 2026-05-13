@@ -20,7 +20,7 @@ export default function ProgressBar({ current, total }: ProgressBarProps) {
           />
         ))}
       </div>
-      <span className="text-xs text-ink-muted font-sans tabular-nums">
+      <span className="text-xs text-ink-muted font-recoleta tabular-nums">
         {current} / {total}
       </span>
     </div>

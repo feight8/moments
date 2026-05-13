@@ -81,14 +81,14 @@ export default function GroupsPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-3xl font-bold text-teal">groups</h1>
-          <p className="font-sans text-sm text-ink-muted">play with friends and compare scores</p>
+          <h1 className="font-recoleta text-3xl font-bold text-teal">groups</h1>
+          <p className="font-recoleta text-sm text-ink-muted">play with friends and compare scores</p>
         </div>
 
         {locked && <PlusGate locked feature="friend groups" />}
 
         {error && (
-          <p className="font-sans text-sm text-red-600">{error}</p>
+          <p className="font-recoleta text-sm text-red-600">{error}</p>
         )}
 
         {!locked && !error && !groups && (
@@ -102,7 +102,7 @@ export default function GroupsPage() {
             {/* Your groups */}
             {groups.length > 0 ? (
               <section className="space-y-3">
-                <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+                <h2 className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
                   your groups
                 </h2>
                 <div className="space-y-2">
@@ -113,8 +113,8 @@ export default function GroupsPage() {
                       className="flex items-center justify-between rounded-2xl border border-ink/10 bg-surface/60 px-5 py-4 hover:bg-surface/80 transition-colors group"
                     >
                       <div>
-                        <p className="font-serif text-base font-bold text-ink">{g.name}</p>
-                        <p className="font-sans text-xs text-ink-muted mt-0.5">
+                        <p className="font-recoleta text-base font-bold text-ink">{g.name}</p>
+                        <p className="font-recoleta text-xs text-ink-muted mt-0.5">
                           {g.memberCount} {g.memberCount === 1 ? "member" : "members"}
                         </p>
                       </div>
@@ -125,19 +125,19 @@ export default function GroupsPage() {
               </section>
             ) : (
               <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 text-center space-y-1">
-                <p className="font-serif text-base text-ink">no groups yet</p>
-                <p className="font-sans text-sm text-ink-muted">create one below or enter a friend&apos;s invite code</p>
+                <p className="font-recoleta text-base text-ink">no groups yet</p>
+                <p className="font-recoleta text-sm text-ink-muted">create one below or enter a friend&apos;s invite code</p>
               </div>
             )}
 
             {/* Form error */}
             {formError && (
-              <p className="font-sans text-sm text-red-600 text-center">{formError}</p>
+              <p className="font-recoleta text-sm text-red-600 text-center">{formError}</p>
             )}
 
             {/* Create a group */}
             <section className="space-y-3">
-              <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+              <h2 className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
                 create a group
               </h2>
               <form onSubmit={handleCreate} className="space-y-3">
@@ -148,7 +148,7 @@ export default function GroupsPage() {
                   onChange={(e) => setNewName(e.target.value)}
                   maxLength={40}
                   required
-                  className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+                  className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
                 />
                 <button
                   type="submit"
@@ -162,7 +162,7 @@ export default function GroupsPage() {
 
             {/* Join a group */}
             <section className="space-y-3">
-              <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+              <h2 className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
                 join a group
               </h2>
               <form onSubmit={handleJoin} className="space-y-3">
@@ -173,7 +173,7 @@ export default function GroupsPage() {
                   onChange={(e) => setInviteInput(e.target.value)}
                   maxLength={8}
                   required
-                  className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors font-mono tracking-widest uppercase"
+                  className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors font-mono tracking-widest uppercase"
                 />
                 <button
                   type="submit"

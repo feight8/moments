@@ -43,10 +43,10 @@ export default function ScoreDistribution({
   return (
     <div className="space-y-3">
       <div className="flex items-baseline justify-between">
-        <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+        <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
           today&apos;s scores
         </p>
-        <p className="font-sans text-xs text-ink-muted">
+        <p className="font-recoleta text-xs text-ink-muted">
           {totalPlayers} {totalPlayers === 1 ? "player" : "players"}
         </p>
       </div>
@@ -59,7 +59,7 @@ export default function ScoreDistribution({
           return (
             <div key={bucket.label} className="flex items-center gap-3">
               <p
-                className={`font-sans text-xs w-16 flex-shrink-0 text-right tabular-nums ${
+                className={`font-recoleta text-xs w-16 flex-shrink-0 text-right tabular-nums ${
                   active ? "font-bold text-gold" : "text-ink-muted"
                 }`}
               >
@@ -74,7 +74,7 @@ export default function ScoreDistribution({
                 />
                 {bucket.count > 0 && (
                   <span
-                    className={`absolute inset-y-0 left-2 flex items-center font-sans text-xs ${
+                    className={`absolute inset-y-0 left-2 flex items-center font-recoleta text-xs ${
                       active ? "text-teal font-semibold" : "text-ink-muted"
                     }`}
                   >
@@ -83,7 +83,7 @@ export default function ScoreDistribution({
                 )}
               </div>
               {active && (
-                <span className="font-sans text-xs text-gold font-semibold flex-shrink-0">
+                <span className="font-recoleta text-xs text-gold font-semibold flex-shrink-0">
                   ← you
                 </span>
               )}
@@ -92,7 +92,7 @@ export default function ScoreDistribution({
         })}
 
         {percentile !== null && (
-          <p className="font-sans text-xs text-ink-muted text-center pt-2 border-t border-ink/8 mt-3">
+          <p className="font-recoleta text-xs text-ink-muted text-center pt-2 border-t border-ink/8 mt-3">
             you scored higher than{" "}
             <span className="font-semibold text-ink">{percentile}%</span> of players today
           </p>

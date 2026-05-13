@@ -66,10 +66,10 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-1">
-        <p className="text-xs font-sans font-semibold uppercase tracking-widest text-ink-muted">
+        <p className="text-xs font-recoleta font-semibold uppercase tracking-widest text-ink-muted">
           {dateLabel}
         </p>
-        <h2 className="font-serif text-3xl font-bold text-teal">today&apos;s results</h2>
+        <h2 className="font-recoleta text-3xl font-bold text-teal">today&apos;s results</h2>
         <div className="flex justify-center pt-1">
           <StreakBadge streak={result.streak} />
         </div>
@@ -95,15 +95,15 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
 
       {/* Total score */}
       <div className="rounded-2xl border border-ink/10 bg-surface/60 p-5 text-center backdrop-blur-sm">
-        <p className="font-sans text-xs text-ink-muted uppercase tracking-widest mb-1">
+        <p className="font-recoleta text-xs text-ink-muted uppercase tracking-widest mb-1">
           total score
         </p>
-        <p className="font-serif text-5xl font-bold text-ink">
+        <p className="font-recoleta text-5xl font-bold text-ink">
           {result.totalScore}
-          <span className="font-sans text-xl font-normal text-ink-muted"> / 500</span>
+          <span className="font-recoleta text-xl font-normal text-ink-muted"> / 500</span>
         </p>
         {bonusScore > 0 && (
-          <p className="mt-1 text-sm font-sans text-gold">
+          <p className="mt-1 text-sm font-recoleta text-gold">
             includes +{bonusScore} perfect bonus
             {result.perfectCount > 1 ? ` (${result.perfectCount} perfects)` : ""}
           </p>
@@ -119,9 +119,9 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
       </button>
 
       {/* Share preview */}
-      <div className="rounded-xl border border-ink/10 bg-surface/40 p-4 font-sans text-sm text-ink-muted">
+      <div className="rounded-xl border border-ink/10 bg-surface/40 p-4 font-recoleta text-sm text-ink-muted">
         <p className="text-xs uppercase tracking-widest mb-2 text-ink-muted/60">preview</p>
-        <pre className="whitespace-pre-wrap font-sans text-sm text-ink">{shareText}</pre>
+        <pre className="whitespace-pre-wrap font-recoleta text-sm text-ink">{shareText}</pre>
       </div>
 
       {/* Score distribution chart */}
@@ -136,7 +136,7 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
       {/* Groups */}
       {groups !== null && groups !== undefined && (
         <section className="space-y-3">
-          <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+          <h2 className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
             your groups
           </h2>
           {groups.length > 0 ? (
@@ -148,8 +148,8 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
                   className="flex items-center justify-between rounded-2xl border border-ink/10 bg-surface/60 px-5 py-4 hover:bg-surface/80 transition-colors group"
                 >
                   <div>
-                    <p className="font-serif text-base font-bold text-ink">{g.name}</p>
-                    <p className="font-sans text-xs text-ink-muted mt-0.5">
+                    <p className="font-recoleta text-base font-bold text-ink">{g.name}</p>
+                    <p className="font-recoleta text-xs text-ink-muted mt-0.5">
                       {g.memberCount} {g.memberCount === 1 ? "member" : "members"}
                     </p>
                   </div>
@@ -159,8 +159,8 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
             </div>
           ) : (
             <div className="rounded-2xl border border-ink/10 bg-surface/60 p-5 text-center space-y-2">
-              <p className="font-sans text-sm text-ink-muted">play with friends and compare scores</p>
-              <a href="/groups" className="font-sans text-sm font-semibold text-gold hover:text-gold/80 transition-colors">
+              <p className="font-recoleta text-sm text-ink-muted">play with friends and compare scores</p>
+              <a href="/groups" className="font-recoleta text-sm font-semibold text-gold hover:text-gold/80 transition-colors">
                 create a group →
               </a>
             </div>

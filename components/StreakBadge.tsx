@@ -10,7 +10,7 @@ export default function StreakBadge({ streak }: StreakBadgeProps) {
       <span className="text-base" role="img" aria-label="fire">
         🔥
       </span>
-      <span className="font-sans text-sm font-semibold text-gold">
+      <span className="font-recoleta text-sm font-semibold text-gold">
         {streak} day{streak === 1 ? "" : "s"}
       </span>
     </div>
