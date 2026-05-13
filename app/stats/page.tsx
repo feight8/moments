@@ -27,9 +27,9 @@ const TrophyIcon = () => (
 function StatTile({ label, value, sub, icon }: { label: string; value: string | number; sub?: string; icon?: ReactNode }) {
   return (
     <div className="rounded-2xl border border-ink/10 bg-surface/60 p-5 text-center backdrop-blur-sm">
-      <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1">{label}</p>
-      <p className="font-serif text-3xl font-bold text-ink">{icon}{value}</p>
-      {sub && <p className="font-sans text-xs text-ink-muted mt-0.5">{sub}</p>}
+      <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1">{label}</p>
+      <p className="font-recoleta text-3xl font-bold text-ink">{icon}{value}</p>
+      {sub && <p className="font-recoleta text-xs text-ink-muted mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -44,7 +44,7 @@ function ScoreHistory({ scores }: { scores: { date: string; score: number }[] })
 
   return (
     <div>
-      <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-3">
+      <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted mb-3">
         Recent scores
       </p>
       <div className="rounded-2xl border border-ink/10 bg-surface/60 px-4 pt-4 pb-3 backdrop-blur-sm">
@@ -61,7 +61,7 @@ function ScoreHistory({ scores }: { scores: { date: string; score: number }[] })
             );
           })}
         </div>
-        <div className="flex justify-between mt-1 font-sans text-[10px] text-ink-muted">
+        <div className="flex justify-between mt-1 font-recoleta text-[10px] text-ink-muted">
           <span>{scores[0] ? formatPuzzleDate(scores[0].date) : ""}</span>
           <span>{scores[scores.length - 1] ? formatPuzzleDate(scores[scores.length - 1].date) : ""}</span>
         </div>
@@ -80,7 +80,7 @@ function EraBreakdown({ eras }: { eras: EraAccuracy[] }) {
 
   return (
     <div>
-      <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-3">
+      <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted mb-3">
         Accuracy by era
       </p>
       <div className="rounded-2xl border border-ink/10 bg-surface/60 divide-y divide-ink/8 backdrop-blur-sm overflow-hidden">
@@ -88,7 +88,7 @@ function EraBreakdown({ eras }: { eras: EraAccuracy[] }) {
           const pct = Math.round((avgScore / maxAvg) * 100);
           return (
             <div key={era} className="flex items-center gap-3 px-5 py-3">
-              <p className="font-sans text-sm font-semibold text-ink w-16 flex-shrink-0">{era}</p>
+              <p className="font-recoleta text-sm font-semibold text-ink w-16 flex-shrink-0">{era}</p>
               <div className="flex-1 h-2 overflow-hidden rounded-full bg-ink/10">
                 <div
                   className="h-full rounded-full bg-gold/70"
@@ -96,8 +96,8 @@ function EraBreakdown({ eras }: { eras: EraAccuracy[] }) {
                 />
               </div>
               <div className="text-right flex-shrink-0 w-24">
-                <span className="font-sans text-sm font-semibold text-ink">{avgScore} avg</span>
-                <span className="font-sans text-xs text-ink-muted ml-1">({count})</span>
+                <span className="font-recoleta text-sm font-semibold text-ink">{avgScore} avg</span>
+                <span className="font-recoleta text-xs text-ink-muted ml-1">({count})</span>
               </div>
             </div>
           );
@@ -140,12 +140,12 @@ export default function StatsPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-3xl font-bold text-teal">stats</h1>
-          <p className="font-sans text-sm text-ink-muted">all-time performance</p>
+          <h1 className="font-recoleta text-3xl font-bold text-teal">stats</h1>
+          <p className="font-recoleta text-sm text-ink-muted">all-time performance</p>
         </div>
 
         {locked && <PlusGate locked feature="stats" />}
-        {error && <p className="font-sans text-sm text-ink-muted text-center py-8">{error}</p>}
+        {error && <p className="font-recoleta text-sm text-ink-muted text-center py-8">{error}</p>}
 
         {!locked && !error && !stats && (
           <div className="flex justify-center py-16">
@@ -155,8 +155,8 @@ export default function StatsPage() {
 
         {stats && stats.totalGames === 0 && (
           <div className="text-center py-12 space-y-2">
-            <p className="font-serif text-xl text-ink">no games yet</p>
-            <p className="font-sans text-sm text-ink-muted">play today's puzzle to start building your stats</p>
+            <p className="font-recoleta text-xl text-ink">no games yet</p>
+            <p className="font-recoleta text-sm text-ink-muted">play today's puzzle to start building your stats</p>
           </div>
         )}
 

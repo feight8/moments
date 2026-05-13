@@ -12,7 +12,7 @@ export default function NavHeader({ backHref }: NavHeaderProps) {
       {backHref ? (
         <Link
           href={backHref}
-          className="flex items-center gap-1.5 font-sans text-sm text-ink-muted hover:text-ink transition-colors"
+          className="flex items-center gap-1.5 font-recoleta text-sm text-ink-muted hover:text-ink transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

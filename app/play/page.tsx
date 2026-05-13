@@ -488,24 +488,24 @@ function PlayPageInner() {
     return (
       <PageShell archiveDate={archiveDate} category={category}>
         <div className="text-center space-y-4 py-12">
-          <p className="font-serif text-xl text-ink">{state.error}</p>
+          <p className="font-recoleta text-xl text-ink">{state.error}</p>
           <div className="space-y-2">
             {canRetry && (
               <button
                 onClick={handleRetrySubmit}
-                className="block w-full rounded-2xl bg-gold py-3 font-sans font-semibold text-teal hover:bg-gold/80 active:scale-95 transition-colors"
+                className="block w-full rounded-2xl bg-gold py-3 font-recoleta font-semibold text-teal hover:bg-gold/80 active:scale-95 transition-colors"
               >
                 Try again
               </button>
             )}
             {state.error?.includes("Circa+") && (
-              <a href="/plus" className="block font-sans text-sm text-gold underline">
+              <a href="/plus" className="block font-recoleta text-sm text-gold underline">
                 Upgrade to Plus
               </a>
             )}
             <a
               href={archiveDate ? "/archive" : "/"}
-              className="block font-sans text-sm text-ink-muted underline"
+              className="block font-recoleta text-sm text-ink-muted underline"
             >
               {archiveDate ? "Back to archive" : "Back to home"}
             </a>
@@ -544,7 +544,7 @@ function PlayPageInner() {
             lock in {state.sliderYear}
           </button>
           {state.guessError && (
-            <p className="text-center font-sans text-sm text-red-600">{state.guessError}</p>
+            <p className="text-center font-recoleta text-sm text-red-600">{state.guessError}</p>
           )}
         </>
       )}
@@ -580,7 +580,7 @@ function PageShell({ children, archiveDate, category }: { children: React.ReactN
       <div className="mx-auto max-w-lg space-y-6">
         <NavHeader backHref={archiveDate ? "/archive" : "/"} />
         {sublabel && (
-          <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted text-center">
+          <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted text-center">
             {sublabel}
           </p>
         )}
@@ -592,7 +592,7 @@ function PageShell({ children, archiveDate, category }: { children: React.ReactN
 
 function LoadingSpinner({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 py-16 font-sans text-ink-muted">
+    <div className="flex flex-col items-center gap-3 py-16 font-recoleta text-ink-muted">
       <div className="h-6 w-6 animate-spin rounded-full border-2 border-ink/20 border-t-gold" />
       <p className="text-sm">{message}</p>
     </div>

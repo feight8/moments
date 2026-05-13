@@ -90,12 +90,12 @@ function SuccessInner() {
   if (status === "error") {
     return (
       <div className="text-center space-y-4 py-12">
-        <p className="font-serif text-xl text-ink">something went wrong</p>
-        <p className="font-sans text-sm text-ink-muted">
+        <p className="font-recoleta text-xl text-ink">something went wrong</p>
+        <p className="font-recoleta text-sm text-ink-muted">
           Your payment was received but we couldn&apos;t activate Plus automatically.
           Please contact support with your email address.
         </p>
-        <Link href="/" className="block font-sans text-sm text-ink-muted underline">
+        <Link href="/" className="block font-recoleta text-sm text-ink-muted underline">
           back to home
         </Link>
       </div>
@@ -115,8 +115,8 @@ function SuccessInner() {
           <div className="flex justify-center">
             <PlusBadge size="md" />
           </div>
-          <h1 className="font-serif text-3xl font-bold text-teal">payment successful!</h1>
-          <p className="font-sans text-sm text-ink-muted">
+          <h1 className="font-recoleta text-3xl font-bold text-teal">payment successful!</h1>
+          <p className="font-recoleta text-sm text-ink-muted">
             Sign in to activate your Plus features.
           </p>
         </div>
@@ -128,7 +128,7 @@ function SuccessInner() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+              className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
             />
             <input
               type="password"
@@ -136,15 +136,15 @@ function SuccessInner() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+              className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
             />
             {signInError && (
-              <p className="font-sans text-xs text-red-600">{signInError}</p>
+              <p className="font-recoleta text-xs text-red-600">{signInError}</p>
             )}
             <button
               type="submit"
               disabled={signingIn}
-              className="w-full rounded-2xl bg-gold py-3.5 font-sans font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
+              className="w-full rounded-2xl bg-gold py-3.5 font-recoleta font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
             >
               {signingIn ? "signing in…" : "sign in to activate Plus"}
             </button>
@@ -166,8 +166,8 @@ function SuccessInner() {
         <div className="flex justify-center">
           <PlusBadge size="md" />
         </div>
-        <h1 className="font-serif text-3xl font-bold text-teal">welcome to plus</h1>
-        <p className="font-sans text-sm text-ink-muted leading-relaxed max-w-xs mx-auto">
+        <h1 className="font-recoleta text-3xl font-bold text-teal">welcome to plus</h1>
+        <p className="font-recoleta text-sm text-ink-muted leading-relaxed max-w-xs mx-auto">
           Your subscription is active. The full archive, stats, streak shields, and groups are now unlocked.
         </p>
       </div>
@@ -175,13 +175,13 @@ function SuccessInner() {
       <div className="space-y-3">
         <Link
           href="/archive"
-          className="block w-full rounded-2xl bg-gold py-4 font-sans font-semibold text-teal transition-colors hover:bg-gold/80 text-center"
+          className="block w-full rounded-2xl bg-gold py-4 font-recoleta font-semibold text-teal transition-colors hover:bg-gold/80 text-center"
         >
           Browse the Archive →
         </Link>
         <Link
           href="/"
-          className="block w-full rounded-2xl border border-ink/10 bg-surface/60 py-4 font-sans font-semibold text-ink transition-colors hover:bg-ink/5 text-center"
+          className="block w-full rounded-2xl border border-ink/10 bg-surface/60 py-4 font-recoleta font-semibold text-ink transition-colors hover:bg-ink/5 text-center"
         >
           Play Today&apos;s Puzzle
         </Link>

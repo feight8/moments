@@ -31,8 +31,8 @@ export default function LinkAccountPrompt() {
     return (
       <div className="rounded-2xl border border-dot-green/30 bg-dot-green/5 p-6 text-center space-y-2">
         <p className="text-2xl">✓</p>
-        <p className="font-serif text-lg font-bold text-ink">check your email</p>
-        <p className="font-sans text-sm text-ink-muted">
+        <p className="font-recoleta text-lg font-bold text-ink">check your email</p>
+        <p className="font-recoleta text-sm text-ink-muted">
           We sent a confirmation link to your address. Click it to finish linking
           your account - then your streak is preserved across devices and browsers.
         </p>
@@ -43,8 +43,8 @@ export default function LinkAccountPrompt() {
   return (
     <div className="rounded-2xl border border-teal/20 bg-cyan/60 p-6 space-y-4">
       <div className="space-y-1">
-        <p className="font-serif text-lg font-bold text-ink">protect your streak</p>
-        <p className="font-sans text-sm text-ink-muted leading-relaxed">
+        <p className="font-recoleta text-lg font-bold text-ink">protect your streak</p>
+        <p className="font-recoleta text-sm text-ink-muted leading-relaxed">
           As a Plus subscriber, you can link an email to your account so your
           streak is preserved even if you clear your browser or switch devices.
         </p>
@@ -57,7 +57,7 @@ export default function LinkAccountPrompt() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
         />
         <input
           type="password"
@@ -66,17 +66,17 @@ export default function LinkAccountPrompt() {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={8}
-          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
         />
 
         {status === "error" && (
-          <p className="font-sans text-xs text-red-600">{errorMsg}</p>
+          <p className="font-recoleta text-xs text-red-600">{errorMsg}</p>
         )}
 
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full rounded-xl bg-gold py-3 font-sans font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
+          className="w-full rounded-xl bg-gold py-3 font-recoleta font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
         >
           {status === "loading" ? "saving…" : "save my account"}
         </button>

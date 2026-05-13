@@ -157,16 +157,16 @@ export default function YearSlider({ value, onChange, disabled = false }: YearSl
           onBlur={commitYearInput}
           onKeyDown={handleYearInputKeyDown}
           aria-label="Year guess - type or use the slider"
-          className={`w-32 bg-transparent text-center font-serif text-5xl font-bold tabular-nums outline-none transition-colors duration-75 disabled:cursor-not-allowed
+          className={`w-32 bg-transparent text-center font-recoleta text-5xl font-bold tabular-nums outline-none transition-colors duration-75 disabled:cursor-not-allowed
             ${isDragging || isEditing ? "text-gold" : "text-ink"}
             ${!disabled ? "cursor-text border-b-2 border-transparent focus:border-gold" : ""}
           `}
         />
-        <span className="text-sm font-sans text-ink-muted">CE</span>
+        <span className="text-sm font-recoleta text-ink-muted">CE</span>
       </div>
 
       {!isEditing && !disabled && (
-        <p className="text-center text-xs font-sans text-ink-muted/60 -mt-3">
+        <p className="text-center text-xs font-recoleta text-ink-muted/60 -mt-3">
           tap year to type
         </p>
       )}

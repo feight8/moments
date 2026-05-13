@@ -93,7 +93,7 @@ export default function TimelineReveal({ guessYear, correctYear }: TimelineRevea
       </div>
 
       {/* ── Range labels ───────────────────────────────────────────── */}
-      <div className="flex justify-between font-sans text-[10px] text-ink/25 px-0.5">
+      <div className="flex justify-between font-recoleta text-[10px] text-ink/25 px-0.5">
         <span>{YEAR_MIN}</span>
         <span>{YEAR_MAX}</span>
       </div>
@@ -105,24 +105,24 @@ export default function TimelineReveal({ guessYear, correctYear }: TimelineRevea
       >
         {isPerfect ? (
           <div className="flex justify-center">
-            <span className="rounded-full bg-gold/15 px-4 py-1.5 font-sans text-sm font-semibold text-gold">
+            <span className="rounded-full bg-gold/15 px-4 py-1.5 font-recoleta text-sm font-semibold text-gold">
               {correctYear} - perfect!
             </span>
           </div>
         ) : (
           <div className="flex items-center justify-between rounded-xl bg-ink/4 px-4 py-3">
             <div className="text-center">
-              <p className="font-sans text-[10px] font-semibold uppercase tracking-widest text-ink-muted">your guess</p>
-              <p className="font-serif text-xl font-bold text-ink mt-0.5">{guessYear}</p>
+              <p className="font-recoleta text-[10px] font-semibold uppercase tracking-widest text-ink-muted">your guess</p>
+              <p className="font-recoleta text-xl font-bold text-ink mt-0.5">{guessYear}</p>
             </div>
             <div className="text-center px-2">
-              <p className="font-sans text-xs text-ink-muted">
+              <p className="font-recoleta text-xs text-ink-muted">
                 {distance === 1 ? "1 year off" : `${distance} years off`}
               </p>
             </div>
             <div className="text-center">
-              <p className="font-sans text-[10px] font-semibold uppercase tracking-widest text-gold">correct</p>
-              <p className="font-serif text-xl font-bold text-gold mt-0.5">{correctYear}</p>
+              <p className="font-recoleta text-[10px] font-semibold uppercase tracking-widest text-gold">correct</p>
+              <p className="font-recoleta text-xl font-bold text-gold mt-0.5">{correctYear}</p>
             </div>
           </div>
         )}

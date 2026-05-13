@@ -21,10 +21,10 @@ export default function PlusGate({ children, locked, feature }: PlusGateProps) {
         <PlusBadge size="md" />
       </div>
       <div className="space-y-1.5">
-        <p className="font-serif text-xl font-bold text-ink">
+        <p className="font-recoleta text-xl font-bold text-ink">
           {feature ?? "This feature"} is plus-exclusive
         </p>
-        <p className="font-sans text-sm text-ink-muted leading-relaxed">
+        <p className="font-recoleta text-sm text-ink-muted leading-relaxed">
           unlock the full archive, streak shields, stats, and more with circa+ for $2.99/month or $14.99/year.
         </p>
       </div>

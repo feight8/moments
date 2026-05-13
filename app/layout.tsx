@@ -16,11 +16,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-parchment text-ink antialiased">
+      <body className="bg-parchment font-recoleta text-ink antialiased">
           <SettingsProvider />
           {children}
           <footer className="py-6 text-center">
-            <p className="font-sans text-xs text-ink-muted/50">Powered by Charbella Games LLC</p>
+            <p className="font-recoleta text-xs text-ink-muted/50">Powered by Charbella Games LLC</p>
           </footer>
         </body>
     </html>

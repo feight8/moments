@@ -36,8 +36,8 @@ function LoginForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-serif text-2xl font-bold text-teal">sign in</h1>
-        <p className="font-sans text-sm text-ink-muted">
+        <h1 className="font-recoleta text-2xl font-bold text-teal">sign in</h1>
+        <p className="font-recoleta text-sm text-ink-muted">
           Access your Circa+ features and saved progress.
         </p>
       </div>
@@ -50,7 +50,7 @@ function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
         />
         <input
           type="password"
@@ -59,24 +59,24 @@ function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
-          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+          className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
         />
 
         {status === "error" && (
-          <p className="font-sans text-xs text-red-600">{error}</p>
+          <p className="font-recoleta text-xs text-red-600">{error}</p>
         )}
 
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full rounded-2xl bg-gold py-3.5 font-sans font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
+          className="w-full rounded-2xl bg-gold py-3.5 font-recoleta font-semibold text-teal transition-colors hover:bg-gold/80 active:scale-95 disabled:opacity-60"
         >
           {status === "loading" ? "signing in…" : "sign in"}
         </button>
       </form>
 
       <div className="text-center space-y-2">
-        <p className="font-sans text-xs text-ink-muted">
+        <p className="font-recoleta text-xs text-ink-muted">
           Don&apos;t have Plus yet?{" "}
           <Link href="/plus" className="underline hover:text-gold transition-colors">
             Learn more

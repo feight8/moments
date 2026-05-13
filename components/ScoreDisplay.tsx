@@ -51,20 +51,20 @@ export default function ScoreDisplay({ result }: ScoreDisplayProps) {
             <span className="text-2xl" role="img" aria-label={dot}>
               {DOT_EMOJI[dot]}
             </span>
-            <span className={`font-serif text-2xl font-bold ${dotColorClass[dot]}`}>
+            <span className={`font-recoleta text-2xl font-bold ${dotColorClass[dot]}`}>
               {result.score}
-              <span className="text-sm font-sans font-normal text-ink-muted"> / 100</span>
+              <span className="text-sm font-recoleta font-normal text-ink-muted"> / 100</span>
             </span>
           </div>
           {result.isPerfect && (
-            <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-sans font-semibold text-gold">
+            <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-recoleta font-semibold text-gold">
               perfect +10
             </span>
           )}
         </div>
 
         {/* Guess vs correct */}
-        <div className="mt-3 flex items-center gap-4 font-sans text-sm">
+        <div className="mt-3 flex items-center gap-4 font-recoleta text-sm">
           <div>
             <p className="text-xs text-ink-muted">your guess</p>
             <p className="font-semibold text-ink">{result.guessYear}</p>
@@ -83,13 +83,13 @@ export default function ScoreDisplay({ result }: ScoreDisplayProps) {
         </div>
 
         {/* Description */}
-        <p className="mt-3 text-xs font-sans text-ink-muted italic line-clamp-2">
+        <p className="mt-3 text-xs font-recoleta text-ink-muted italic line-clamp-2">
           {result.description}
         </p>
 
         {/* Additional context */}
         {result.additionalContext && (
-          <p className="mt-3 font-sans text-sm leading-relaxed text-ink/80 border-t border-ink/10 pt-3">
+          <p className="mt-3 font-recoleta text-sm leading-relaxed text-ink/80 border-t border-ink/10 pt-3">
             {result.additionalContext}
           </p>
         )}

@@ -76,15 +76,15 @@ function ResultsPageInner() {
 
         {error && (
           <div className="text-center py-12 space-y-3">
-            <p className="font-serif text-xl text-ink">{error}</p>
-            <a href="/" className="font-sans text-sm text-ink-muted underline">
+            <p className="font-recoleta text-xl text-ink">{error}</p>
+            <a href="/" className="font-recoleta text-sm text-ink-muted underline">
               back to home
             </a>
           </div>
         )}
 
         {!result && !error && (
-          <div className="flex flex-col items-center gap-3 py-16 font-sans text-ink-muted">
+          <div className="flex flex-col items-center gap-3 py-16 font-recoleta text-ink-muted">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-ink/20 border-t-gold" />
             <p className="text-sm">loading results…</p>
           </div>
@@ -101,7 +101,7 @@ function ResultsPageInner() {
         {showLinkPrompt && <LinkAccountPrompt />}
 
         {result && (
-          <p className="text-center font-sans text-xs text-ink-muted pb-4">
+          <p className="text-center font-recoleta text-xs text-ink-muted pb-4">
             {category ? `come back tomorrow for a new ${category} puzzle` : "come back tomorrow for a new puzzle"}
           </p>
         )}
@@ -116,7 +116,7 @@ export default function ResultsPage() {
       <main className="min-h-screen bg-parchment px-4 py-8">
         <div className="mx-auto max-w-lg space-y-6">
           <NavHeader />
-          <div className="flex flex-col items-center gap-3 py-16 font-sans text-ink-muted">
+          <div className="flex flex-col items-center gap-3 py-16 font-recoleta text-ink-muted">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-ink/20 border-t-gold" />
             <p className="text-sm">loading results…</p>
           </div>

@@ -21,14 +21,14 @@ function Toggle({ label, description, checked, onChange, badge }: ToggleProps) {
     <label className="flex cursor-pointer items-start justify-between gap-4 py-4">
       <div className="space-y-0.5">
         <div className="flex items-center gap-2">
-          <span className="font-sans text-sm font-semibold text-ink">{label}</span>
+          <span className="font-recoleta text-sm font-semibold text-ink">{label}</span>
           {badge && (
-            <span className="rounded-full bg-ink/8 px-2 py-0.5 text-xs font-sans text-ink-muted">
+            <span className="rounded-full bg-ink/8 px-2 py-0.5 text-xs font-recoleta text-ink-muted">
               {badge}
             </span>
           )}
         </div>
-        <p className="font-sans text-xs text-ink-muted leading-relaxed">{description}</p>
+        <p className="font-recoleta text-xs text-ink-muted leading-relaxed">{description}</p>
       </div>
       <button
         role="switch"
@@ -55,7 +55,7 @@ function Toggle({ label, description, checked, onChange, badge }: ToggleProps) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-3">
-      <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+      <h2 className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
         {title}
       </h2>
       {children}
@@ -77,7 +77,7 @@ function Card({ children, divided }: { children: React.ReactNode; divided?: bool
 
 function ScoreRow({ distance, score, dot }: { distance: string; score: string; dot: DigTier }) {
   return (
-    <div className="flex items-center justify-between py-2 font-sans text-sm">
+    <div className="flex items-center justify-between py-2 font-recoleta text-sm">
       <div className="flex items-center gap-2">
         <span>{DOT_EMOJI[dot]}</span>
         <span className="text-ink-muted">{distance}</span>
@@ -100,8 +100,8 @@ export default function HelpPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-3xl font-bold text-teal">help & settings</h1>
-          <p className="font-sans text-sm text-ink-muted">how to play, scoring, and preferences</p>
+          <h1 className="font-recoleta text-3xl font-bold text-teal">help & settings</h1>
+          <p className="font-recoleta text-sm text-ink-muted">how to play, scoring, and preferences</p>
         </div>
 
         {/* ------------------------------------------------------------------ */}
@@ -109,7 +109,7 @@ export default function HelpPage() {
         {/* ------------------------------------------------------------------ */}
         <Section title="How to play">
           <Card>
-            <ol className="space-y-4 font-sans text-sm text-ink">
+            <ol className="space-y-4 font-recoleta text-sm text-ink">
               <li className="flex gap-3">
                 <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-parchment">1</span>
                 <div>
@@ -147,7 +147,7 @@ export default function HelpPage() {
         {/* ------------------------------------------------------------------ */}
         <Section title="Scoring">
           <Card>
-            <p className="font-sans text-sm text-ink-muted mb-4">
+            <p className="font-recoleta text-sm text-ink-muted mb-4">
               each event is worth up to <span className="font-semibold text-ink">100 points</span>, plus a <span className="font-semibold text-gold">+10 bonus</span> for an exact year. score drops smoothly the further off you are, zeroing out at 150+ years.
             </p>
             <div className="divide-y divide-ink/8">
@@ -160,7 +160,7 @@ export default function HelpPage() {
               <ScoreRow distance="~100 years off" score="~11 pts" dot="rock" />
               <ScoreRow distance="150+ years off" score="0 pts" dot="rock" />
             </div>
-            <p className="mt-4 font-sans text-xs text-ink-muted">
+            <p className="mt-4 font-recoleta text-xs text-ink-muted">
               max session score: <span className="font-semibold text-ink">550 pts</span> (5 perfect guesses)
             </p>
           </Card>
@@ -171,7 +171,7 @@ export default function HelpPage() {
         {/* ------------------------------------------------------------------ */}
         <Section title="Result symbols">
           <Card>
-            <div className="divide-y divide-ink/8 font-sans text-sm">
+            <div className="divide-y divide-ink/8 font-recoleta text-sm">
               {[
                 { emoji: "💎", label: "gem", desc: "exact year - perfect find!" },
                 { emoji: "🏺", label: "artifact", desc: "within ~10 years (85+ pts)" },
@@ -196,7 +196,7 @@ export default function HelpPage() {
         {/* ------------------------------------------------------------------ */}
         <Section title="Streaks">
           <Card>
-            <p className="font-sans text-sm text-ink-muted leading-relaxed">
+            <p className="font-recoleta text-sm text-ink-muted leading-relaxed">
               complete the daily puzzle to start a streak. come back the next day to keep it going - missing a day resets your streak to zero. your longest ever streak is saved separately. streaks are shown on your results card and in the share text.
             </p>
           </Card>
@@ -227,7 +227,7 @@ export default function HelpPage() {
         {/* ------------------------------------------------------------------ */}
         <Section title="About">
           <Card>
-            <div className="font-sans text-sm text-ink-muted space-y-2 leading-relaxed">
+            <div className="font-recoleta text-sm text-ink-muted space-y-2 leading-relaxed">
               <p>circa is a daily history guessing game. a new puzzle drops every day, same events for everyone, same time to play.</p>
             </div>
           </Card>

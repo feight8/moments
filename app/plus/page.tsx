@@ -114,19 +114,19 @@ function PricingCard({ plan, price, period, badge, onSelect, loading }: PricingC
     >
       {badge && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="rounded-full bg-gold px-3 py-1 text-xs font-sans font-bold text-teal shadow">
+          <span className="rounded-full bg-gold px-3 py-1 text-xs font-recoleta font-bold text-teal shadow">
             {badge}
           </span>
         </div>
       )}
 
       <div>
-        <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted">
+        <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
           {isAnnual ? "Annual" : "Monthly"}
         </p>
         <div className="flex items-end gap-1 mt-1">
-          <span className="font-serif text-4xl font-bold text-ink">{price}</span>
-          <span className="font-sans text-sm text-ink-muted pb-1">{period}</span>
+          <span className="font-recoleta text-4xl font-bold text-ink">{price}</span>
+          <span className="font-recoleta text-sm text-ink-muted pb-1">{period}</span>
         </div>
       </div>
 
@@ -139,12 +139,12 @@ function PricingCard({ plan, price, period, badge, onSelect, loading }: PricingC
       </button>
 
       {isAnnual && (
-        <p className="text-center font-sans text-xs text-ink-muted">
+        <p className="text-center font-recoleta text-xs text-ink-muted">
           best value · $1.25/month · billed yearly
         </p>
       )}
       {!isAnnual && (
-        <p className="text-center font-sans text-xs text-ink-muted">
+        <p className="text-center font-recoleta text-xs text-ink-muted">
           cancel anytime · billed monthly
         </p>
       )}
@@ -221,8 +221,8 @@ export default function PlusPage() {
           <div className="flex justify-center">
             <PlusBadge size="md" />
           </div>
-          <h1 className="font-serif text-4xl font-bold text-teal">circa+</h1>
-          <p className="font-sans text-sm text-ink-muted leading-relaxed max-w-sm mx-auto">
+          <h1 className="font-recoleta text-4xl font-bold text-teal">circa+</h1>
+          <p className="font-recoleta text-sm text-ink-muted leading-relaxed max-w-sm mx-auto">
             for history lovers who want to go deeper. unlock the archive, protect your streak, and track every guess.
           </p>
         </div>
@@ -233,8 +233,8 @@ export default function PlusPage() {
             <div key={title} className="flex items-start gap-4 px-5 py-4">
               <span className="w-5 h-5 mt-0.5 flex-shrink-0 text-teal">{icon}</span>
               <div>
-                <p className="font-sans text-sm font-semibold text-ink">{title}</p>
-                <p className="font-sans text-xs text-ink-muted mt-0.5 leading-relaxed">{desc}</p>
+                <p className="font-recoleta text-sm font-semibold text-ink">{title}</p>
+                <p className="font-recoleta text-xs text-ink-muted mt-0.5 leading-relaxed">{desc}</p>
               </div>
             </div>
           ))}
@@ -244,13 +244,13 @@ export default function PlusPage() {
         {isAnonymous && (
           <div className="space-y-3">
             <div className="space-y-1">
-              <p className="font-sans text-sm font-semibold text-ink">create your account</p>
-              <p className="font-sans text-xs text-ink-muted">
+              <p className="font-recoleta text-sm font-semibold text-ink">create your account</p>
+              <p className="font-recoleta text-xs text-ink-muted">
                 your email and password keep your streak and scores safe across devices.
               </p>
             </div>
             <div className="space-y-1">
-              <label htmlFor="plus-email" className="font-sans text-xs font-semibold text-ink-muted">email</label>
+              <label htmlFor="plus-email" className="font-recoleta text-xs font-semibold text-ink-muted">email</label>
               <input
                 id="plus-email"
                 type="email"
@@ -258,11 +258,11 @@ export default function PlusPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
-                className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+                className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="plus-password" className="font-sans text-xs font-semibold text-ink-muted">password</label>
+              <label htmlFor="plus-password" className="font-recoleta text-xs font-semibold text-ink-muted">password</label>
               <input
                 id="plus-password"
                 type="password"
@@ -271,7 +271,7 @@ export default function PlusPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+                className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
               />
             </div>
           </div>
@@ -297,15 +297,15 @@ export default function PlusPage() {
         </div>
 
         {error && (
-          <p className="text-center font-sans text-sm text-red-600">{error}</p>
+          <p className="text-center font-recoleta text-sm text-red-600">{error}</p>
         )}
 
         {/* Trust signals */}
         <div className="text-center space-y-2 pb-4">
-          <p className="font-sans text-xs text-ink-muted">
+          <p className="font-recoleta text-xs text-ink-muted">
             payments processed securely by Stripe. cancel anytime.
           </p>
-          <p className="font-sans text-xs text-ink-muted">
+          <p className="font-recoleta text-xs text-ink-muted">
             already have plus?{" "}
             <Link href="/login?next=/" className="underline hover:text-gold transition-colors">
               sign in

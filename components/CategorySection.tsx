@@ -40,7 +40,7 @@ export default function CategorySection() {
 
   return (
     <section className="space-y-3">
-      <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted text-center">
+      <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted text-center">
         category puzzles
       </p>
       <div className="space-y-2">
@@ -50,7 +50,7 @@ export default function CategorySection() {
             href={`/play?category=${slug}`}
             className="flex items-center justify-between rounded-2xl border border-ink/10 bg-surface/60 px-5 py-4 hover:bg-surface/80 transition-colors group"
           >
-            <p className="font-sans text-sm font-semibold text-ink">{label}</p>
+            <p className="font-recoleta text-sm font-semibold text-ink">{label}</p>
             <span className="text-ink-muted group-hover:translate-x-0.5 transition-transform">→</span>
           </a>
         ))}

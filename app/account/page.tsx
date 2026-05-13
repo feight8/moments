@@ -184,7 +184,7 @@ export default function AccountPage() {
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
-  const inputClass = "w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-sans text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors";
+  const inputClass = "w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors";
   const btnPrimary = "btn-primary w-full py-3.5";
 
   return (
@@ -193,7 +193,7 @@ export default function AccountPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-serif text-2xl font-bold text-teal">account</h1>
+          <h1 className="font-recoleta text-2xl font-bold text-teal">account</h1>
         </div>
 
         {/* ---------------------------------------------------------------- */}
@@ -211,33 +211,33 @@ export default function AccountPage() {
         {view === "signed-out" && (
           <div className="space-y-6">
             <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
-              <p className="font-sans text-sm font-semibold text-ink">sign in</p>
+              <p className="font-recoleta text-sm font-semibold text-ink">sign in</p>
               <form onSubmit={handleSignIn} className="space-y-3">
                 <input type="email" placeholder="your@email.com" value={email}
                   onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className={inputClass} />
                 <input type="password" placeholder="password" value={password}
                   onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" className={inputClass} />
                 {message && (
-                  <p className={`font-sans text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
+                  <p className={`font-recoleta text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
                 )}
                 <button type="submit" disabled={busy} className={btnPrimary}>
                   {busy ? "signing in…" : "sign in"}
                 </button>
               </form>
               <button onClick={() => { setView("forgot"); clearMessage(); }}
-                className="w-full text-center font-sans text-xs text-ink-muted hover:text-ink underline transition-colors">
+                className="w-full text-center font-recoleta text-xs text-ink-muted hover:text-ink underline transition-colors">
                 forgot password?
               </button>
             </div>
 
             <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-3">
-              <p className="font-sans text-sm font-semibold text-ink">new to circa+?</p>
-              <p className="font-sans text-xs text-ink-muted">create a free account to save your progress, then subscribe to unlock plus features.</p>
+              <p className="font-recoleta text-sm font-semibold text-ink">new to circa+?</p>
+              <p className="font-recoleta text-xs text-ink-muted">create a free account to save your progress, then subscribe to unlock plus features.</p>
               <button onClick={() => { setView("create"); clearMessage(); }}
-                className="w-full rounded-2xl border border-ink/15 bg-teal py-3 font-sans text-sm font-semibold text-parchment hover:bg-teal/80 transition-colors">
+                className="w-full rounded-2xl border border-ink/15 bg-teal py-3 font-recoleta text-sm font-semibold text-parchment hover:bg-teal/80 transition-colors">
                 create account
               </button>
-              <Link href="/plus" className="block w-full text-center font-sans text-sm font-semibold text-gold hover:text-gold/80 transition-colors">
+              <Link href="/plus" className="block w-full text-center font-recoleta text-sm font-semibold text-gold hover:text-gold/80 transition-colors">
                 learn about circa+ →
               </Link>
             </div>
@@ -250,7 +250,7 @@ export default function AccountPage() {
         {view === "create" && (
           <div className="space-y-4">
             <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
-              <p className="font-sans text-sm font-semibold text-ink">create account</p>
+              <p className="font-recoleta text-sm font-semibold text-ink">create account</p>
               <form onSubmit={handleCreate} className="space-y-3">
                 <input type="email" placeholder="your@email.com" value={email}
                   onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className={inputClass} />
@@ -259,14 +259,14 @@ export default function AccountPage() {
                 <input type="password" placeholder="confirm password" value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)} required autoComplete="new-password" className={inputClass} />
                 {message && (
-                  <p className={`font-sans text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
+                  <p className={`font-recoleta text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
                 )}
                 <button type="submit" disabled={busy} className={btnPrimary}>
                   {busy ? "creating account…" : "create account"}
                 </button>
               </form>
               <button onClick={() => { setView("signed-out"); clearMessage(); }}
-                className="w-full text-center font-sans text-xs text-ink-muted hover:text-ink underline transition-colors">
+                className="w-full text-center font-recoleta text-xs text-ink-muted hover:text-ink underline transition-colors">
                 already have an account? sign in
               </button>
             </div>
@@ -279,21 +279,21 @@ export default function AccountPage() {
         {view === "forgot" && (
           <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
             <div className="space-y-1">
-              <p className="font-sans text-sm font-semibold text-ink">reset password</p>
-              <p className="font-sans text-xs text-ink-muted">Enter your email and we'll send a reset link.</p>
+              <p className="font-recoleta text-sm font-semibold text-ink">reset password</p>
+              <p className="font-recoleta text-xs text-ink-muted">Enter your email and we'll send a reset link.</p>
             </div>
             <form onSubmit={handleForgot} className="space-y-3">
               <input type="email" placeholder="your@email.com" value={email}
                 onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className={inputClass} />
               {message && (
-                <p className={`font-sans text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
+                <p className={`font-recoleta text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
               )}
               <button type="submit" disabled={busy} className={btnPrimary}>
                 {busy ? "sending…" : "send reset email"}
               </button>
             </form>
             <button onClick={() => { setView("signed-out"); clearMessage(); }}
-              className="w-full text-center font-sans text-xs text-ink-muted hover:text-ink underline transition-colors">
+              className="w-full text-center font-recoleta text-xs text-ink-muted hover:text-ink underline transition-colors">
               back to sign in
             </button>
           </div>
@@ -305,8 +305,8 @@ export default function AccountPage() {
         {view === "reset" && (
           <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
             <div className="space-y-1">
-              <p className="font-sans text-sm font-semibold text-ink">set new password</p>
-              <p className="font-sans text-xs text-ink-muted">Choose a new password for your account.</p>
+              <p className="font-recoleta text-sm font-semibold text-ink">set new password</p>
+              <p className="font-recoleta text-xs text-ink-muted">Choose a new password for your account.</p>
             </div>
             <form onSubmit={handleSetPassword} className="space-y-3">
               <input type="password" placeholder="new password (8+ characters)" value={newPassword}
@@ -314,7 +314,7 @@ export default function AccountPage() {
               <input type="password" placeholder="confirm new password" value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)} required autoComplete="new-password" className={inputClass} />
               {message && (
-                <p className={`font-sans text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
+                <p className={`font-recoleta text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
               )}
               <button type="submit" disabled={busy} className={btnPrimary}>
                 {busy ? "updating…" : "set password"}
@@ -332,15 +332,15 @@ export default function AccountPage() {
             <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-sans text-xs text-ink-muted uppercase tracking-widest font-semibold">signed in as</p>
-                  <p className="font-sans text-sm font-semibold text-ink mt-0.5">{account.email}</p>
+                  <p className="font-recoleta text-xs text-ink-muted uppercase tracking-widest font-semibold">signed in as</p>
+                  <p className="font-recoleta text-sm font-semibold text-ink mt-0.5">{account.email}</p>
                 </div>
                 {account.isPlus && <PlusBadge size="sm" />}
               </div>
 
               {account.isPlus ? (
                 <div className="space-y-1 pt-1 border-t border-ink/8">
-                  <p className="font-sans text-xs text-ink-muted">
+                  <p className="font-recoleta text-xs text-ink-muted">
                     {account.plan === "annual" ? "annual plan" : "monthly plan"}
                     {account.periodEnd && (
                       <> · renews {new Date(account.periodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</>
@@ -349,7 +349,7 @@ export default function AccountPage() {
                 </div>
               ) : (
                 <div className="pt-1 border-t border-ink/8">
-                  <Link href="/plus" className="font-sans text-sm font-semibold text-gold hover:text-gold/80 transition-colors">
+                  <Link href="/plus" className="font-recoleta text-sm font-semibold text-gold hover:text-gold/80 transition-colors">
                     upgrade to Circa+ →
                   </Link>
                 </div>
@@ -366,14 +366,14 @@ export default function AccountPage() {
 
             {/* Change password */}
             <div className="rounded-2xl border border-ink/10 bg-surface/60 p-6 space-y-4">
-              <p className="font-sans text-sm font-semibold text-ink">change password</p>
+              <p className="font-recoleta text-sm font-semibold text-ink">change password</p>
               <form onSubmit={handleChangePassword} className="space-y-3">
                 <input type="password" placeholder="new password (8+ characters)" value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)} required minLength={8} autoComplete="new-password" className={inputClass} />
                 <input type="password" placeholder="confirm new password" value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)} required autoComplete="new-password" className={inputClass} />
                 {message && (
-                  <p className={`font-sans text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
+                  <p className={`font-recoleta text-xs ${message.type === "error" ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
                 )}
                 <button type="submit" disabled={busy} className={btnPrimary}>
                   {busy ? "updating…" : "update password"}
