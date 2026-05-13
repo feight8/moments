@@ -92,7 +92,7 @@ export default function RevealCard({ result, eventNumber, description }: RevealC
           <p className="mb-2 text-xs font-recoleta font-semibold uppercase tracking-widest text-ink-muted">
             the story
           </p>
-          <p className="font-recoleta text-base leading-relaxed text-ink">
+          <p className="font-serif text-base leading-relaxed text-ink">
             {result.additionalContext}
           </p>
         </div>

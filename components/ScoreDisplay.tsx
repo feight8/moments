@@ -89,7 +89,7 @@ export default function ScoreDisplay({ result }: ScoreDisplayProps) {
 
         {/* Additional context */}
         {result.additionalContext && (
-          <p className="mt-3 font-recoleta text-sm leading-relaxed text-ink/80 border-t border-ink/10 pt-3">
+          <p className="mt-3 font-sans text-sm leading-relaxed text-ink/80 border-t border-ink/10 pt-3">
             {result.additionalContext}
           </p>
         )}
