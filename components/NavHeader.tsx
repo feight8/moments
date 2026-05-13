@@ -21,7 +21,7 @@ export default function NavHeader({ backHref }: NavHeaderProps) {
         </Link>
       ) : (
         <Link href="/" className="text-ink hover:opacity-80 transition-opacity">
-          <CircaLogo className="h-7 w-auto" />
+          <CircaLogo className="h-[42px] w-auto" />
         </Link>
       )}
 

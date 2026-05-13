@@ -18,7 +18,7 @@ export default function HomePage() {
         {/* Logo / title */}
         <div className="text-center space-y-2">
           <div className="flex justify-center">
-            <CircaLogo className="h-14 w-auto text-ink" />
+            <CircaLogo className="h-[140px] w-auto" />
           </div>
           <p className="font-sans text-ink-muted">{dateLabel}</p>
         </div>
