@@ -35,11 +35,16 @@ async function getTodayEventIds(request: APIRequestContext): Promise<string[] | 
 }
 
 test.describe('POST /api/submit — unauthenticated', () => {
-  test('returns 401 without an auth header', async ({ request }) => {
-    const res = await request.post('/api/submit', {
-      data: { guesses: [] },
+  // Use native fetch (no cookie store) rather than the `request` fixture,
+  // which inherits storageState and would send the Supabase auth cookie,
+  // making the request authenticated and returning 400 instead of 401.
+  test('returns 401 without an auth header', async () => {
+    const res = await fetch('http://localhost:3000/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guesses: [] }),
     });
-    expect(res.status()).toBe(401);
+    expect(res.status).toBe(401);
   });
 });
 

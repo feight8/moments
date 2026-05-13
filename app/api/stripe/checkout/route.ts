@@ -123,6 +123,10 @@ export async function POST(req: NextRequest) {
 
   const origin = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+  const renewalMessage = plan === "annual"
+    ? "Your subscription automatically renews each year at $14.99 until cancelled. Cancel anytime in your account settings at circagame.com/account."
+    : "Your subscription automatically renews each month at $2.99 until cancelled. Cancel anytime in your account settings at circagame.com/account.";
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
@@ -131,6 +135,9 @@ export async function POST(req: NextRequest) {
     cancel_url: `${origin}/plus`,
     metadata: { user_id: userId, plan },
     subscription_data: { metadata: { user_id: userId, plan } },
+    custom_text: {
+      after_submit: { message: renewalMessage },
+    },
   });
 
   return NextResponse.json({ url: session.url });
