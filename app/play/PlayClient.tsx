@@ -106,6 +106,7 @@ export default function PlayClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const archiveDate = searchParams.get("date") ?? undefined;
+  const category = searchParams.get("category") ?? undefined;
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -137,7 +138,7 @@ export default function PlayClient() {
         }
       }
 
-      if (!archiveDate) {
+      if (!archiveDate && !category) {
         const existingRes = await authFetch("/api/results");
         if (existingRes.ok) {
           router.replace("/results");
@@ -145,7 +146,11 @@ export default function PlayClient() {
         }
       }
 
-      const dailyUrl = archiveDate ? `/api/daily?date=${archiveDate}` : "/api/daily";
+      const dailyUrl = archiveDate
+        ? `/api/daily?date=${archiveDate}${category ? `&category=${category}` : ""}`
+        : category
+          ? `/api/daily?category=${category}`
+          : "/api/daily";
       const puzzleRes = await authFetch(dailyUrl);
       if (!puzzleRes.ok) {
         if (puzzleRes.status === 403) {
@@ -229,6 +234,7 @@ export default function PlayClient() {
         body: JSON.stringify({
           guesses: state.guesses,
           ...(archiveDate ? { puzzleDate: archiveDate } : {}),
+          ...(category ? { category } : {}),
         }),
       });
 
