@@ -29,7 +29,7 @@ interface State {
 }
 
 type Action =
-  | { type: "PUZZLE_LOADED"; puzzle: DailyPuzzle }
+  | { type: "PUZZLE_LOADED"; puzzle: DailyPuzzle; savedProgress?: { currentIndex: number; guesses: Guess[] } }
   | { type: "SLIDER_CHANGED"; year: number }
   | { type: "GUESS_REVEALED"; result: GuessResult; guess: Guess }
   | { type: "NEXT_EVENT" }
@@ -40,8 +40,18 @@ const MID_YEAR = Math.round((YEAR_MIN + YEAR_MAX) / 2); // 1512
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "PUZZLE_LOADED":
-      return { ...state, phase: "guessing", puzzle: action.puzzle, sliderYear: MID_YEAR };
+    case "PUZZLE_LOADED": {
+      const { puzzle, savedProgress } = action;
+      const restoredIndex = savedProgress ? Math.min(savedProgress.guesses.length, puzzle.events.length - 1) : 0;
+      return {
+        ...state,
+        phase: "guessing",
+        puzzle,
+        currentIndex: restoredIndex,
+        guesses: savedProgress?.guesses ?? [],
+        sliderYear: MID_YEAR,
+      };
+    }
 
     case "SLIDER_CHANGED":
       return state.phase === "guessing" ? { ...state, sliderYear: action.year } : state;
@@ -72,6 +82,10 @@ function reducer(state: State, action: Action): State {
     default:
       return state;
   }
+}
+
+function progressKey(puzzle: DailyPuzzle) {
+  return `circa_progress_${puzzle.date}${puzzle.category ? `_${puzzle.category}` : ""}`;
 }
 
 const initialState: State = {
@@ -142,12 +156,36 @@ export default function PlayClient() {
         return;
       }
       const puzzle: DailyPuzzle = await puzzleRes.json();
-      dispatch({ type: "PUZZLE_LOADED", puzzle });
+
+      let savedProgress: { currentIndex: number; guesses: Guess[] } | undefined;
+      try {
+        const raw = sessionStorage.getItem(progressKey(puzzle));
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.guesses.length < puzzle.events.length) {
+            savedProgress = parsed;
+          } else {
+            sessionStorage.removeItem(progressKey(puzzle));
+          }
+        }
+      } catch { /* ignore */ }
+
+      dispatch({ type: "PUZZLE_LOADED", puzzle, savedProgress });
     }
 
     init();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Persist mid-game progress so a refresh restores the current event
+  useEffect(() => {
+    if (!state.puzzle || state.guesses.length === 0) return;
+    if (state.phase !== "guessing" && state.phase !== "revealing") return;
+    sessionStorage.setItem(progressKey(state.puzzle), JSON.stringify({
+      currentIndex: state.currentIndex,
+      guesses: state.guesses,
+    }));
+  }, [state.currentIndex, state.guesses, state.puzzle, state.phase]);
 
   async function handleLockGuess() {
     if (!state.puzzle) return;
@@ -183,6 +221,7 @@ export default function PlayClient() {
 
     if (isLast) {
       dispatch({ type: "SUBMITTING" });
+      sessionStorage.removeItem(progressKey(state.puzzle));
 
       const res = await authFetch("/api/submit", {
         method: "POST",
@@ -203,6 +242,7 @@ export default function PlayClient() {
       router.push("/results");
     } else {
       dispatch({ type: "NEXT_EVENT" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }
 
