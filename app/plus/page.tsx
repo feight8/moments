@@ -159,20 +159,49 @@ function PricingCard({ plan, price, period, badge, onSelect, loading, disabled }
 
 export default function PlusPage() {
   const [loadingPlan, setLoadingPlan] = useState<"monthly" | "annual" | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAnonymous, setIsAnonymous] = useState<boolean | null>(null);
   const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [plusStatus, setPlusStatus] = useState<{
+    isPlus: boolean;
+    plan: "monthly" | "annual" | null;
+    currentPeriodEnd: string | null;
+    isAdmin: boolean;
+  } | null>(null);
 
   // Only collected for anonymous users — sent to the server to create the account
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    createClient().auth.getSession().then(({ data: { session } }) => {
-      // Show account form if no session at all, or session has no linked email
+    async function load() {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
       setIsAnonymous(!session?.user?.email);
-    });
+
+      const res = await fetch("/api/plus/status", {
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+      });
+      if (res.ok) setPlusStatus(await res.json());
+    }
+    load();
   }, []);
+
+  async function handleManageSubscription() {
+    setPortalLoading(true);
+    setError(null);
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch("/api/stripe/portal", {
+      method: "POST",
+      headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+    });
+    const data = await res.json();
+    setPortalLoading(false);
+    if (!res.ok) { setError(data.error ?? "Could not open subscription portal."); return; }
+    window.location.href = data.url;
+  }
 
   async function handleSelect(plan: "monthly" | "annual") {
     setError(null);
@@ -245,94 +274,136 @@ export default function PlusPage() {
           ))}
         </div>
 
-        {/* Account fields — anonymous users only */}
-        {isAnonymous && (
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <p className="font-recoleta text-sm font-semibold text-ink">create your account</p>
+        {plusStatus?.isPlus ? (
+          /* ── Already subscribed ── */
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-gold/40 bg-cyan/60 p-6 space-y-3 backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <p className="font-recoleta text-sm font-semibold text-ink">you&apos;re a plus member</p>
+                <PlusBadge size="sm" />
+              </div>
+              <div className="border-t border-ink/8 pt-3 space-y-1">
+                <p className="font-recoleta text-xs text-ink-muted">
+                  {plusStatus.plan === "annual" ? "annual plan" : "monthly plan"}
+                  {plusStatus.currentPeriodEnd && (
+                    <> · renews {new Date(plusStatus.currentPeriodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {!plusStatus.isAdmin && (
+              <button
+                onClick={handleManageSubscription}
+                disabled={portalLoading}
+                className="btn-primary w-full py-3.5"
+              >
+                {portalLoading ? "opening…" : "manage subscription"}
+              </button>
+            )}
+
+            <Link
+              href="/account"
+              className="block text-center font-recoleta text-sm text-ink-muted hover:text-ink transition-colors"
+            >
+              back to account →
+            </Link>
+
+            {error && <p className="text-center font-recoleta text-sm text-red-600">{error}</p>}
+          </div>
+        ) : (
+          /* ── Not yet subscribed ── */
+          <>
+            {/* Account fields — anonymous users only */}
+            {isAnonymous && (
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <p className="font-recoleta text-sm font-semibold text-ink">create your account</p>
+                  <p className="font-recoleta text-xs text-ink-muted">
+                    your email and password keep your streak and scores safe across devices.
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <label htmlFor="plus-email" className="font-recoleta text-xs font-semibold text-ink-muted">email</label>
+                  <input
+                    id="plus-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label htmlFor="plus-password" className="font-recoleta text-xs font-semibold text-ink-muted">password</label>
+                  <input
+                    id="plus-password"
+                    type="password"
+                    placeholder="8+ characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    minLength={8}
+                    autoComplete="new-password"
+                    className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Age gate — COPPA */}
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={ageConfirmed}
+                onChange={(e) => { setAgeConfirmed(e.target.checked); setError(null); }}
+                data-testid="age-gate-checkbox"
+                className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-ink/30 accent-teal cursor-pointer"
+              />
+              <span className="font-sans text-xs text-ink-muted leading-relaxed group-hover:text-ink transition-colors">
+                I confirm that I am 13 years of age or older.
+              </span>
+            </label>
+
+            {/* Pricing cards */}
+            <div className="space-y-4">
+              <PricingCard
+                plan="annual"
+                price="$14.99"
+                period="/ year"
+                badge="best value"
+                onSelect={handleSelect}
+                loading={loadingPlan === "annual"}
+                disabled={!ageConfirmed}
+              />
+              <PricingCard
+                plan="monthly"
+                price="$2.99"
+                period="/ month"
+                onSelect={handleSelect}
+                loading={loadingPlan === "monthly"}
+                disabled={!ageConfirmed}
+              />
+            </div>
+
+            {error && (
+              <p className="text-center font-recoleta text-sm text-red-600">{error}</p>
+            )}
+
+            {/* Trust signals */}
+            <div className="text-center space-y-2 pb-4">
               <p className="font-recoleta text-xs text-ink-muted">
-                your email and password keep your streak and scores safe across devices.
+                payments processed securely by Stripe. cancel anytime.
+              </p>
+              <p className="font-recoleta text-xs text-ink-muted">
+                already have plus?{" "}
+                <Link href="/login?next=/" className="underline hover:text-gold transition-colors">
+                  sign in
+                </Link>
               </p>
             </div>
-            <div className="space-y-1">
-              <label htmlFor="plus-email" className="font-recoleta text-xs font-semibold text-ink-muted">email</label>
-              <input
-                id="plus-email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
-              />
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="plus-password" className="font-recoleta text-xs font-semibold text-ink-muted">password</label>
-              <input
-                id="plus-password"
-                type="password"
-                placeholder="8+ characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={8}
-                autoComplete="new-password"
-                className="w-full rounded-xl border border-ink/15 bg-surface/80 px-4 py-3 font-recoleta text-sm text-ink placeholder:text-ink-muted/50 outline-none focus:border-gold transition-colors"
-              />
-            </div>
-          </div>
+          </>
         )}
-
-        {/* Age gate — COPPA */}
-        <label className="flex items-start gap-3 cursor-pointer group">
-          <input
-            type="checkbox"
-            checked={ageConfirmed}
-            onChange={(e) => { setAgeConfirmed(e.target.checked); setError(null); }}
-            data-testid="age-gate-checkbox"
-            className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-ink/30 accent-teal cursor-pointer"
-          />
-          <span className="font-sans text-xs text-ink-muted leading-relaxed group-hover:text-ink transition-colors">
-            I confirm that I am 13 years of age or older.
-          </span>
-        </label>
-
-        {/* Pricing cards */}
-        <div className="space-y-4">
-          <PricingCard
-            plan="annual"
-            price="$14.99"
-            period="/ year"
-            badge="best value"
-            onSelect={handleSelect}
-            loading={loadingPlan === "annual"}
-            disabled={!ageConfirmed}
-          />
-          <PricingCard
-            plan="monthly"
-            price="$2.99"
-            period="/ month"
-            onSelect={handleSelect}
-            loading={loadingPlan === "monthly"}
-            disabled={!ageConfirmed}
-          />
-        </div>
-
-        {error && (
-          <p className="text-center font-recoleta text-sm text-red-600">{error}</p>
-        )}
-
-        {/* Trust signals */}
-        <div className="text-center space-y-2 pb-4">
-          <p className="font-recoleta text-xs text-ink-muted">
-            payments processed securely by Stripe. cancel anytime.
-          </p>
-          <p className="font-recoleta text-xs text-ink-muted">
-            already have plus?{" "}
-            <Link href="/login?next=/" className="underline hover:text-gold transition-colors">
-              sign in
-            </Link>
-          </p>
-        </div>
       </div>
     </main>
   );
