@@ -203,6 +203,7 @@ export default function PlayClient() {
       body: JSON.stringify({
         ...guess,
         ...(archiveDate ? { puzzleDate: archiveDate } : {}),
+        ...(category ? { category } : {}),
       }),
     });
 
