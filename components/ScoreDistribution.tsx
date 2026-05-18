@@ -80,7 +80,7 @@ export default function ScoreDistribution({
               <div className="flex-1 h-6 rounded-md overflow-hidden bg-ink/5 relative">
                 <div
                   className={`h-full rounded-md transition-all duration-500 ${
-                    active ? "bg-gold" : branded ? "bg-dot-orange/70" : "bg-ink/15"
+                    active ? "bg-gold" : branded ? "bg-brand-orange" : "bg-ink/15"
                   }`}
                   style={{ width: `${Math.max(pct, bucket.count > 0 ? 2 : 0)}%` }}
                 />
