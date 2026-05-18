@@ -34,14 +34,15 @@ function formatSlug(slug: string): string {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { date?: string };
+  searchParams: Promise<{ date?: string }>;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user || !isAdminUser(user.id)) redirect("/");
 
-  const date = typeof searchParams.date === "string" ? searchParams.date : todayDate();
+  const params = await searchParams;
+  const date = typeof params.date === "string" ? params.date : todayDate();
   const prevDate = offsetDate(date, -1);
   const nextDate = offsetDate(date, 1);
 
@@ -145,7 +146,13 @@ export default async function AdminPage({
         ) : (
           <>
             {/* Score distribution */}
-            <ScoreDistribution buckets={buckets} totalPlayers={totalPlayers} />
+            <ScoreDistribution
+              buckets={buckets}
+              totalPlayers={totalPlayers}
+              branded
+              showPercentage
+              showPlayerCount={false}
+            />
 
             {/* Key stats */}
             <div className="grid grid-cols-2 gap-3">
