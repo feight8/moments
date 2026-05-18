@@ -5,7 +5,7 @@ import type { DistributionBucket } from "@/app/api/distribution/route";
 interface ScoreDistributionProps {
   buckets: DistributionBucket[];
   totalPlayers: number;
-  userScore: number;
+  userScore?: number;
 }
 
 export default function ScoreDistribution({
@@ -18,27 +18,31 @@ export default function ScoreDistribution({
   const maxCount = Math.max(...buckets.map((b) => b.count), 1);
 
   function isUserBucket(bucket: DistributionBucket): boolean {
+    if (userScore === undefined) return false;
     return userScore >= bucket.min && userScore <= bucket.max;
   }
 
-  // How many players scored at or below the user (percentile display)
-  const scoredAtOrBelow = buckets
-    .filter((b) => b.max <= (isUserBucket(b) ? userScore : b.max) || b.max < userScore)
-    .reduce((sum, b) => {
-      if (b.max < userScore) return sum + b.count;
-      if (isUserBucket(b)) {
-        // partial: assume uniform distribution within bucket
-        const bucketRange = Math.min(b.max, 550) - b.min + 1;
-        const userOffset = userScore - b.min + 1;
-        return sum + Math.round((userOffset / bucketRange) * b.count);
-      }
-      return sum;
-    }, 0);
+  let scoredAtOrBelow = 0;
+  let percentile: number | null = null;
 
-  const percentile =
-    totalPlayers > 1
-      ? Math.round((scoredAtOrBelow / totalPlayers) * 100)
-      : null;
+  if (userScore !== undefined) {
+    const u = userScore;
+    scoredAtOrBelow = buckets
+      .filter((b) => b.max <= (isUserBucket(b) ? u : b.max) || b.max < u)
+      .reduce((sum, b) => {
+        if (b.max < u) return sum + b.count;
+        if (isUserBucket(b)) {
+          const bucketRange = Math.min(b.max, 550) - b.min + 1;
+          const userOffset = u - b.min + 1;
+          return sum + Math.round((userOffset / bucketRange) * b.count);
+        }
+        return sum;
+      }, 0);
+
+    if (totalPlayers > 1) {
+      percentile = Math.round((scoredAtOrBelow / totalPlayers) * 100);
+    }
+  }
 
   return (
     <div className="space-y-3">
