@@ -20,6 +20,7 @@ const config: Config = {
         "dot-green": "#16A34A",
         "dot-yellow": "#CA8A04",
         "dot-orange": "#EA580C",
+        "brand-orange": "#e49930",
         "dot-red": "#DC2626",
       },
       fontFamily: {
