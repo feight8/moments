@@ -6,12 +6,18 @@ interface ScoreDistributionProps {
   buckets: DistributionBucket[];
   totalPlayers: number;
   userScore?: number;
+  branded?: boolean;
+  showPercentage?: boolean;
+  showPlayerCount?: boolean;
 }
 
 export default function ScoreDistribution({
   buckets,
   totalPlayers,
   userScore,
+  branded,
+  showPercentage,
+  showPlayerCount,
 }: ScoreDistributionProps) {
   if (totalPlayers === 0) return null;
 
@@ -50,9 +56,11 @@ export default function ScoreDistribution({
         <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
           today&apos;s scores
         </p>
-        <p className="font-recoleta text-xs text-ink-muted">
-          {totalPlayers} {totalPlayers === 1 ? "player" : "players"}
-        </p>
+        {showPlayerCount !== false && (
+          <p className="font-recoleta text-xs text-ink-muted">
+            {totalPlayers} {totalPlayers === 1 ? "player" : "players"}
+          </p>
+        )}
       </div>
 
       <div className="rounded-2xl border border-ink/10 bg-surface/60 px-5 pt-5 pb-4 backdrop-blur-sm space-y-2">
@@ -72,7 +80,7 @@ export default function ScoreDistribution({
               <div className="flex-1 h-6 rounded-md overflow-hidden bg-ink/5 relative">
                 <div
                   className={`h-full rounded-md transition-all duration-500 ${
-                    active ? "bg-gold" : "bg-ink/15"
+                    active ? "bg-gold" : branded ? "bg-dot-orange/70" : "bg-ink/15"
                   }`}
                   style={{ width: `${Math.max(pct, bucket.count > 0 ? 2 : 0)}%` }}
                 />
@@ -82,7 +90,9 @@ export default function ScoreDistribution({
                       active ? "text-teal font-semibold" : "text-ink-muted"
                     }`}
                   >
-                    {bucket.count}
+                    {showPercentage
+                      ? `${Math.round((bucket.count / totalPlayers) * 100)}%`
+                      : bucket.count}
                   </span>
                 )}
               </div>
