@@ -41,7 +41,7 @@ export default function LinkAccountPrompt() {
   }
 
   return (
-    <div className="rounded-2xl border border-teal/20 bg-cyan/60 p-6 space-y-4">
+    <div className="rounded-2xl border border-ink/20 bg-surface/60 p-6 space-y-4">
       <div className="space-y-1">
         <p className="font-recoleta text-lg font-bold text-ink">protect your streak</p>
         <p className="font-recoleta text-sm text-ink-muted leading-relaxed">

@@ -102,7 +102,12 @@ export default function YearSlider({ value, onChange, disabled = false }: YearSl
   }
 
   function handleYearInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setInputText(e.target.value);
+    const text = e.target.value;
+    setInputText(text);
+    const parsed = parseInt(text, 10);
+    if (!isNaN(parsed)) {
+      onChange(clamp(parsed));
+    }
   }
 
   function commitYearInput() {

@@ -109,7 +109,7 @@ function PricingCard({ plan, price, period, badge, onSelect, loading, disabled }
     <div
       className={`relative rounded-2xl border p-6 space-y-4 ${
         isAnnual
-          ? "border-gold/50 bg-cyan/60 ring-2 ring-gold/20"
+          ? "border-gold/50 bg-surface/60 ring-2 ring-gold/20"
           : "border-ink/10 bg-surface/60"
       } backdrop-blur-sm`}
     >
@@ -255,7 +255,7 @@ export default function PlusPage() {
           <div className="flex justify-center">
             <PlusBadge size="md" />
           </div>
-          <h1 className="font-recoleta text-4xl font-bold text-teal">circa+</h1>
+          <h1 className="font-recoleta text-4xl font-bold text-teal dark:text-ink">circa+</h1>
           <p className="font-recoleta text-sm text-ink-muted leading-relaxed max-w-sm mx-auto">
             for history lovers who want to go deeper. unlock the archive, protect your streak, and track every guess.
           </p>
@@ -277,7 +277,7 @@ export default function PlusPage() {
         {plusStatus?.isPlus ? (
           /* ── Already subscribed ── */
           <div className="space-y-4">
-            <div className="rounded-2xl border border-gold/40 bg-cyan/60 p-6 space-y-3 backdrop-blur-sm">
+            <div className="rounded-2xl border border-gold/40 bg-surface/60 p-6 space-y-3 backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <p className="font-recoleta text-sm font-semibold text-ink">you&apos;re a plus member</p>
                 <PlusBadge size="sm" />

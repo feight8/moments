@@ -69,7 +69,7 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
         <p className="text-xs font-recoleta font-semibold uppercase tracking-widest text-ink-muted">
           {dateLabel}
         </p>
-        <h2 className="font-recoleta text-3xl font-bold text-teal">today&apos;s results</h2>
+        <h2 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">today&apos;s results</h2>
         <div className="flex justify-center pt-1">
           <StreakBadge streak={result.streak} />
         </div>

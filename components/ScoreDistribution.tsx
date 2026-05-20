@@ -87,7 +87,7 @@ export default function ScoreDistribution({
                 {bucket.count > 0 && (
                   <span
                     className={`absolute inset-y-0 left-2 flex items-center font-recoleta text-xs ${
-                      active ? "text-teal font-semibold" : "text-ink-muted"
+                      active ? "text-teal dark:text-gold font-semibold" : "text-ink-muted"
                     }`}
                   >
                     {showPercentage

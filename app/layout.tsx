@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="bg-parchment font-recoleta text-ink antialiased">
-          <SettingsProvider />
+        <SettingsProvider>
           {children}
           <footer className="py-6 text-center">
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-recoleta text-xs text-ink-muted/50">
@@ -33,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/dmca" className="hover:text-ink-muted transition-colors">DMCA / Copyright</Link>
             </div>
           </footer>
+        </SettingsProvider>
         </body>
     </html>
   );

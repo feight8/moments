@@ -193,7 +193,7 @@ export default function AccountPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-recoleta text-2xl font-bold text-teal">account</h1>
+          <h1 className="font-recoleta text-2xl font-bold text-teal dark:text-ink">account</h1>
         </div>
 
         {/* ---------------------------------------------------------------- */}
@@ -234,7 +234,7 @@ export default function AccountPage() {
               <p className="font-recoleta text-sm font-semibold text-ink">new to circa+?</p>
               <p className="font-recoleta text-xs text-ink-muted">create a free account to save your progress, then subscribe to unlock plus features.</p>
               <button onClick={() => { setView("create"); clearMessage(); }}
-                className="w-full rounded-2xl border border-ink/15 bg-teal py-3 font-recoleta text-sm font-semibold text-parchment hover:bg-teal/80 transition-colors">
+                className="w-full rounded-2xl border border-ink/15 bg-teal py-3 font-recoleta text-sm font-semibold text-parchment hover:bg-teal/80 transition-colors dark:bg-gold dark:text-ink dark:hover:bg-gold/80">
                 create account
               </button>
               <Link href="/plus" className="block w-full text-center font-recoleta text-sm font-semibold text-gold hover:text-gold/80 transition-colors">

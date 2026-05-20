@@ -112,15 +112,15 @@ export default function GroupPage() {
     <PageShell>
       {/* Group header */}
       <div className="space-y-1">
-        <h1 className="font-recoleta text-2xl font-bold text-teal">{group.name}</h1>
+        <h1 className="font-recoleta text-2xl font-bold text-teal dark:text-ink">{group.name}</h1>
         <p className="font-recoleta text-sm text-ink-muted">{dateLabel}</p>
       </div>
 
       {/* Scoreboard */}
       <section className="rounded-2xl border border-ink/10 bg-surface/60 overflow-hidden">
         {scores && !scores.viewerHasPlayed && (
-          <div className="px-5 py-3 bg-cyan/80 border-b border-teal/15">
-            <p className="font-recoleta text-xs text-teal font-semibold text-center">
+          <div className="px-5 py-3 bg-surface/80 border-b border-ink/15">
+            <p className="font-recoleta text-xs text-teal dark:text-ink font-semibold text-center">
               play today&apos;s puzzle to see your friends&apos; scores
             </p>
           </div>
@@ -130,7 +130,7 @@ export default function GroupPage() {
           <div
             key={m.userId}
             className={`flex items-center gap-3 px-5 py-3.5 border-b border-ink/5 last:border-0 ${
-              m.userId === viewerUserId ? "bg-cyan/40" : ""
+              m.userId === viewerUserId ? "bg-surface/40" : ""
             }`}
           >
             {/* Rank */}

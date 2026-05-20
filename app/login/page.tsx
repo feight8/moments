@@ -36,7 +36,7 @@ function LoginForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-recoleta text-2xl font-bold text-teal">sign in</h1>
+        <h1 className="font-recoleta text-2xl font-bold text-teal dark:text-ink">sign in</h1>
         <p className="font-recoleta text-sm text-ink-muted">
           Access your Circa+ features and saved progress.
         </p>

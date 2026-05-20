@@ -160,7 +160,7 @@ export default async function AdminPage({
                 <p className="font-recoleta text-[10px] font-semibold uppercase tracking-widest text-ink-muted mb-1">
                   top score
                 </p>
-                <p className="font-recoleta text-2xl font-bold text-teal">
+                <p className="font-recoleta text-2xl font-bold text-teal dark:text-ink">
                   {topScore}
                 </p>
               </div>
@@ -168,7 +168,7 @@ export default async function AdminPage({
                 <p className="font-recoleta text-[10px] font-semibold uppercase tracking-widest text-ink-muted mb-1">
                   best streak
                 </p>
-                <p className="font-recoleta text-2xl font-bold text-teal">
+                <p className="font-recoleta text-2xl font-bold text-teal dark:text-ink">
                   {longestActiveStreak}
                   <span className="font-recoleta text-xs font-normal text-ink-muted ml-1">days</span>
                 </p>
@@ -184,7 +184,7 @@ export default async function AdminPage({
                 {perfectsPerEvent.map(({ eventId, slug, perfectCount }) => (
                   <div key={eventId} className="flex items-center justify-between px-4 py-2.5">
                     <p className="font-recoleta text-sm text-ink">{formatSlug(slug)}</p>
-                    <p className="font-recoleta text-sm font-semibold text-teal tabular-nums">
+                    <p className="font-recoleta text-sm font-semibold text-teal dark:text-ink tabular-nums">
                       {perfectCount}
                     </p>
                   </div>

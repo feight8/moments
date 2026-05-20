@@ -1,49 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { createContext, useContext } from "react";
 
 export interface Settings {
   soundEnabled: boolean;
   darkMode: boolean;
 }
 
-const DEFAULTS: Settings = {
+export const SETTINGS_DEFAULTS: Settings = {
   soundEnabled: true,
   darkMode: false,
 };
 
-const STORAGE_KEY = "circa_settings";
+export const SETTINGS_STORAGE_KEY = "circa_settings";
 
-function load(): Settings {
-  if (typeof window === "undefined") return DEFAULTS;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
-  } catch {
-    return DEFAULTS;
-  }
+interface SettingsContextValue {
+  settings: Settings;
+  update: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
 }
 
-function save(settings: Settings) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  } catch { /* ignore quota errors */ }
-}
+export const SettingsContext = createContext<SettingsContextValue>({
+  settings: SETTINGS_DEFAULTS,
+  update: () => {},
+});
 
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS);
-
-  useEffect(() => {
-    setSettings(load());
-  }, []);
-
-  const update = useCallback(<K extends keyof Settings>(key: K, value: Settings[K]) => {
-    setSettings((prev) => {
-      const next = { ...prev, [key]: value };
-      save(next);
-      return next;
-    });
-  }, []);
-
-  return { settings, update };
+  return useContext(SettingsContext);
 }
