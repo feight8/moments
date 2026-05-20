@@ -81,7 +81,7 @@ export default function GroupsPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-recoleta text-3xl font-bold text-teal">groups</h1>
+          <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">groups</h1>
           <p className="font-recoleta text-sm text-ink-muted">play with friends and compare scores</p>
         </div>
 

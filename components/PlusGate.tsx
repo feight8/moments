@@ -16,7 +16,7 @@ export default function PlusGate({ children, locked, feature }: PlusGateProps) {
   if (!locked) return <>{children}</>;
 
   return (
-    <div className="rounded-2xl border border-teal/20 bg-cyan/60 p-8 text-center space-y-4">
+    <div className="rounded-2xl border border-ink/20 bg-surface/60 p-8 text-center space-y-4">
       <div className="flex justify-center">
         <PlusBadge size="md" />
       </div>

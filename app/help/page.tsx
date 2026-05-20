@@ -100,7 +100,7 @@ export default function HelpPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-recoleta text-3xl font-bold text-teal">help & settings</h1>
+          <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">help & settings</h1>
           <p className="font-recoleta text-sm text-ink-muted">how to play, scoring, and preferences</p>
         </div>
 

@@ -115,7 +115,7 @@ function SuccessInner() {
           <div className="flex justify-center">
             <PlusBadge size="md" />
           </div>
-          <h1 className="font-recoleta text-3xl font-bold text-teal">payment successful!</h1>
+          <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">payment successful!</h1>
           <p className="font-recoleta text-sm text-ink-muted">
             Sign in to activate your Plus features.
           </p>
@@ -166,7 +166,7 @@ function SuccessInner() {
         <div className="flex justify-center">
           <PlusBadge size="md" />
         </div>
-        <h1 className="font-recoleta text-3xl font-bold text-teal">welcome to plus</h1>
+        <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">welcome to plus</h1>
         <p className="font-recoleta text-sm text-ink-muted leading-relaxed max-w-xs mx-auto">
           Your subscription is active. The full archive, stats, streak shields, and groups are now unlocked.
         </p>

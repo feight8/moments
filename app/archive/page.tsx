@@ -66,7 +66,7 @@ export default function ArchivePage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-recoleta text-3xl font-bold text-teal">archive</h1>
+          <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">archive</h1>
           <p className="font-recoleta text-sm text-ink-muted">every puzzle, playable anytime</p>
         </div>
 

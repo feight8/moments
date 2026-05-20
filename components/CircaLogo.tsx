@@ -11,7 +11,7 @@ export default function CircaLogo({ className = "" }: CircaLogoProps) {
       alt="Circa"
       width={320}
       height={320}
-      className={className}
+      className={`${className} circa-logo`}
       priority
     />
   );

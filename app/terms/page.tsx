@@ -9,7 +9,7 @@ export default function TermsPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-2">
-          <h1 className="font-serif text-3xl font-bold text-teal">terms of service</h1>
+          <h1 className="font-serif text-3xl font-bold text-teal dark:text-ink">terms of service</h1>
           <p className="font-sans text-sm text-ink-muted">Circa Game · Operated by Charbella Games LLC</p>
           <p className="font-sans text-xs text-ink-muted">Effective Date: May 2, 2026</p>
         </div>

@@ -140,7 +140,7 @@ export default function StatsPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-1">
-          <h1 className="font-recoleta text-3xl font-bold text-teal">stats</h1>
+          <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">stats</h1>
           <p className="font-recoleta text-sm text-ink-muted">all-time performance</p>
         </div>
 

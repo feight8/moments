@@ -9,7 +9,7 @@ export default function DmcaPage() {
         <NavHeader backHref="/" />
 
         <div className="space-y-2">
-          <h1 className="font-serif text-3xl font-bold text-teal">dmca / copyright</h1>
+          <h1 className="font-serif text-3xl font-bold text-teal dark:text-ink">dmca / copyright</h1>
           <p className="font-sans text-xs text-ink-muted">Last updated: May 2, 2026</p>
         </div>
 

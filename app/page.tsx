@@ -24,7 +24,7 @@ export default function HomePage() {
         </div>
 
         {/* Description */}
-        <div className="rounded-2xl bg-cyan p-6 text-left space-y-3">
+        <div className="rounded-2xl bg-surface p-6 text-left space-y-3">
           <p className="font-recoleta text-lg text-ink leading-relaxed">
             five moments in history. when did they happen?
           </p>
@@ -39,7 +39,7 @@ export default function HomePage() {
         {/* CTA */}
         <Link
           href="/play"
-          className="inline-block w-full rounded-2xl bg-teal py-4 font-recoleta font-semibold text-parchment transition-colors hover:bg-teal/80 active:scale-95 text-center"
+          className="inline-block w-full rounded-2xl bg-teal py-4 font-recoleta font-semibold text-parchment transition-colors hover:bg-teal/80 active:scale-95 text-center dark:bg-gold dark:text-ink dark:hover:bg-gold/80"
         >
           play today&apos;s puzzle
         </Link>
