@@ -38,13 +38,18 @@ export async function GET(req: NextRequest) {
   }
 
   const client = createServiceClient();
+  const categoryParam = new URL(req.url).searchParams.get("category"); // null = main daily
 
-  // All results for this user, newest first
-  const { data: results, error: resultsError } = await client
+  // All results for this user for the requested category, newest first
+  const baseQuery = client
     .from("user_results")
     .select("puzzle_date, total_score, guesses")
     .eq("user_id", user.id)
     .order("puzzle_date", { ascending: false });
+
+  const { data: results, error: resultsError } = await (categoryParam
+    ? baseQuery.eq("category", categoryParam)
+    : baseQuery.is("category", null));
 
   if (resultsError) {
     return NextResponse.json({ error: "Failed to load stats." }, { status: 500 });

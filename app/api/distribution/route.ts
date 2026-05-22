@@ -43,12 +43,17 @@ export async function GET(req: NextRequest) {
   // Caller may pass their score to get an exact percentile back
   const userScoreParam = url.searchParams.get("userScore");
   const userScore = userScoreParam !== null ? parseInt(userScoreParam, 10) : null;
+  const categoryParam = url.searchParams.get("category"); // null = main daily
 
-  // Fetch all scores for this puzzle date (aggregate — no PII exposed)
-  const { data: rows } = await serviceClient
+  // Fetch all scores for this puzzle date filtered by category
+  const baseQuery = serviceClient
     .from("user_results")
     .select("total_score")
     .eq("puzzle_date", puzzleDate);
+
+  const { data: rows } = await (categoryParam
+    ? baseQuery.eq("category", categoryParam)
+    : baseQuery.is("category", null));
 
   const scores = (rows ?? []).map((r: { total_score: number }) => r.total_score);
 

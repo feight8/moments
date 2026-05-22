@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import NavHeader from "@/components/NavHeader";
 import PlusGate from "@/components/PlusGate";
+import CategorySwitcher, { type CategoryValue } from "@/components/CategorySwitcher";
 import { createClient } from "@/lib/supabase/client";
 import { formatPuzzleDate } from "@/lib/dates";
 import type { UserStats, EraAccuracy } from "@/app/api/stats/route";
@@ -112,16 +113,19 @@ function EraBreakdown({ eras }: { eras: EraAccuracy[] }) {
 // ---------------------------------------------------------------------------
 
 export default function StatsPage() {
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [locked, setLocked] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats]       = useState<UserStats | null>(null);
+  const [locked, setLocked]     = useState(false);
+  const [error, setError]       = useState<string | null>(null);
+  const [category, setCategory] = useState<CategoryValue>(null);
 
   useEffect(() => {
+    setStats(null);
     async function load() {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
 
-      const res = await fetch("/api/stats", {
+      const url = category ? `/api/stats?category=${category}` : "/api/stats";
+      const res = await fetch(url, {
         headers: session?.access_token
           ? { Authorization: `Bearer ${session.access_token}` }
           : {},
@@ -132,16 +136,19 @@ export default function StatsPage() {
       setStats(await res.json());
     }
     load();
-  }, []);
+  }, [category]);
 
   return (
     <main className="min-h-screen bg-parchment px-4 py-8">
       <div className="mx-auto max-w-lg space-y-6">
         <NavHeader backHref="/" />
 
-        <div className="space-y-1">
-          <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">stats</h1>
-          <p className="font-recoleta text-sm text-ink-muted">all-time performance</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">stats</h1>
+            <p className="font-recoleta text-sm text-ink-muted">all-time performance</p>
+          </div>
+          <CategorySwitcher value={category} onChange={(cat) => setCategory(cat)} />
         </div>
 
         {locked && <PlusGate locked feature="stats" />}
@@ -170,11 +177,13 @@ export default function StatsPage() {
               <StatTile label="Perfect guesses" value={stats.perfectGuesses} />
             </div>
 
-            {/* Streak */}
-            <div className="grid grid-cols-2 gap-3">
-              <StatTile label="Current streak" value={stats.currentStreak} sub="days" icon={<FlameIcon />} />
-              <StatTile label="Longest streak" value={stats.longestStreak} sub="days" icon={<TrophyIcon />} />
-            </div>
+            {/* Streak — main daily only */}
+            {!category && (
+              <div className="grid grid-cols-2 gap-3">
+                <StatTile label="Current streak" value={stats.currentStreak} sub="days" icon={<FlameIcon />} />
+                <StatTile label="Longest streak" value={stats.longestStreak} sub="days" icon={<TrophyIcon />} />
+              </div>
+            )}
 
             {/* Score history chart */}
             <ScoreHistory scores={stats.recentScores} />

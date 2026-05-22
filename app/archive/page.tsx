@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import NavHeader from "@/components/NavHeader";
 import PlusGate from "@/components/PlusGate";
+import CategorySwitcher, { type CategoryValue } from "@/components/CategorySwitcher";
 import { createClient } from "@/lib/supabase/client";
 import type { ArchiveEntry } from "@/app/api/archive/route";
 
@@ -33,6 +34,7 @@ export default function ArchivePage() {
   const [locked, setLocked]     = useState(false);
   const [error, setError]       = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [category, setCategory] = useState<CategoryValue>(null);
 
   function toggle(date: string) {
     setExpanded((prev) => {
@@ -65,9 +67,12 @@ export default function ArchivePage() {
       <div className="mx-auto max-w-lg space-y-6">
         <NavHeader backHref="/" />
 
-        <div className="space-y-1">
-          <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">archive</h1>
-          <p className="font-recoleta text-sm text-ink-muted">every puzzle, playable anytime</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">archive</h1>
+            <p className="font-recoleta text-sm text-ink-muted">every puzzle, playable anytime</p>
+          </div>
+          <CategorySwitcher value={category} onChange={(cat) => { setCategory(cat); setExpanded(new Set()); }} />
         </div>
 
         {locked && <PlusGate locked feature="the puzzle archive" />}
@@ -89,12 +94,34 @@ export default function ArchivePage() {
           </div>
         )}
 
-        {entries && entries.length > 0 && (
+        {entries && entries.length > 0 && (() => {
+          // When a category is selected, filter entries to only those with that category puzzle
+          const displayEntries = category === null
+            ? entries
+            : entries
+                .filter((e) => e.puzzles.some((p) => p.category === category))
+                .map((e) => ({
+                  ...e,
+                  puzzles: e.puzzles.filter((p) => p.category === category),
+                  playedCount: e.puzzles.filter((p) => p.category === category && p.played).length,
+                  totalCount: e.puzzles.filter((p) => p.category === category).length,
+                }));
+
+          if (displayEntries.length === 0) {
+            return (
+              <div className="text-center py-12">
+                <p className="font-recoleta text-lg text-ink">no puzzles yet</p>
+                <p className="font-recoleta text-sm text-ink-muted mt-1">check back soon</p>
+              </div>
+            );
+          }
+
+          return (
           <div className="rounded-2xl border border-ink/10 bg-surface/60 divide-y divide-ink/8 backdrop-blur-sm overflow-hidden">
-            {entries.map((entry) => {
+            {displayEntries.map((entry) => {
               const { day, month, year } = formatArchiveDate(entry.date);
               const isOpen = expanded.has(entry.date);
-              const isMulti = entry.totalCount > 1;
+              const isMulti = category === null && entry.totalCount > 1;
               const mainPuzzle = entry.puzzles[0];
 
               return (
@@ -166,7 +193,8 @@ export default function ArchivePage() {
               );
             })}
           </div>
-        )}
+          );
+        })()}
       </div>
     </main>
   );

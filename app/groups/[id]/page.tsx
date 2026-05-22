@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import NavHeader from "@/components/NavHeader";
+import CategorySwitcher, { type CategoryValue } from "@/components/CategorySwitcher";
 import { formatPuzzleDate, todayDate } from "@/lib/dates";
 import type { Group, GroupMember, GroupScoresResponse } from "@/types";
 
@@ -16,6 +17,7 @@ export default function GroupPage() {
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [scores, setScores] = useState<GroupScoresResponse | null>(null);
   const [viewerUserId, setViewerUserId] = useState<string | null>(null);
+  const [category, setCategory] = useState<CategoryValue>(null);
   const [copied, setCopied] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,9 +39,13 @@ export default function GroupPage() {
       ? { Authorization: `Bearer ${session.access_token}` }
       : {} as Record<string, string>;
 
+    const scoresUrl = category
+      ? `/api/groups/${groupId}/scores?category=${category}`
+      : `/api/groups/${groupId}/scores`;
+
     const [groupRes, scoresRes] = await Promise.all([
       fetch(`/api/groups/${groupId}`, { headers }),
-      fetch(`/api/groups/${groupId}/scores`, { headers }),
+      fetch(scoresUrl, { headers }),
     ]);
 
     if (!groupRes.ok) {
@@ -55,7 +61,7 @@ export default function GroupPage() {
     if (scoresRes.ok) {
       setScores(await scoresRes.json());
     }
-  }, [groupId, router]);
+  }, [groupId, router, category]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -111,9 +117,12 @@ export default function GroupPage() {
   return (
     <PageShell>
       {/* Group header */}
-      <div className="space-y-1">
-        <h1 className="font-recoleta text-2xl font-bold text-teal dark:text-ink">{group.name}</h1>
-        <p className="font-recoleta text-sm text-ink-muted">{dateLabel}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <h1 className="font-recoleta text-2xl font-bold text-teal dark:text-ink">{group.name}</h1>
+          <p className="font-recoleta text-sm text-ink-muted">{dateLabel}</p>
+        </div>
+        <CategorySwitcher value={category} onChange={(cat) => { setScores(null); setCategory(cat); }} />
       </div>
 
       {/* Scoreboard */}
