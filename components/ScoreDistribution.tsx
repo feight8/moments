@@ -6,6 +6,7 @@ interface ScoreDistributionProps {
   buckets: DistributionBucket[];
   totalPlayers: number;
   userScore?: number;
+  userPercentile?: number | null;
   branded?: boolean;
   showPercentage?: boolean;
   showPlayerCount?: boolean;
@@ -15,6 +16,7 @@ export default function ScoreDistribution({
   buckets,
   totalPlayers,
   userScore,
+  userPercentile,
   branded,
   showPercentage,
   showPlayerCount,
@@ -28,27 +30,7 @@ export default function ScoreDistribution({
     return userScore >= bucket.min && userScore <= bucket.max;
   }
 
-  let scoredAtOrBelow = 0;
-  let percentile: number | null = null;
-
-  if (userScore !== undefined) {
-    const u = userScore;
-    scoredAtOrBelow = buckets
-      .filter((b) => b.max <= (isUserBucket(b) ? u : b.max) || b.max < u)
-      .reduce((sum, b) => {
-        if (b.max < u) return sum + b.count;
-        if (isUserBucket(b)) {
-          const bucketRange = Math.min(b.max, 550) - b.min + 1;
-          const userOffset = u - b.min + 1;
-          return sum + Math.round((userOffset / bucketRange) * b.count);
-        }
-        return sum;
-      }, 0);
-
-    if (totalPlayers > 1) {
-      percentile = Math.round((scoredAtOrBelow / totalPlayers) * 100);
-    }
-  }
+  const percentile = userPercentile !== undefined ? userPercentile : null;
 
   return (
     <div className="space-y-3">

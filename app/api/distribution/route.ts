@@ -19,6 +19,8 @@ export interface DistributionResponse {
   /** Whether the requesting user is Plus and still anonymous (show link-account prompt) */
   showLinkPrompt: boolean;
   puzzleDate: string;
+  /** Exact percentile: % of players the user scored strictly higher than. Null when not computable. */
+  userPercentile: number | null;
 }
 
 const BUCKETS: Omit<DistributionBucket, "count">[] = [
@@ -34,9 +36,13 @@ export async function GET(req: NextRequest) {
   const serviceClient = createServiceClient();
   const { user } = await getUserFromRequest(req);
 
+  const url = new URL(req.url);
   // Determine puzzle date — default to today, allow ?date= override
-  const paramDate = new URL(req.url).searchParams.get("date");
+  const paramDate = url.searchParams.get("date");
   const puzzleDate = paramDate ?? todayDate();
+  // Caller may pass their score to get an exact percentile back
+  const userScoreParam = url.searchParams.get("userScore");
+  const userScore = userScoreParam !== null ? parseInt(userScoreParam, 10) : null;
 
   // Fetch all scores for this puzzle date (aggregate — no PII exposed)
   const { data: rows } = await serviceClient
@@ -61,11 +67,18 @@ export async function GET(req: NextRequest) {
     showLinkPrompt = isPlus && isAnonymous;
   }
 
+  let userPercentile: number | null = null;
+  if (userScore !== null && !isNaN(userScore) && scores.length > 1) {
+    const scoredBelow = scores.filter((s) => s < userScore).length;
+    userPercentile = Math.round((scoredBelow / scores.length) * 100);
+  }
+
   const response: DistributionResponse = {
     buckets,
     totalPlayers: scores.length,
     showLinkPrompt,
     puzzleDate,
+    userPercentile,
   };
 
   return NextResponse.json(response);

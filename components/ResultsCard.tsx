@@ -11,7 +11,7 @@ import type { DistributionBucket } from "@/app/api/distribution/route";
 
 interface ResultsCardProps {
   result: SessionResult;
-  distribution?: { buckets: DistributionBucket[]; totalPlayers: number } | null;
+  distribution?: { buckets: DistributionBucket[]; totalPlayers: number; userPercentile?: number | null } | null;
   groups?: Group[] | null;
 }
 
@@ -130,6 +130,8 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
           buckets={distribution.buckets}
           totalPlayers={distribution.totalPlayers}
           userScore={result.totalScore}
+          userPercentile={distribution.userPercentile}
+          showPercentage
         />
       )}
 

@@ -14,12 +14,15 @@ export async function GET(req: NextRequest) {
       currentPeriodEnd: null,
       isAdmin: false,
       categoriesEnabled: isCategoriesEnabled(),
+      canAccessCategories: isCategoriesEnabled(),
     });
   }
+  const admin = isAdminUser(user.id);
   const status = await getUserPlusStatus(user.id);
   return NextResponse.json({
     ...status,
-    isAdmin: isAdminUser(user.id),
+    isAdmin: admin,
     categoriesEnabled: isCategoriesEnabled(),
+    canAccessCategories: admin || status.isPlus || isCategoriesEnabled(),
   });
 }
