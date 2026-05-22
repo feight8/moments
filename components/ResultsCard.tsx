@@ -132,6 +132,7 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
           userScore={result.totalScore}
           userPercentile={distribution.userPercentile}
           showPercentage
+          showPlayerCount={false}
         />
       )}
 
