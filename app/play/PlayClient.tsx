@@ -138,10 +138,11 @@ export default function PlayClient() {
         }
       }
 
-      if (!archiveDate && !category) {
-        const existingRes = await authFetch("/api/results");
+      if (!archiveDate) {
+        const existingUrl = category ? `/api/results?category=${category}` : "/api/results";
+        const existingRes = await authFetch(existingUrl);
         if (existingRes.ok) {
-          router.replace("/results");
+          router.replace(category ? `/results?category=${category}` : "/results");
           return;
         }
       }
@@ -245,8 +246,9 @@ export default function PlayClient() {
       }
 
       const result: SessionResult = await res.json();
-      sessionStorage.setItem("circa_result", JSON.stringify(result));
-      router.push("/results");
+      const resultKey = category ? `circa_result_${category}` : "circa_result";
+      sessionStorage.setItem(resultKey, JSON.stringify(result));
+      router.push(category ? `/results?category=${category}` : "/results");
     } else {
       dispatch({ type: "NEXT_EVENT" });
       window.scrollTo({ top: 0, behavior: "smooth" });

@@ -11,9 +11,9 @@ import type { ArchiveEntry } from "@/app/api/archive/route";
 function formatArchiveDate(dateStr: string): { day: string; month: string; year: string } {
   const d = new Date(dateStr + "T12:00:00Z");
   return {
-    day:   d.toLocaleDateString("en-US", { day: "numeric",   timeZone: "UTC" }),
-    month: d.toLocaleDateString("en-US", { month: "short",   timeZone: "UTC" }),
-    year:  d.toLocaleDateString("en-US", { year: "numeric",  timeZone: "UTC" }),
+    day:   d.toLocaleDateString("en-US", { day: "numeric",  timeZone: "UTC" }),
+    month: d.toLocaleDateString("en-US", { month: "short",  timeZone: "UTC" }),
+    year:  d.toLocaleDateString("en-US", { year: "numeric", timeZone: "UTC" }),
   };
 }
 
@@ -30,19 +30,10 @@ function ScoreBar({ score }: { score: number }) {
 }
 
 export default function ArchivePage() {
-  const [entries, setEntries]   = useState<ArchiveEntry[] | null>(null);
-  const [locked, setLocked]     = useState(false);
-  const [error, setError]       = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [entries, setEntries] = useState<ArchiveEntry[] | null>(null);
+  const [locked, setLocked]   = useState(false);
+  const [error, setError]     = useState<string | null>(null);
   const [category, setCategory] = useState<CategoryValue>(null);
-
-  function toggle(date: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(date)) next.delete(date); else next.add(date);
-      return next;
-    });
-  }
 
   useEffect(() => {
     async function load() {
@@ -62,6 +53,16 @@ export default function ArchivePage() {
     load();
   }, []);
 
+  // For each date, pick the puzzle that matches the selected category
+  const displayEntries = entries
+    ? entries
+        .map((entry) => ({
+          ...entry,
+          puzzle: entry.puzzles.find((p) => p.category === category) ?? null,
+        }))
+        .filter((entry) => entry.puzzle !== null)
+    : null;
+
   return (
     <main className="min-h-screen bg-parchment px-4 py-8">
       <div className="mx-auto max-w-lg space-y-6">
@@ -72,7 +73,7 @@ export default function ArchivePage() {
             <h1 className="font-recoleta text-3xl font-bold text-teal dark:text-ink">archive</h1>
             <p className="font-recoleta text-sm text-ink-muted">every puzzle, playable anytime</p>
           </div>
-          <CategorySwitcher value={category} onChange={(cat) => { setCategory(cat); setExpanded(new Set()); }} />
+          <CategorySwitcher value={category} onChange={setCategory} />
         </div>
 
         {locked && <PlusGate locked feature="the puzzle archive" />}
@@ -87,114 +88,52 @@ export default function ArchivePage() {
           </div>
         )}
 
-        {entries && entries.length === 0 && (
+        {displayEntries && displayEntries.length === 0 && (
           <div className="text-center py-12">
             <p className="font-recoleta text-lg text-ink">no past puzzles yet</p>
             <p className="font-recoleta text-sm text-ink-muted mt-1">check back after the first puzzle goes live</p>
           </div>
         )}
 
-        {entries && entries.length > 0 && (() => {
-          // When a category is selected, filter entries to only those with that category puzzle
-          const displayEntries = category === null
-            ? entries
-            : entries
-                .filter((e) => e.puzzles.some((p) => p.category === category))
-                .map((e) => ({
-                  ...e,
-                  puzzles: e.puzzles.filter((p) => p.category === category),
-                  playedCount: e.puzzles.filter((p) => p.category === category && p.played).length,
-                  totalCount: e.puzzles.filter((p) => p.category === category).length,
-                }));
-
-          if (displayEntries.length === 0) {
-            return (
-              <div className="text-center py-12">
-                <p className="font-recoleta text-lg text-ink">no puzzles yet</p>
-                <p className="font-recoleta text-sm text-ink-muted mt-1">check back soon</p>
-              </div>
-            );
-          }
-
-          return (
+        {displayEntries && displayEntries.length > 0 && (
           <div className="rounded-2xl border border-ink/10 bg-surface/60 divide-y divide-ink/8 backdrop-blur-sm overflow-hidden">
-            {displayEntries.map((entry) => {
-              const { day, month, year } = formatArchiveDate(entry.date);
-              const isOpen = expanded.has(entry.date);
-              const isMulti = category === null && entry.totalCount > 1;
-              const mainPuzzle = entry.puzzles[0];
+            {displayEntries.map(({ date, puzzle }) => {
+              const { day, month, year } = formatArchiveDate(date);
+              const href = puzzle!.category
+                ? `/play?date=${date}&category=${puzzle!.category}`
+                : `/play?date=${date}`;
 
               return (
-                <div key={entry.date}>
-                  {/* Date row */}
-                  <button
-                    onClick={() => toggle(entry.date)}
-                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-ink/3 transition-colors group text-left"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="text-center w-10">
-                        <p className="font-recoleta text-lg font-bold text-ink leading-tight">{day}</p>
-                        <p className="font-recoleta text-[10px] text-ink-muted uppercase tracking-wide">{month}</p>
-                      </div>
-                      <div>
-                        <p className="font-recoleta text-sm font-semibold text-ink">{year}</p>
-                        {isMulti ? (
-                          <p className="font-recoleta text-xs text-ink-muted">
-                            {entry.playedCount}/{entry.totalCount} puzzles played
-                          </p>
-                        ) : mainPuzzle.played ? (
-                          <ScoreBar score={mainPuzzle.totalScore!} />
-                        ) : (
-                          <p className="font-recoleta text-xs text-ink-muted">not played</p>
-                        )}
-                      </div>
+                <Link
+                  key={date}
+                  href={href}
+                  className="flex items-center justify-between px-5 py-4 hover:bg-ink/3 transition-colors group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-center w-10">
+                      <p className="font-recoleta text-lg font-bold text-ink leading-tight">{day}</p>
+                      <p className="font-recoleta text-[10px] text-ink-muted uppercase tracking-wide">{month}</p>
                     </div>
-                    <span
-                      className={`text-ink-muted transition-transform duration-200 ${
-                        isOpen ? "rotate-90" : "group-hover:translate-x-0.5"
-                      }`}
-                    >
-                      →
-                    </span>
-                  </button>
-
-                  {/* Expanded sub-entries */}
-                  {isOpen && (
-                    <div className="border-t border-ink/8 divide-y divide-ink/5 bg-ink/[0.02]">
-                      {entry.puzzles.map((puzzle) => {
-                        const href = puzzle.category
-                          ? `/play?date=${entry.date}&category=${puzzle.category}`
-                          : `/play?date=${entry.date}`;
-                        return (
-                          <Link
-                            key={puzzle.category ?? "daily"}
-                            href={href}
-                            className="flex items-center justify-between pl-16 pr-5 py-3 hover:bg-ink/3 transition-colors group"
-                          >
-                            <div>
-                              <p className="font-recoleta text-sm font-semibold text-ink capitalize">
-                                {puzzle.label}
-                              </p>
-                              {puzzle.played ? (
-                                <ScoreBar score={puzzle.totalScore!} />
-                              ) : (
-                                <p className="font-recoleta text-xs text-ink-muted">not played</p>
-                              )}
-                            </div>
-                            <span className="font-recoleta text-xs text-ink-muted font-semibold group-hover:translate-x-0.5 transition-transform">
-                              {puzzle.played ? "replay" : "play"} →
-                            </span>
-                          </Link>
-                        );
-                      })}
+                    <div>
+                      <p className="font-recoleta text-sm font-semibold text-ink">{year}</p>
+                      {puzzle!.played ? (
+                        <ScoreBar score={puzzle!.totalScore!} />
+                      ) : (
+                        <p className="font-recoleta text-xs text-ink-muted">not played</p>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-ink-muted">
+                    {puzzle!.played && (
+                      <span className="font-recoleta text-xs font-semibold">replay</span>
+                    )}
+                    <span className="text-lg group-hover:translate-x-0.5 transition-transform">→</span>
+                  </div>
+                </Link>
               );
             })}
           </div>
-          );
-        })()}
+        )}
       </div>
     </main>
   );

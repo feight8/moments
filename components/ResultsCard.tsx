@@ -27,8 +27,17 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
 
+  const CATEGORY_LABELS: Record<string, string> = {
+    "sports":      "sports",
+    "pop-culture": "pop culture",
+    "science":     "science",
+    "arts":        "arts & culture",
+    "politics":    "politics",
+  };
+
   const emojiRow = buildEmojiRow(result.guesses.map((g) => g.score));
   const dateLabel = formatPuzzleDate(result.date);
+  const categoryLabel = result.category ? (CATEGORY_LABELS[result.category] ?? result.category) : null;
   const baseScore = result.guesses.reduce(
     (sum, g) => sum + Math.min(g.score, 100),
     0
@@ -36,7 +45,7 @@ export default function ResultsCard({ result, distribution, groups }: ResultsCar
   const bonusScore = result.totalScore - baseScore;
 
   const shareText = [
-    `circa - ${dateLabel}`,
+    categoryLabel ? `circa - ${categoryLabel} - ${dateLabel}` : `circa - ${dateLabel}`,
     emojiRow,
     `score: ${result.totalScore}/500${bonusScore > 0 ? ` (+${bonusScore} perfect)` : ""}`,
     result.streak > 0 ? `streak: 🔥 ${result.streak}` : "",
