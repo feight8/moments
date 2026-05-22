@@ -6,22 +6,26 @@ import { createClient } from "@/lib/supabase/client";
 import ResultsCard from "@/components/ResultsCard";
 import LinkAccountPrompt from "@/components/LinkAccountPrompt";
 import NavHeader from "@/components/NavHeader";
+import CategorySwitcher, { type CategoryValue } from "@/components/CategorySwitcher";
 import type { SessionResult, Group } from "@/types";
 import type { DistributionResponse } from "@/app/api/distribution/route";
 
 function ResultsPageInner() {
   const searchParams = useSearchParams();
-  const category = searchParams.get("category") ?? null;
+  const urlCategory = (searchParams.get("category") as CategoryValue) ?? null;
 
+  const [category, setCategory]         = useState<CategoryValue>(urlCategory);
   const [result, setResult]             = useState<SessionResult | null>(null);
   const [distribution, setDistribution] = useState<DistributionResponse | null>(null);
   const [showLinkPrompt, setShowLinkPrompt] = useState(false);
   const [groups, setGroups]             = useState<Group[] | null>(null);
   const [error, setError]               = useState<string | null>(null);
 
-  const storageKey = category ? `circa_result_${category}` : "circa_result";
-
   useEffect(() => {
+    setResult(null);
+    setDistribution(null);
+    setError(null);
+
     async function load() {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -30,6 +34,7 @@ function ResultsPageInner() {
         : {};
 
       // 1. Load result (sessionStorage first, then API)
+      const storageKey = category ? `circa_result_${category}` : "circa_result";
       let sessionResult: SessionResult | null = null;
       const cached = sessionStorage.getItem(storageKey);
       if (cached) {
@@ -40,22 +45,23 @@ function ResultsPageInner() {
         const url = category ? `/api/results?category=${category}` : "/api/results";
         const res = await fetch(url, { headers: authHeader });
         if (!res.ok) {
-          setError("could not load your results. please try again.");
+          setError(category ? `no ${category} result found for today` : "could not load your results. please try again.");
           return;
         }
         sessionResult = await res.json();
       }
       setResult(sessionResult);
 
-      // 2. Distribution + link-prompt (main puzzle only)
-      if (!category) {
-        const date = sessionResult!.date;
-        const distRes = await fetch(`/api/distribution?date=${date}&userScore=${sessionResult!.totalScore}`, { headers: authHeader });
-        if (distRes.ok) {
-          const distData: DistributionResponse = await distRes.json();
-          setDistribution(distData);
-          setShowLinkPrompt(distData.showLinkPrompt);
-        }
+      // 2. Distribution for any category (include category param for correct filtering)
+      const date = sessionResult!.date;
+      const distUrl = category
+        ? `/api/distribution?date=${date}&userScore=${sessionResult!.totalScore}&category=${category}`
+        : `/api/distribution?date=${date}&userScore=${sessionResult!.totalScore}`;
+      const distRes = await fetch(distUrl, { headers: authHeader });
+      if (distRes.ok) {
+        const distData: DistributionResponse = await distRes.json();
+        setDistribution(distData);
+        setShowLinkPrompt(distData.showLinkPrompt);
       }
 
       // 3. Groups (Plus only; silently ignore if not Plus)
@@ -73,6 +79,10 @@ function ResultsPageInner() {
     <main className="min-h-screen bg-parchment px-4 py-8">
       <div className="mx-auto max-w-lg space-y-6">
         <NavHeader />
+
+        <div className="flex justify-end">
+          <CategorySwitcher value={category} onChange={(cat) => setCategory(cat)} />
+        </div>
 
         {error && (
           <div className="text-center py-12 space-y-3">

@@ -29,7 +29,9 @@ export async function GET(
 
   const client = createServiceClient();
   const { id: groupId } = await params;
-  const dateParam = new URL(req.url).searchParams.get("date");
+  const url = new URL(req.url);
+  const dateParam = url.searchParams.get("date");
+  const categoryParam = url.searchParams.get("category"); // null = main daily
   const puzzleDate = dateParam ?? todayDate();
 
   // Verify requesting user is a member
@@ -66,22 +68,30 @@ export async function GET(
 
   const memberIds = members.map((m: { user_id: string }) => m.user_id);
 
-  // Check if the requesting user has played this date
-  const { data: viewerResult } = await client
+  // Check if the requesting user has played this date+category
+  const viewerBaseQuery = client
     .from("user_results")
     .select("total_score")
     .eq("user_id", user.id)
-    .eq("puzzle_date", puzzleDate)
-    .single();
+    .eq("puzzle_date", puzzleDate);
+
+  const { data: viewerResult } = await (categoryParam
+    ? viewerBaseQuery.eq("category", categoryParam)
+    : viewerBaseQuery.is("category", null)
+  ).maybeSingle();
 
   const viewerHasPlayed = viewerResult !== null;
 
-  // Fetch results for all members on this date (service client bypasses RLS)
-  const { data: results } = await client
+  // Fetch results for all members on this date+category (service client bypasses RLS)
+  const membersBaseQuery = client
     .from("user_results")
     .select("user_id, total_score, guesses")
     .eq("puzzle_date", puzzleDate)
     .in("user_id", memberIds);
+
+  const { data: results } = await (categoryParam
+    ? membersBaseQuery.eq("category", categoryParam)
+    : membersBaseQuery.is("category", null));
 
   const resultMap = new Map<string, { total_score: number; guesses: ScoredGuess[] }>();
   for (const r of results ?? []) {
