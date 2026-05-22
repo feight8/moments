@@ -50,7 +50,7 @@ function ResultsPageInner() {
       // 2. Distribution + link-prompt (main puzzle only)
       if (!category) {
         const date = sessionResult!.date;
-        const distRes = await fetch(`/api/distribution?date=${date}`, { headers: authHeader });
+        const distRes = await fetch(`/api/distribution?date=${date}&userScore=${sessionResult!.totalScore}`, { headers: authHeader });
         if (distRes.ok) {
           const distData: DistributionResponse = await distRes.json();
           setDistribution(distData);

@@ -6,15 +6,13 @@ import { createClient } from "@/lib/supabase/client";
 interface StatusResponse {
   isAdmin: boolean;
   categoriesEnabled: boolean;
+  canAccessCategories: boolean;
 }
 
-// Slug → display label
+// Slug → display label (only active categories listed here)
 const CATEGORY_LABELS: Record<string, string> = {
   "sports":      "sports",
   "pop-culture": "pop culture",
-  "science":     "science",
-  "arts":        "arts & culture",
-  "politics":    "politics",
 };
 
 export default function CategorySection() {
@@ -31,7 +29,7 @@ export default function CategorySection() {
       });
       if (!res.ok) return;
       const status: StatusResponse = await res.json();
-      setVisible(status.isAdmin || status.categoriesEnabled);
+      setVisible(status.canAccessCategories);
     }
     check();
   }, []);

@@ -39,10 +39,13 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Category access → requires admin or global flag
+  // Category access → requires admin, Plus, or global flag
   if (category !== null && userId) {
     if (!isAdminUser(userId) && !isCategoriesEnabled()) {
-      return NextResponse.json({ error: "No puzzle found." }, { status: 404 });
+      const { isPlus } = await getUserPlusStatus(userId);
+      if (!isPlus) {
+        return NextResponse.json({ error: "No puzzle found." }, { status: 404 });
+      }
     }
   }
 
