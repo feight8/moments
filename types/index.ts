@@ -58,6 +58,27 @@ export interface ScoredGuess {
   revealImageUrl: string | null;
 }
 
+/** A badge definition as returned by the public API. */
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  emoji: string;
+  /** Custom uploaded icon URL. Takes priority over `emoji` when set. */
+  iconUrl: string | null;
+  conditionType: string;
+  conditionValue: number | null;
+  conditionMeta: Record<string, string> | null;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+/** A badge the user has already earned, with timestamp. */
+export interface UserBadge {
+  badge: Badge;
+  earnedAt: string;
+}
+
 /** Full session result returned by POST /api/submit and GET /api/results. */
 export interface SessionResult {
   date: string;
@@ -67,6 +88,8 @@ export interface SessionResult {
   maxScore: number;
   perfectCount: number;
   streak: number;
+  /** Badges newly earned by completing this session. Empty array if none. */
+  newBadges: Badge[];
 }
 
 // ---------------------------------------------------------------------------
@@ -156,6 +179,8 @@ export interface GroupMemberScore {
   totalScore: number | null;
   emojiRow: string | null;
   perfectCount: number | null;
+  /** Most recently earned badge, shown in group leaderboard */
+  featuredBadge: { emoji: string; name: string } | null;
 }
 
 export interface GroupScoresResponse {

@@ -149,7 +149,14 @@ export default function GroupPage() {
 
             {/* Name + emoji row */}
             <div className="flex-1 min-w-0">
-              <p className="font-recoleta text-sm font-semibold text-ink truncate">{m.displayName}</p>
+              <div className="flex items-center gap-1.5 min-w-0">
+                {m.featuredBadge && (
+                  <span title={m.featuredBadge.name} className="text-base leading-none shrink-0">
+                    {m.featuredBadge.emoji}
+                  </span>
+                )}
+                <p className="font-recoleta text-sm font-semibold text-ink truncate">{m.displayName}</p>
+              </div>
               {m.emojiRow && (
                 <p className="font-recoleta text-xs tracking-wide mt-0.5">{m.emojiRow}</p>
               )}

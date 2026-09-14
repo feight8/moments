@@ -21,6 +21,7 @@ const MOCK_RESULT: SessionResult = {
   maxScore: 550,
   perfectCount: 1,
   streak: 3,
+  newBadges: [],
   guesses: [
     {
       eventId: 'e1', guessYear: 2000, correctYear: 2000, score: 110,

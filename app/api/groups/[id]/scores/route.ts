@@ -98,6 +98,21 @@ export async function GET(
     resultMap.set(r.user_id, r);
   }
 
+  // Fetch most recently earned badge per member
+  const { data: badgeRows } = await client
+    .from("user_badges")
+    .select("user_id, earned_at, badges(emoji, name)")
+    .in("user_id", memberIds)
+    .order("earned_at", { ascending: false });
+
+  const featuredBadgeMap = new Map<string, { emoji: string; name: string }>();
+  for (const row of (badgeRows ?? []) as unknown as Array<{ user_id: string; badges: { emoji: string; name: string } | { emoji: string; name: string }[] | null }>) {
+    if (!featuredBadgeMap.has(row.user_id) && row.badges) {
+      const b = Array.isArray(row.badges) ? row.badges[0] : row.badges;
+      if (b) featuredBadgeMap.set(row.user_id, { emoji: b.emoji, name: b.name });
+    }
+  }
+
   const memberScores: GroupMemberScore[] = members.map((m: { user_id: string; display_name: string }) => {
     const result = resultMap.get(m.user_id);
     const isViewer = m.user_id === user.id;
@@ -112,6 +127,7 @@ export async function GET(
       totalScore: showScore && result ? result.total_score : null,
       emojiRow: showScore && result ? buildEmojiRow(result.guesses.map((g) => g.score)) : null,
       perfectCount: showScore && result ? result.guesses.filter((g) => g.isPerfect).length : null,
+      featuredBadge: featuredBadgeMap.get(m.user_id) ?? null,
     };
   });
 

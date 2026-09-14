@@ -7,6 +7,7 @@ import CategorySwitcher, { type CategoryValue } from "@/components/CategorySwitc
 import { createClient } from "@/lib/supabase/client";
 import { formatPuzzleDate } from "@/lib/dates";
 import type { UserStats, EraAccuracy } from "@/app/api/stats/route";
+import type { UserBadge } from "@/types";
 
 // ---------------------------------------------------------------------------
 // Stat tile
@@ -109,6 +110,56 @@ function EraBreakdown({ eras }: { eras: EraAccuracy[] }) {
 }
 
 // ---------------------------------------------------------------------------
+// Badge summary (3 most recent + "view all" link)
+// ---------------------------------------------------------------------------
+
+function BadgeSummary() {
+  const [earned, setEarned] = useState<UserBadge[] | null>(null);
+
+  useEffect(() => {
+    fetch("/api/badges")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d) setEarned(d.earned);
+      })
+      .catch(() => {/* silently ignore */});
+  }, []);
+
+  if (!earned || earned.length === 0) return null;
+
+  const preview = earned.slice(0, 3);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <p className="font-recoleta text-xs font-semibold uppercase tracking-widest text-ink-muted">
+          Badges
+        </p>
+        <a href="/badges" className="font-recoleta text-xs text-gold underline">
+          View all ({earned.length}) →
+        </a>
+      </div>
+      <div className="flex gap-3">
+        {preview.map(({ badge }) => (
+          <div
+            key={badge.id}
+            title={badge.name}
+            className="flex-1 rounded-2xl border border-gold/30 bg-surface/60 p-3 flex flex-col items-center gap-1 text-center"
+          >
+            {badge.iconUrl ? (
+              <img src={badge.iconUrl} alt="" className="w-9 h-9 rounded-full object-cover" />
+            ) : (
+              <span className="text-3xl leading-none">{badge.emoji}</span>
+            )}
+            <p className="font-recoleta text-xs font-semibold text-gold leading-tight">{badge.name}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
@@ -190,6 +241,9 @@ export default function StatsPage() {
 
             {/* Era accuracy */}
             <EraBreakdown eras={stats.eraAccuracy} />
+
+            {/* Badge summary — main daily only */}
+            {!category && <BadgeSummary />}
           </div>
         )}
       </div>
