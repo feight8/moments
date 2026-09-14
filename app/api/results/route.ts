@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
     maxScore: MAX_SCORE_PER_EVENT * 5,
     perfectCount,
     streak: streakRow?.current_streak ?? 0,
+    newBadges: [],
   };
 
   return NextResponse.json(response);

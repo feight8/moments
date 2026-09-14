@@ -7,6 +7,7 @@ import ResultsCard from "@/components/ResultsCard";
 import LinkAccountPrompt from "@/components/LinkAccountPrompt";
 import NavHeader from "@/components/NavHeader";
 import CategorySwitcher, { type CategoryValue } from "@/components/CategorySwitcher";
+import BadgeModal from "@/components/BadgeModal";
 import type { SessionResult, Group } from "@/types";
 import type { DistributionResponse } from "@/app/api/distribution/route";
 
@@ -20,6 +21,7 @@ function ResultsPageInner() {
   const [showLinkPrompt, setShowLinkPrompt] = useState(false);
   const [groups, setGroups]             = useState<Group[] | null>(null);
   const [error, setError]               = useState<string | null>(null);
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
 
   useEffect(() => {
     setResult(null);
@@ -51,6 +53,9 @@ function ResultsPageInner() {
         sessionResult = await res.json();
       }
       setResult(sessionResult);
+      if (sessionResult?.newBadges?.length) {
+        setShowBadgeModal(true);
+      }
 
       // 2. Distribution for any category (include category param for correct filtering)
       const date = sessionResult!.date;
@@ -99,6 +104,13 @@ function ResultsPageInner() {
             <p className="text-sm">loading results…</p>
           </div>
         )}
+
+        {showBadgeModal && result?.newBadges?.length ? (
+          <BadgeModal
+            badges={result.newBadges}
+            onClose={() => setShowBadgeModal(false)}
+          />
+        ) : null}
 
         {result && (
           <ResultsCard

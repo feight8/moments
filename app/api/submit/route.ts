@@ -4,8 +4,9 @@ import { getUserFromRequest } from "@/lib/supabase/auth";
 import { getUserPlusStatus, consumeStreakShield, isAdminUser } from "@/lib/plus";
 import { scoreGuess, isPerfect, MAX_SCORE_PER_EVENT, YEAR_MIN, YEAR_MAX } from "@/lib/scoring";
 import { todayDate } from "@/lib/dates";
+import { checkAndAwardBadges, buildBadgeContext } from "@/lib/badges";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Guess, ScoredGuess, SessionResult, DbEvent, DbUserStreak } from "@/types";
+import type { Badge, Guess, ScoredGuess, SessionResult, DbEvent, DbUserStreak } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -106,7 +107,7 @@ export async function POST(req: NextRequest) {
       .select("current_streak")
       .eq("user_id", user.id)
       .single()) as { data: Pick<DbUserStreak, "current_streak"> | null };
-    return buildResultResponse(existing.guesses, existing.total_score, date, streakRow?.current_streak ?? 0, category);
+    return buildResultResponse(existing.guesses, existing.total_score, date, streakRow?.current_streak ?? 0, category, []);
   }
 
   const validIds = new Set<string>(puzzle.event_ids);
@@ -170,7 +171,15 @@ export async function POST(req: NextRequest) {
     ? await updateStreak(user.id, date, isPlus, serviceClient)
     : await getCurrentStreak(user.id, serviceClient);
 
-  return buildResultResponse(scoredGuesses, totalScore, date, newStreak, category);
+  // Check and award any newly earned badges (never blocks the response)
+  const badgeCtx = await buildBadgeContext(
+    user.id,
+    { totalScore, guesses: scoredGuesses, category, date },
+    newStreak
+  );
+  const newBadges = await checkAndAwardBadges(user.id, badgeCtx);
+
+  return buildResultResponse(scoredGuesses, totalScore, date, newStreak, category, newBadges);
 }
 
 /** Returns the new current streak count after updating. */
@@ -229,7 +238,8 @@ function buildResultResponse(
   totalScore: number,
   date: string,
   streak: number,
-  category: string | null
+  category: string | null,
+  newBadges: Badge[]
 ): NextResponse {
   const result: SessionResult = {
     date,
@@ -239,6 +249,7 @@ function buildResultResponse(
     maxScore: MAX_SCORE_PER_EVENT * 5,
     perfectCount: scoredGuesses.filter((g) => g.isPerfect).length,
     streak,
+    newBadges,
   };
   return NextResponse.json(result);
 }
